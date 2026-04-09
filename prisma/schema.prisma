@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      String   @default("CLIENT") // "ADMIN" or "CLIENT"
+  address   Address?
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+model Address {
+  id         Int    @id @default(autoincrement())
+  userId     Int    @unique
+  user       User   @relation(fields: [userId], references: [id])
+  zipCode    String
+  street     String
+  number     String
+  complement String?
+  city       String
+  state      String
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id             Int      @id @default(autoincrement())
+  name           String
+  description    String
+  basePrice      Float
+  salePercentage Float    @default(0)
+  finalPrice     Float
+  stock          Int      @default(0)
+  weight         Float    @default(0) // in kg for freight
+  images         String   // JSON or comma separated URLs
+  categoryId     Int
+  category       Category @relation(fields: [categoryId], references: [id])
+  createdAt      DateTime @default(now())
+}
+
+model Banner {
+  id      Int     @id @default(autoincrement())
+  image   String
+  title   String?
+  link    String?
+  active  Boolean @default(true)
+}
+
+model Order {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  user        User     @relation(fields: [userId], references: [id])
+  items       String   // JSON list of items
+  totalAmount Float
+  status      String   @default("PENDENTE") // "PROCESSANDO", "SAIU_ENTREGA", "ENTREGUE"
+  pdfBudget   String?  // URL for the PDF if generated
+  createdAt   DateTime @default(now())
+}
+
+model Coupon {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  discount   Float    // Percentage
+  active     Boolean  @default(true)
+  expiresAt  DateTime?
+}

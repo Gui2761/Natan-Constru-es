@@ -1,0 +1,7 @@
+RewriteEngine On
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f [OR]
+RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -d
+RewriteRule ^ - [L]
+
+# Se não for arquivo ou diretório real, redireciona para o index.html (Vital para React Router)
+RewriteRule ^ index.html [L]
