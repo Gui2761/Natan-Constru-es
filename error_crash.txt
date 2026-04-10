@@ -40,3 +40,8 @@ SQL:
       ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     
 Params: []
+
+[2026-04-10T19:56:50.108Z] SQL ERROR:
+DATABASE_URL inválida. Configure mysql:// no painel da Hostinger.
+SQL: SELECT * FROM `Product`  ORDER BY `createdAt` DESC 
+Params: []
