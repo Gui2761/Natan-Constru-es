@@ -29,9 +29,9 @@ const syncDatabase = () => {
     const prismaBinary = path.join(__dirname, 'node_modules/prisma/build/index.js');
     console.log(`📂 [DB] Usando binário em: ${prismaBinary}`);
     
-    // Tenta gerar o cliente e fazer o push das tabelas usando o caminho direto
-    execSync(`node "${prismaBinary}" generate`, { stdio: 'inherit' });
-    execSync(`node "${prismaBinary}" db push --accept-data-loss`, { stdio: 'inherit' });
+    // Tenta gerar o cliente e fazer o push das tabelas usando o caminho absoluto do Node
+    execSync(`"${process.execPath}" "${prismaBinary}" generate`, { stdio: 'inherit' });
+    execSync(`"${process.execPath}" "${prismaBinary}" db push --accept-data-loss`, { stdio: 'inherit' });
     
     console.log("✅ [DB] Tabelas sincronizadas com sucesso!");
   } catch (error) {
