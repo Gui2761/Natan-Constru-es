@@ -28,11 +28,12 @@ process.on('unhandledRejection', (reason, promise) => {
 app.use(cors());
 app.use(express.json());
 
-// Servir arquivos estáticos (Imagens de Upload)
-app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
-
 // Servir Frontend (Vite Build)
-app.use(express.static(path.join(__dirname, '../../dist')));
+const distPath = path.resolve(__dirname, '../../dist');
+const uploadsPath = path.resolve(__dirname, '../public/uploads');
+
+app.use(express.static(distPath));
+app.use('/uploads', express.static(uploadsPath));
 
 // Importar Rotas
 import authRoutes from './routes/authRoutes.js';
@@ -43,10 +44,14 @@ import bannerRoutes from './routes/bannerRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 
-
 // Rota de Teste
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Natan Construções API rodando!' });
+  res.json({ 
+    status: 'OK', 
+    message: 'Natan Construções API rodando!',
+    environment: process.env.NODE_ENV || 'production',
+    paths: { dist: distPath, uploads: uploadsPath }
+  });
 });
 
 // Usar Rotas
@@ -81,9 +86,11 @@ app.use((err, req, res, next) => {
 
 // Suporte a Rotas do React (SPA) - Catch-all
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../../dist/index.html'));
+  const indexPath = path.join(distPath, 'index.html');
+  res.sendFile(indexPath);
 });
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor unificado rodando em http://localhost:${PORT}`);
+  console.log(`📂 Servindo frontend de: ${distPath}`);
 });
