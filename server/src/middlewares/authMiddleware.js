@@ -23,3 +23,5 @@ export const admin = (req, res, next) => {
     res.status(403).json({ message: "Acesso negado. Requer privilégios de Administrador." });
   }
 };
+
+export const verifyToken = auth;
