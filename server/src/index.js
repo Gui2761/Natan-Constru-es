@@ -32,9 +32,11 @@ app.use(express.json());
 // Servir Frontend (Vite Build)
 const distPath = path.resolve(__dirname, '../../dist');
 const uploadsPath = path.resolve(__dirname, '../public/uploads');
+const midiaPath = path.resolve(__dirname, '../../midia'); // Pasta raiz fora da src
 
 app.use(express.static(distPath));
 app.use('/uploads', express.static(uploadsPath));
+app.use('/midia', express.static(midiaPath)); // Nova rota unificada
 
 // Importar Rotas
 import authRoutes from './routes/authRoutes.js';
