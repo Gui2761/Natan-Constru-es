@@ -84,7 +84,8 @@ app.get('/api/health', (req, res) => {
     nodeVersion: process.version,
     dbUrl: process.env.DATABASE_URL 
       ? process.env.DATABASE_URL.substring(0, 20) + '...' 
-      : 'NÃO DEFINIDA'
+      : 'NÃO DEFINIDA',
+    version: 'v1.2.6-meta-fix'
   });
 });
 
@@ -135,6 +136,35 @@ app.get('/api/diag/logs', (req, res) => {
     }
   } catch (err) {
     res.status(500).send("Erro ao ler logs: " + err.message);
+  }
+});
+
+app.get('/api/diag/ls-midia', (req, res) => {
+  try {
+    const p = path.join(process.cwd(), 'midia');
+    if (!fs.existsSync(p)) return res.json({ error: "Pasta midia não existe", path: p });
+    const files = fs.readdirSync(p);
+    res.json({ count: files.length, files, cwd: process.cwd() });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/diag/test-img/:name', (req, res) => {
+  try {
+    const p = path.join(process.cwd(), 'midia', req.params.name);
+    if (!fs.existsSync(p)) return res.status(404).json({ error: "Arquivo não existe", path: p });
+    const stats = fs.statSync(p);
+    const buffer = fs.readFileSync(p);
+    res.json({ 
+      name: req.params.name, 
+      size: stats.size, 
+      readable: true,
+      bufferLength: buffer.length,
+      firstBytes: buffer.slice(0, 10).toString('hex')
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 
