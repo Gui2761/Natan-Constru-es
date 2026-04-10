@@ -45,8 +45,13 @@ export const categoryModel = {
 export const orderModel = {
   async findMany({ where = {}, include = {}, orderBy = {} } = {}) {
     const order = orderBy.createdAt ? `ORDER BY \`createdAt\` ${orderBy.createdAt.toUpperCase()}` : 'ORDER BY `createdAt` DESC';
-    const rows = await q(`SELECT * FROM \`Order\` ${order}`); // Simplificado para o exemplo
+    const rows = await q(`SELECT * FROM \`Order\` ${order}`); 
     return rows;
+  },
+  async findUnique({ where = {} } = {}) {
+    const keys = Object.keys(where);
+    const clause = 'WHERE ' + keys.map(k => `\`${k}\` = ?`).join(' AND ');
+    return q(`SELECT * FROM \`Order\` ${clause} LIMIT 1`, keys.map(k => where[k])).then(r => r[0] || null);
   },
   async create({ data = {} } = {}) {
     const [res] = await q(
@@ -60,6 +65,14 @@ export const orderModel = {
 
 // --- COUPON MODEL ---
 export const couponModel = {
+  async findMany() {
+    return q('SELECT * FROM `Coupon` ORDER BY `id` DESC');
+  },
+  async findUnique({ where = {} } = {}) {
+    const keys = Object.keys(where);
+    const clause = 'WHERE ' + keys.map(k => `\`${k}\` = ?`).join(' AND ');
+    return q(`SELECT * FROM \`Coupon\` ${clause} LIMIT 1`, keys.map(k => where[k])).then(r => r[0] || null);
+  },
   async findFirst({ where = {} } = {}) {
     const keys = Object.keys(where);
     const clause = keys.length ? 'WHERE ' + keys.map(k => `\`${k}\` = ?`).join(' AND ') : '';
