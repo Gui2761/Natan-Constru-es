@@ -138,14 +138,8 @@ app.get('/api/diag/logs', (req, res) => {
   }
 });
 
-app.get('/api/diag/ls-midia', (req, res) => {
-  try {
-    const p = path.join(process.cwd(), 'midia');
-    if (!fs.existsSync(p)) return res.json({ error: "Pasta midia não existe", path: p });
-    const files = fs.readdirSync(p);
-    res.json({ count: files.length, files });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).send("Erro ao ler logs: " + err.message);
   }
 });
 
