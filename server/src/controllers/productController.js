@@ -1,5 +1,22 @@
 import prisma from '../lib/prisma.js';
 import { parseResilientFloat, calculateFinalPrice } from '../utils/math.js';
+import fs from 'fs';
+import path from 'path';
+
+// Helper para deletar arquivo físico
+const deleteFile = (relativeUrl) => {
+  if (!relativeUrl) return;
+  const fileName = relativeUrl.split('/').pop();
+  if (!fileName) return;
+  const filePath = path.join(process.cwd(), 'midia', fileName);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (e) {
+      console.error("Erro ao deletar arquivo:", filePath, e);
+    }
+  }
+};
 
 export const getProducts = async (req, res) => {
   try {
@@ -98,6 +115,12 @@ export const createProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   const { id } = req.params;
   try {
+    const product = await prisma.product.findUnique({ where: { id: parseInt(id) } });
+    if (product && product.images) {
+      const allImages = product.images.split(',');
+      allImages.forEach(img => deleteFile(img.trim()));
+    }
+
     await prisma.product.delete({ where: { id: parseInt(id) } });
     res.json({ message: "Produto removido com sucesso" });
   } catch (error) {
@@ -131,12 +154,27 @@ export const updateProduct = async (req, res) => {
        if (!isNaN(catId)) updateData.categoryId = catId;
     }
 
+    const currentItem = await prisma.product.findUnique({ where: { id: parseInt(id) } });
+    if (!currentItem) return res.status(404).json({ message: "Produto não encontrado" });
+
     let finalImages = '';
+    
+    // Lógica de Limpeza de Fotos Antigas
     if (req.body.keptImages !== undefined) {
+       // Se o usuário mandou quais fotos quer manter, comparamos com as fotos atuais
+       const oldImages = currentItem.images ? currentItem.images.split(',') : [];
+       const keptImages = req.body.keptImages ? req.body.keptImages.split(',') : [];
+       
+       // Deletar do disco as fotos que NÃO foram mantidas
+       oldImages.forEach(oldImg => {
+         if (!keptImages.includes(oldImg.trim())) {
+           deleteFile(oldImg.trim());
+         }
+       });
+       
        finalImages = req.body.keptImages;
     } else {
-       const currentItem = await prisma.product.findUnique({ where: { id: parseInt(id) } });
-       finalImages = currentItem?.images || '';
+       finalImages = currentItem.images || '';
     }
     
     if (req.files && req.files.length > 0) {

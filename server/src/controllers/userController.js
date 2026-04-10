@@ -1,4 +1,21 @@
 import prisma from '../lib/prisma.js';
+import fs from 'fs';
+import path from 'path';
+
+// Helper para deletar arquivo físico
+const deleteFile = (relativeUrl) => {
+  if (!relativeUrl) return;
+  const fileName = relativeUrl.split('/').pop();
+  if (!fileName) return;
+  const filePath = path.join(process.cwd(), 'midia', fileName);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (e) {
+      console.error("Erro ao deletar arquivo:", filePath, e);
+    }
+  }
+};
 import bcrypt from 'bcryptjs';
 import { cleanNumbers } from '../utils/math.js';
 
@@ -49,6 +66,11 @@ export const updateMe = async (req, res) => {
     }
 
     if (req.file) {
+      // Buscar avatar antigo para remover do disco
+      const currentUser = await prisma.user.findUnique({ where: { id: req.userId } });
+      if (currentUser && currentUser.avatar) {
+        deleteFile(currentUser.avatar);
+      }
       updateData.avatar = `/midia/${req.file.filename}`;
     }
 

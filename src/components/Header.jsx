@@ -55,10 +55,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto py-4 flex items-center justify-between gap-8">
         {/* LOGO */}
         <Link to="/" className="flex-shrink-0">
-          <h1 className="text-2xl font-black text-primary uppercase italic tracking-tighter leading-none">
-            Natan <span className="text-secondary">Construções</span>
-          </h1>
-          <p className="text-[8px] font-bold text-outline tracking-[0.2em] uppercase">Especialista em Obras</p>
+          <img src="/logo_horizontal.png" alt="Natan Construções" className="h-12 w-auto object-contain" />
         </Link>
 
         {/* BUSCA */}

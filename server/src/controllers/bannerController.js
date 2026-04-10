@@ -1,4 +1,21 @@
 import prisma from '../lib/prisma.js';
+import fs from 'fs';
+import path from 'path';
+
+// Helper para deletar arquivo físico
+const deleteFile = (relativeUrl) => {
+  if (!relativeUrl) return;
+  const fileName = relativeUrl.split('/').pop();
+  if (!fileName) return;
+  const filePath = path.join(process.cwd(), 'midia', fileName);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+    } catch (e) {
+      console.error("Erro ao deletar arquivo:", filePath, e);
+    }
+  }
+};
 
 export const getBanners = async (req, res) => {
   try {
@@ -31,6 +48,11 @@ export const createBanner = async (req, res) => {
 export const deleteBanner = async (req, res) => {
   const { id } = req.params;
   try {
+    const banner = await prisma.banner.findUnique({ where: { id: parseInt(id) } });
+    if (banner && banner.image) {
+      deleteFile(banner.image);
+    }
+
     await prisma.banner.delete({ where: { id: parseInt(id) } });
     res.json({ message: "Banner removido com sucesso" });
   } catch (error) {
@@ -44,11 +66,16 @@ export const updateBanner = async (req, res) => {
    
    let updateData = { title, link, buttonText };
    
-   if (req.file) {
-      updateData.image = `/uploads/${req.file.filename}`;
-   }
-   
    try {
+     const oldBanner = await prisma.banner.findUnique({ where: { id: parseInt(id) } });
+
+     if (req.file) {
+        if (oldBanner && oldBanner.image) {
+          deleteFile(oldBanner.image);
+        }
+        updateData.image = `/midia/${req.file.filename}`;
+     }
+     
      const banner = await prisma.banner.update({
         where: { id: parseInt(id) },
         data: updateData

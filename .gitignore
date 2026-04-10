@@ -30,3 +30,9 @@ prisma/*.db
 prisma/*.db-journal
 dist/
 dist-ssr/
+
+# Persistent Media
+/midia/
+/server/midia/
+uploads/
+server/uploads/

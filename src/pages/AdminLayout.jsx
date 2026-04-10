@@ -40,9 +40,8 @@ export default function AdminLayout() {
     <div className="flex min-h-screen bg-background">
       {/* Sidebar */}
       <aside className="w-64 bg-surface border-r border-outline-variant flex flex-col fixed h-full z-20">
-        <div className="p-8 border-b border-outline-variant">
-          <h2 className="text-xl font-black text-primary uppercase tracking-tighter italic">Natan Admin</h2>
-          <p className="text-[10px] text-outline font-bold uppercase tracking-widest mt-1">Gestão de Obras</p>
+        <div className="p-6 border-b border-outline-variant flex justify-center">
+          <img src="/logo_horizontal.png" alt="Admin Natan" className="h-10 w-auto object-contain" />
         </div>
 
         <nav className="flex-1 mt-6">
