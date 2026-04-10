@@ -138,11 +138,6 @@ app.get('/api/diag/logs', (req, res) => {
   }
 });
 
-  } catch (err) {
-    res.status(500).send("Erro ao ler logs: " + err.message);
-  }
-});
-
 
 // Rota para Limpar Imagens Antigas (Solicitado pelo Usuário)
 app.get('/api/diag/clear-images', async (req, res) => {
