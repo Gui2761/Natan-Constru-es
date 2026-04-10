@@ -28,7 +28,8 @@ export default function ProductDetail() {
   const fetchProduct = async () => {
     try {
       const { data } = await api.get(`/products`);
-      const item = data.find(p => p.id === parseInt(id));
+      const list = data.products || data; // Compatibilidade com resposta paginada
+      const item = list.find(p => p.id === parseInt(id));
       setProduct(item);
       if (item && item.images) {
         setSelectedImage(item.images.split(',')[0]);
@@ -36,7 +37,7 @@ export default function ProductDetail() {
         setSelectedImage('https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?q=80&w=1000');
       }
       
-      const relatedItems = data.filter(p => p.categoryId === item.categoryId && p.id !== item.id).slice(0, 4);
+      const relatedItems = list.filter(p => p.categoryId === item?.categoryId && p.id !== item?.id).slice(0, 4);
       setRelated(relatedItems);
     } catch (err) {
       console.error(err);

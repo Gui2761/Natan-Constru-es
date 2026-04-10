@@ -8,7 +8,8 @@ import {
   ShoppingCart, 
   LogOut, 
   Image as ImageIcon,
-  Ticket
+  Ticket,
+  Store
 } from 'lucide-react';
 
 const SidebarItem = ({ to, icon: Icon, label, active }) => (
@@ -53,6 +54,15 @@ export default function AdminLayout() {
           <SidebarItem to="/admin/cupons" icon={Ticket} label="Cupons" active={location.pathname.includes('/cupons')} />
         </nav>
 
+        {/* Botão Voltar à Loja */}
+        <Link
+          to="/"
+          className="p-6 flex items-center gap-3 text-secondary hover:bg-secondary/5 border-t border-outline-variant font-bold"
+        >
+          <Store size={20} />
+          <span>Ver a Loja</span>
+        </Link>
+
         <button 
           onClick={handleLogout}
           className="p-6 flex items-center gap-3 text-error hover:bg-error/5 border-t border-outline-variant mt-auto"
@@ -71,8 +81,11 @@ export default function AdminLayout() {
               <p className="text-sm font-bold">{user?.name}</p>
               <p className="text-[10px] text-outline uppercase font-bold tracking-widest">Administrador</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-              {user?.name?.[0]}
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border-2 border-outline-variant">
+              {user?.avatar 
+                ? <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                : <span>{user?.name?.[0]}</span>
+              }
             </div>
           </div>
         </header>
