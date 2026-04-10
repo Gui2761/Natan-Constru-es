@@ -26,9 +26,13 @@ dotenv.config();
 const syncDatabase = () => {
   console.log("🔄 [DB] Sincronizando banco de dados MySQL...");
   try {
-    // Tenta gerar o cliente e fazer o push das tabelas
-    execSync('npx prisma generate', { stdio: 'inherit' });
-    execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+    const prismaBinary = path.join(__dirname, 'node_modules/prisma/build/index.js');
+    console.log(`📂 [DB] Usando binário em: ${prismaBinary}`);
+    
+    // Tenta gerar o cliente e fazer o push das tabelas usando o caminho direto
+    execSync(`node "${prismaBinary}" generate`, { stdio: 'inherit' });
+    execSync(`node "${prismaBinary}" db push --accept-data-loss`, { stdio: 'inherit' });
+    
     console.log("✅ [DB] Tabelas sincronizadas com sucesso!");
   } catch (error) {
     console.error("❌ [DB ERROR] Falha ao sincronizar banco de dados:", error.message);
