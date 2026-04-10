@@ -70,8 +70,8 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal Server Error", details: err.message });
 });
 
-// Suporte a Rotas do React (SPA)
-app.get('/*', (req, res) => {
+// Fallback para Rotas do React (SPA) - Middleware Universal
+app.use((req, res) => {
   const indexPath = path.join(distPath, 'index.html');
   if (fs.existsSync(indexPath)) {
     res.sendFile(indexPath);
