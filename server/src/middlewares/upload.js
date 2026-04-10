@@ -3,8 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-// Usa process.cwd() para garantir o caminho absoluto correto na Hostinger
-const uploadDir = path.join(process.cwd(), 'midia');
+// Trava o caminho absoluto na raiz do projeto para evitar erros na Hostinger (Passenger)
+const uploadDir = path.resolve(__dirname, '../../../midia');
 
 // Garante que a pasta existe
 if (!fs.existsSync(uploadDir)) {

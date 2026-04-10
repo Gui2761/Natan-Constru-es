@@ -2,13 +2,19 @@ import { productModel } from '../models/productModel.js';
 import { parseResilientFloat, calculateFinalPrice } from '../utils/math.js';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Helper privado para gestão de arquivos
 const deletePhysicalFile = (relativeUrl) => {
   if (!relativeUrl) return;
   const fileName = relativeUrl.split('/').pop();
   if (!fileName) return;
-  const filePath = path.join(process.cwd(), 'midia', fileName);
+  
+  // Trava o caminho absoluto na raiz do projeto
+  const filePath = path.resolve(__dirname, '../../../midia', fileName);
   if (fs.existsSync(filePath)) {
     try {
       fs.unlinkSync(filePath);
