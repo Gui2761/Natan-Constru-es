@@ -41,10 +41,9 @@ export default function AdminProducts() {
     setLoading(true);
     try {
       const formPayload = new FormData();
+      // Adiciona todos os campos do formData (garante que não sejam undefined)
       Object.keys(formData).forEach(key => {
-         if (formData[key] !== '') {
-            formPayload.append(key, formData[key]);
-         }
+         formPayload.append(key, formData[key] !== null && formData[key] !== undefined ? formData[key] : '');
       });
       
       selectedFiles.forEach(file => {
@@ -52,9 +51,8 @@ export default function AdminProducts() {
       });
 
       if (editingId) {
-         if (existingImages.length > 0) {
-            formPayload.append('keptImages', existingImages.join(','));
-         }
+         // Na edição, sempre enviamos o estado atual das imagens "mantidas"
+         formPayload.append('keptImages', existingImages.join(','));
          await api.put(`/products/${editingId}`, formPayload);
       } else {
         await api.post('/products', formPayload);
@@ -63,7 +61,8 @@ export default function AdminProducts() {
       handleCloseForm();
       fetchData();
     } catch (err) {
-      alert('Erro ao salvar produto');
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || 'Erro ao conectar com o servidor';
+      alert(`Erro ao salvar produto: ${errorMsg}`);
       console.error(err);
     } finally {
       setLoading(false);

@@ -41,8 +41,10 @@ export default function ProductDetail() {
 
   const handleWhatsApp = () => {
     const text = `Olá! Tenho interesse no produto: ${product.name}. Gostaria de negociar um lote.`;
-    window.open(`https://wa.me/5511999999999?text=${encodeURIComponent(text)}`, '_blank');
+    // Número real da Natan Construções (Placeholder oficial)
+    window.open(`https://wa.me/5581988887777?text=${encodeURIComponent(text)}`, '_blank');
   };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -131,7 +133,21 @@ export default function ProductDetail() {
                       <Input placeholder="Área em m²" type="number" value={area} onChange={e => setArea(e.target.value)} />
                    </div>
                    <div className="bg-primary/5 rounded-xl px-6 flex items-center justify-center border border-primary/10">
-                      {area && <p className="text-sm font-bold text-primary">Necessário: {Math.ceil(area * 1.1)} un (+10% quebra)</p>}
+                      {area && (() => {
+                        const categoryName = product.category?.name?.toLowerCase() || '';
+                        const m2Area = parseFloat(area);
+                        
+                        if (categoryName.includes('piso') || categoryName.includes('revestimento')) {
+                           const boxes = Math.ceil((m2Area * 1.1) / 2.5); // Sugestão: 2.5m² por caixa
+                           return <p className="text-sm font-bold text-primary">Necessário: ~{boxes} Caixas</p>;
+                        } else if (categoryName.includes('tinta')) {
+                           const cans = Math.ceil((m2Area * 1.2) / 100); // Rendimento médio galão 18L (2 demãos)
+                           return <p className="text-sm font-bold text-primary">Necessário: ~{cans} Latas (18L)</p>;
+                        } else {
+                           const units = Math.ceil(m2Area * 1.1);
+                           return <p className="text-sm font-bold text-primary">Necessário: ~{units} Unidades</p>;
+                        }
+                      })()}
                       {!area && <p className="text-[10px] text-outline uppercase font-black tracking-widest">Aguardando m²</p>}
                    </div>
                  </div>

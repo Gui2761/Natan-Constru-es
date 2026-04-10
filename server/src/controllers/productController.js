@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 export const getProducts = async (req, res) => {
   try {
@@ -11,21 +10,31 @@ export const getProducts = async (req, res) => {
 };
 
 export const createProduct = async (req, res) => {
+  console.log(">>> [POST] Criando Produto:", req.body);
+  console.log(">>> Arquivos Recebidos:", req.files ? req.files.length : 0);
+  
   try {
     const { name, description, basePrice, salePercentage, stock, weight, categoryId } = req.body;
     
-    // Processamento de campos opcionais e tratamento de vírgula
-    const parseResilientFloat = (val) => val ? parseFloat(val.toString().replace(',', '.')) : 0;
+    // Processamento resiliente
+    const parseResilientFloat = (val) => {
+      if (val === undefined || val === null || val === '') return 0;
+      const clean = val.toString().replace(',', '.');
+      const num = parseFloat(clean);
+      return isNaN(num) ? 0 : num;
+    };
 
-    const salePercentageVal = parseResilientFloat(salePercentage);
-    const basePriceVal = parseResilientFloat(basePrice);
-    const weightVal = parseResilientFloat(weight);
+    const sPercent = parseResilientFloat(salePercentage);
+    const bPrice = parseResilientFloat(basePrice);
+    const wVal = parseResilientFloat(weight);
+    const catId = parseInt(categoryId);
 
-    // Lógica de Preço Promocional
-    const discount = (basePriceVal * (salePercentageVal / 100));
-    const finalPrice = basePriceVal - discount;
+    if (isNaN(catId)) {
+       return res.status(400).json({ message: "Categoria ID inválida ou ausente." });
+    }
 
-    // Processamento de imagens enviadas
+    const finalPrice = bPrice - (bPrice * (sPercent / 100));
+
     let imageUrls = '';
     if (req.files && req.files.length > 0) {
        imageUrls = req.files.map(file => `/uploads/${file.filename}`).join(',');
@@ -33,21 +42,21 @@ export const createProduct = async (req, res) => {
 
     const product = await prisma.product.create({
       data: {
-        name,
-        description,
-        basePrice: basePriceVal,
-        salePercentage: salePercentageVal,
-        finalPrice,
+        name: name || 'Produto Sem Nome',
+        description: description || 'Sem descrição.',
+        basePrice: bPrice,
+        salePercentage: sPercent,
+        finalPrice: finalPrice,
         stock: stock ? parseInt(stock) : 0,
-        weight: weightVal,
-        images: imageUrls, // Prisma exige String (não nulo)
-        categoryId: parseInt(categoryId)
+        weight: wVal,
+        images: imageUrls,
+        categoryId: catId
       }
     });
     res.status(201).json(product);
   } catch (error) {
-    console.error("Erro no cadastro:", error);
-    res.status(400).json({ message: "Erro ao criar produto", error: error.message });
+    console.error("!!! Erro no Prisma (createProduct):", error);
+    res.status(400).json({ message: "Erro ao criar produto no banco de dados", error: error.message });
   }
 };
 
@@ -63,34 +72,49 @@ export const deleteProduct = async (req, res) => {
 
 export const updateProduct = async (req, res) => {
   const { id } = req.params;
+  console.log(`\n>>> [TRACE-START] Iniciando PUT Produto ${id}`);
+  console.log(">>> [BODY]:", JSON.stringify(req.body).substring(0, 200));
+  console.log(">>> [FILES]:", req.files ? req.files.length : 0);
+
+
   try {
     const { name, description, basePrice, salePercentage, stock, weight, categoryId } = req.body;
     
-    // Processamento de campos
-    const parseResilientFloat = (val) => val ? parseFloat(val.toString().replace(',', '.')) : 0;
-
-    const salePercentageVal = parseResilientFloat(salePercentage);
-    const basePriceVal = parseResilientFloat(basePrice);
-    const weightVal = parseResilientFloat(weight);
-
-    // Lógica de Preço Promocional
-    const discount = (basePriceVal * (salePercentageVal / 100));
-    const finalPrice = basePriceVal - discount;
-
-    let updateData = {
-      name,
-      description,
-      basePrice: basePriceVal,
-      salePercentage: salePercentageVal,
-      finalPrice,
-      stock: stock ? parseInt(stock) : 0,
-      weight: weightVal,
-      categoryId: parseInt(categoryId)
+    const parseResilientFloat = (val) => {
+      if (val === undefined || val === null || val === '') return 0;
+      const clean = val.toString().replace(',', '.');
+      const num = parseFloat(clean);
+      return isNaN(num) ? 0 : num;
     };
 
+    const sPercent = parseResilientFloat(salePercentage);
+    const bPrice = parseResilientFloat(basePrice);
+    const wVal = parseResilientFloat(weight);
+
+    const updateData = {
+      finalPrice: bPrice - (bPrice * (sPercent / 100)),
+      basePrice: bPrice,
+      salePercentage: sPercent,
+      weight: wVal,
+      stock: stock ? parseInt(stock) : 0
+    };
+
+    // Campos opcionais de texto: só atualiza se vierem no body (preserva o antigo se omitido)
+    if (name !== undefined) updateData.name = name || 'Produto Sem Nome';
+    if (description !== undefined) updateData.description = description || 'Sem descrição.';
+    if (categoryId !== undefined) {
+       const catId = parseInt(categoryId);
+       if (!isNaN(catId)) updateData.categoryId = catId;
+    }
+
+    // Lógica de Imagens Consolidada
     let finalImages = '';
-    if (req.body.keptImages) {
-       finalImages = req.body.keptImages;
+    if (req.body.keptImages !== undefined) {
+       finalImages = req.body.keptImages; // Pode ser vindo do join(',') do front
+    } else {
+       // Se não enviou keptImages, buscamos as atuais do banco para não perder se for multipart edit básico
+       const currentItem = await prisma.product.findUnique({ where: { id: parseInt(id) } });
+       finalImages = currentItem?.images || '';
     }
     
     if (req.files && req.files.length > 0) {
@@ -105,9 +129,10 @@ export const updateProduct = async (req, res) => {
       data: updateData
     });
     
+    console.log(`>>> [TRACE-END] Sucesso PUT Produto ${id}`);
     res.json(product);
   } catch (error) {
-    console.error("Erro na edição:", error);
-    res.status(400).json({ message: "Erro ao atualizar produto", error: error.message });
+    console.error(`!!! Erro no Prisma (updateProduct ${id}):`, error);
+    res.status(400).json({ message: "Erro ao atualizar produto no banco de dados", error: error.message });
   }
 };

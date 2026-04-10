@@ -1,5 +1,4 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma.js';
 
 // 1. Listar todos os pedidos (Para o Admin)
 export const getOrders = async (req, res) => {

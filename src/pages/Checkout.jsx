@@ -4,16 +4,20 @@ import Footer from '../components/Footer';
 import { Card, Button, Input } from '../components/UI';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { CheckCircle, Truck, MapPin, CreditCard, ArrowRight } from 'lucide-react';
+import { CheckCircle, Truck, MapPin, CreditCard, ArrowRight, Ticket, Tag } from 'lucide-react';
+
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function Checkout() {
-  const { cart, subtotal, totalWeight, clearCart } = useCart();
+  const { cart, subtotal, totalWeight, clearCart, total, coupon, applyCoupon, discountAmount } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponResult, setCouponResult] = useState(null);
+
 
   // Pre-fill address if user is logged in
   const [formData, setFormData] = useState({
@@ -32,9 +36,10 @@ export default function Checkout() {
     try {
       await api.post('/orders', {
         items: JSON.stringify(cart),
-        totalAmount: subtotal,
+        totalAmount: total,
         userId: user.id
       });
+
       setSuccess(true);
       clearCart();
     } catch (err) {
@@ -105,6 +110,41 @@ export default function Checkout() {
                  <CheckCircle className="text-primary" />
               </div>
             </Card>
+
+            {/* Seção de Cupom */}
+            <Card className="border-dashed border-2 border-secondary/30 bg-secondary/5">
+              <h3 className="text-lg font-black uppercase italic tracking-tighter text-primary mb-4 flex items-center gap-2">
+                <Ticket size={20} className="text-secondary" /> Possui um Cupom?
+              </h3>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                   <Input 
+                     placeholder="Digite o código" 
+                     value={couponCode} 
+                     onChange={e => setCouponCode(e.target.value)}
+                     disabled={!!coupon}
+                   />
+                </div>
+                <Button 
+                  variant={coupon ? "secondary" : "primary"}
+                  onClick={async () => {
+                    if (coupon) return;
+                    const res = await applyCoupon(couponCode);
+                    setCouponResult(res);
+                  }}
+                  className="px-8"
+                  disabled={!couponCode || !!coupon}
+                >
+                  {coupon ? 'Aplicado!' : 'Aplicar'}
+                </Button>
+              </div>
+              {couponResult && !couponResult.success && (
+                <p className="text-red-500 text-xs mt-2 font-bold uppercase">{couponResult.message}</p>
+              )}
+              {coupon && (
+                <p className="text-green-600 text-xs mt-2 font-bold uppercase">Cupom {coupon.code} aplicado com sucesso!</p>
+              )}
+            </Card>
           </div>
 
           {/* Resumo Final */}
@@ -121,15 +161,22 @@ export default function Checkout() {
                </div>
 
                <div className="space-y-4 border-t border-outline-variant pt-6">
-                 <div className="flex justify-between text-sm">
-                    <span className="text-outline uppercase font-black text-[10px]">Peso Total da Carga</span>
-                    <span className="font-black">{totalWeight.toFixed(2)} kg</span>
-                 </div>
-                 <div className="flex justify-between items-center text-2xl font-black text-primary">
-                    <span className="italic uppercase tracking-tighter">Total</span>
-                    <span>R$ {subtotal.toFixed(2)}</span>
-                 </div>
-               </div>
+                  <div className="flex justify-between text-sm">
+                     <span className="text-outline uppercase font-black text-[10px]">Peso Total da Carga</span>
+                     <span className="font-black">{totalWeight.toFixed(2)} kg</span>
+                  </div>
+                  {coupon && (
+                    <div className="flex justify-between text-sm text-green-600 py-2 border-y border-green-100 italic font-bold">
+                       <span className="flex items-center gap-1"><Tag size={14} /> Desconto ({coupon.discount}%)</span>
+                       <span>- R$ {discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center text-4xl font-black text-primary pt-2">
+                     <span className="italic uppercase tracking-tighter">Total</span>
+                     <span>R$ {total.toFixed(2)}</span>
+                  </div>
+                </div>
+
 
                <Button size="lg" className="w-full mt-8 h-16 font-black uppercase italic text-lg" disabled={loading || cart.length === 0} onClick={handleSubmit}>
                   {loading ? 'Processando...' : <><CheckCircle className="mr-2" /> Confirmar Pedido</>}

@@ -1,8 +1,9 @@
-import { PrismaClient } from '@prisma/client';
+import prisma from '../lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
-const prisma = new PrismaClient();
+// prisma instance coming from lib/prisma.js singleton
+
 
 export const register = async (req, res) => {
   const { name, email, password, address } = req.body;

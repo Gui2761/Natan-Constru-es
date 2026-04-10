@@ -11,9 +11,19 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config({ path: path.join(__dirname, '../.env') });
 
+import prisma from './lib/prisma.js';
 const app = express();
-const prisma = new PrismaClient();
 const PORT = process.env.PORT || 3001;
+
+// Capturar erros que acontecem fora do ciclo de vida normal do Express
+process.on('uncaughtException', (err) => {
+  console.error('!!! UNCAUGHT EXCEPTION - O SERVIDOR IA CAIR:', err);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('!!! UNHANDLED REJECTION:', reason);
+});
+
 
 app.use(cors());
 app.use(express.json());
@@ -27,6 +37,8 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
+import couponRoutes from './routes/couponRoutes.js';
+
 
 // Rota de Teste
 app.get('/api/health', (req, res) => {
@@ -39,12 +51,27 @@ app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/banners', bannerRoutes);
+app.use('/api/coupons', couponRoutes);
+
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  console.error(">>> GLOBAL ERROR HANDLER CAUGHT:");
-  console.error(err.stack || err);
-  res.status(500).json({ message: "Internal Server Error", error: err.message, stack: err.stack });
+  console.error("\n[!] ERRO NO SERVIDOR:");
+  console.error("Mensagem:", err.message);
+  
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ 
+      message: "Imagem muito grande! O limite é de 25MB por arquivo.",
+      error: "LIMIT_FILE_SIZE"
+    });
+  }
+
+  console.error("Stack Trace:\n", err.stack);
+  res.status(500).json({ 
+    message: "Erro Interno no Servidor", 
+    error: err.message,
+    details: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
 });
 
 app.listen(PORT, () => {
