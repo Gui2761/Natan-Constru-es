@@ -141,10 +141,34 @@ app.get('/api/diag/logs', (req, res) => {
 
 app.get('/api/diag/ls-midia', (req, res) => {
   try {
-    const p = path.join(process.cwd(), 'midia');
-    if (!fs.existsSync(p)) return res.json({ error: "Pasta midia não existe", path: p });
-    const files = fs.readdirSync(p);
-    res.json({ count: files.length, files, cwd: process.cwd() });
+    const root = process.cwd();
+    const parent = path.dirname(root);
+    const midiaPath = path.join(root, 'midia');
+    
+    const results = {
+      cwd: root,
+      midiaPath,
+      midiaExists: fs.existsSync(midiaPath),
+      midiaFiles: fs.existsSync(midiaPath) ? fs.readdirSync(midiaPath) : [],
+      parentFiles: fs.readdirSync(parent),
+      env: process.env.NODE_ENV
+    };
+
+    // Tentar encontrar onde estariam os uploads
+    const possiblePaths = [
+      path.join(root, 'public', 'uploads'),
+      path.join(root, 'server', 'public', 'uploads'),
+      path.join(parent, 'public_html', 'midia'),
+      path.join(parent, 'public_html', 'uploads')
+    ];
+
+    results.prospecting = possiblePaths.map(p => ({
+      path: p,
+      exists: fs.existsSync(p),
+      files: fs.existsSync(p) ? fs.readdirSync(p).slice(0, 5) : []
+    }));
+
+    res.json(results);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
