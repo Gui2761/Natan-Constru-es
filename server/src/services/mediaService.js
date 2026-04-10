@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Helper para caminhos absolutos
-const getFilePath = (fileName) => path.resolve(__dirname, '../../../midia', fileName);
+// Helper para caminhos absolutos - Sincronizado com a blindagem de mídia
+const getFilePath = (fileName) => path.resolve(process.cwd(), '../midia_persistente', fileName);
 
 export const mediaService = {
   /**
