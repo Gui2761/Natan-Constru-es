@@ -7,11 +7,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Trava o caminho absoluto na raiz do projeto para evitar erros na Hostinger (Passenger)
-const uploadDir = path.resolve(__dirname, '../../../midia');
-
-// Garante que a pasta existe
+// Pasta de upload centralizada fora do root do projeto (persistente no Hostinger)
+const uploadDir = path.resolve(process.cwd(), '../midia_persistente');
 if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
+  fs.mkdirSync(uploadDir, { recursive: true });
 }
 
 const storage = multer.diskStorage({

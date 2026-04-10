@@ -54,12 +54,9 @@ app.use(express.json());
 
 // Resolução de Caminhos Estáticos (A partir da RAIZ)
 const distPath = path.resolve(__dirname, 'dist');
-const uploadsPath = path.join(process.cwd(), 'midia');
-
-console.log("📂 [CONFIG] Servindo frontend de: " + distPath);
-console.log("📂 [CONFIG] Tentando carregar mídia de: " + uploadsPath);
+// Pasta persistente for do nodejs (Hostinger)
+const uploadsPath = path.resolve(process.cwd(), '../midia_persistente');
 if (!fs.existsSync(uploadsPath)) {
-  console.log("⚠️  [CONFIG] Pasta de mídia não existe, criando...");
   fs.mkdirSync(uploadsPath, { recursive: true });
 }
 
@@ -84,8 +81,7 @@ app.get('/api/health', (req, res) => {
     nodeVersion: process.version,
     dbUrl: process.env.DATABASE_URL 
       ? process.env.DATABASE_URL.substring(0, 20) + '...' 
-      : 'NÃO DEFINIDA',
-    version: 'v1.2.6-meta-fix'
+      : 'NÃO DEFINIDA'
   });
 });
 
@@ -136,59 +132,6 @@ app.get('/api/diag/logs', (req, res) => {
     }
   } catch (err) {
     res.status(500).send("Erro ao ler logs: " + err.message);
-  }
-});
-
-app.get('/api/diag/ls-midia', (req, res) => {
-  try {
-    const root = process.cwd();
-    const parent = path.dirname(root);
-    const midiaPath = path.join(root, 'midia');
-    
-    const results = {
-      cwd: root,
-      midiaPath,
-      midiaExists: fs.existsSync(midiaPath),
-      midiaFiles: fs.existsSync(midiaPath) ? fs.readdirSync(midiaPath) : [],
-      parentFiles: fs.readdirSync(parent),
-      env: process.env.NODE_ENV
-    };
-
-    // Tentar encontrar onde estariam os uploads
-    const possiblePaths = [
-      path.join(root, 'public', 'uploads'),
-      path.join(root, 'server', 'public', 'uploads'),
-      path.join(parent, 'public_html', 'midia'),
-      path.join(parent, 'public_html', 'uploads')
-    ];
-
-    results.prospecting = possiblePaths.map(p => ({
-      path: p,
-      exists: fs.existsSync(p),
-      files: fs.existsSync(p) ? fs.readdirSync(p).slice(0, 5) : []
-    }));
-
-    res.json(results);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.get('/api/diag/test-img/:name', (req, res) => {
-  try {
-    const p = path.join(process.cwd(), 'midia', req.params.name);
-    if (!fs.existsSync(p)) return res.status(404).json({ error: "Arquivo não existe", path: p });
-    const stats = fs.statSync(p);
-    const buffer = fs.readFileSync(p);
-    res.json({ 
-      name: req.params.name, 
-      size: stats.size, 
-      readable: true,
-      bufferLength: buffer.length,
-      firstBytes: buffer.slice(0, 10).toString('hex')
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
 });
 
