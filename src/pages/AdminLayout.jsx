@@ -9,7 +9,8 @@ import {
   LogOut, 
   Image as ImageIcon,
   Ticket,
-  Store
+  Store,
+  UserPlus
 } from 'lucide-react';
 
 const SidebarItem = ({ to, icon: Icon, label, active }) => (
