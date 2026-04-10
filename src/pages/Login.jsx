@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Input, Card } from '../components/UI';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, UserPlus, Eye, EyeOff, Mail, Lock, User as UserIcon, Camera, MapPin, Hash } from 'lucide-react';
+import { LogIn, UserPlus, Mail, Lock, User as UserIcon, Camera, MapPin, Hash } from 'lucide-react';
 import useSEO from '../hooks/useSEO';
 
 export default function Login() {
@@ -13,7 +13,6 @@ export default function Login() {
     description: "Acesse sua conta na Natan Construções para gerenciar seus pedidos e aproveitar ofertas exclusivas." 
   });
 
-  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
   const navigate = useNavigate();

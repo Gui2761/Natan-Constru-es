@@ -13,7 +13,7 @@ export default function Profile() {
     description: "Gerencie suas informações pessoais, endereços e acompanhe seus pedidos na Natan Construções." 
   });
 
-  const { user, updateProfile } = useAuth();
+  const { user, updateProfile, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
@@ -76,8 +76,11 @@ export default function Profile() {
       <Header />
 
       <main className="max-w-4xl mx-auto py-12 px-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-outline hover:text-primary mb-8 font-bold uppercase text-[10px] tracking-widest bg-surface-container px-4 py-2 rounded-full border border-outline-variant transition-colors">
-           <ArrowLeft size={14} /> Voltar para a obra
+        <button 
+          onClick={() => isAdmin ? navigate('/admin') : navigate(-1)} 
+          className="flex items-center gap-2 text-outline hover:text-primary mb-8 font-bold uppercase text-[10px] tracking-widest bg-surface-container px-4 py-2 rounded-full border border-outline-variant transition-colors"
+        >
+           <ArrowLeft size={14} /> Voltar para {isAdmin ? 'o Painel' : 'a obra'}
         </button>
 
         <div className="flex flex-col md:flex-row gap-8 items-start">

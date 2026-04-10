@@ -31,18 +31,36 @@ export const Button = ({ className, variant = 'primary', size = 'md', children, 
   );
 };
 
-export const Input = ({ label, error, className, ...props }) => {
+import { Eye, EyeOff } from 'lucide-react';
+
+export const Input = ({ label, error, className, type = 'text', ...props }) => {
+  const [show, setShow] = React.useState(false);
+  const isPassword = type === 'password';
+
   return (
     <div className="w-full space-y-1.5">
       {label && <label className="text-sm font-medium text-on-surface/80 ml-1">{label}</label>}
-      <input
-        className={twMerge(
-          'w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all',
-          error && 'border-error ring-error/20',
-          className
+      <div className="relative group">
+        <input
+          type={isPassword ? (show ? 'text' : 'password') : type}
+          className={twMerge(
+            'w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all',
+            error && 'border-error ring-error/20',
+            isPassword && 'pr-12',
+            className
+          )}
+          {...props}
+        />
+        {isPassword && (
+          <button
+            type="button"
+            onClick={() => setShow(!show)}
+            className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-primary transition-colors"
+          >
+            {show ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
         )}
-        {...props}
-      />
+      </div>
       {error && <span className="text-xs text-error ml-1">{error}</span>}
     </div>
   );

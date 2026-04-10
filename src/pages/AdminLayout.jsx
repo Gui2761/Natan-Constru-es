@@ -62,13 +62,26 @@ export default function AdminLayout() {
           <span>Ver a Loja</span>
         </Link>
 
-        <button 
-          onClick={handleLogout}
-          className="p-6 flex items-center gap-3 text-error hover:bg-error/5 border-t border-outline-variant mt-auto"
-        >
-          <LogOut size={20} />
-          <span className="font-bold">Sair do Painel</span>
-        </button>
+        <div className="mt-auto border-t border-outline-variant">
+          <button 
+            onClick={() => {
+              logout();
+              navigate('/login');
+            }}
+            className="w-full p-6 flex items-center gap-3 text-secondary hover:bg-secondary/5 transition-colors"
+          >
+            <UserPlus size={20} />
+            <span className="font-bold text-sm">Trocar de Conta</span>
+          </button>
+          
+          <button 
+            onClick={handleLogout}
+            className="w-full p-6 flex items-center gap-3 text-error hover:bg-error/5 border-t border-outline-variant transition-colors"
+          >
+            <LogOut size={20} />
+            <span className="font-bold text-sm">Sair do Painel</span>
+          </button>
+        </div>
       </aside>
 
       {/* Main Content */}
@@ -80,12 +93,12 @@ export default function AdminLayout() {
               <p className="text-sm font-bold">{user?.name}</p>
               <p className="text-[10px] text-outline uppercase font-bold tracking-widest">Administrador</p>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border-2 border-outline-variant">
+            <Link to="/minha-conta" className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold overflow-hidden border-2 border-outline-variant hover:border-primary transition-all hover:scale-105 active:scale-95">
               {user?.avatar 
                 ? <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                 : <span>{user?.name?.[0]}</span>
               }
-            </div>
+            </Link>
           </div>
         </header>
 

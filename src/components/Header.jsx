@@ -90,6 +90,13 @@ export default function Header() {
                     <span className="hidden md:block text-xs font-black uppercase text-primary italic group-hover:underline">Minha Conta</span>
                   </Link>
                   <button 
+                    onClick={() => { logout(); navigate('/login'); }}
+                    className="p-2 text-outline hover:text-secondary transition-colors bg-surface-container rounded-full border border-outline-variant"
+                    title="Trocar de Conta"
+                  >
+                    <UserPlus size={18} />
+                  </button>
+                  <button 
                     onClick={handleLogout}
                     className="p-2 text-outline hover:text-error transition-colors bg-surface-container rounded-full border border-outline-variant"
                     title="Sair da Conta"
