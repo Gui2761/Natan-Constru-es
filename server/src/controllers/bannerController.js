@@ -46,17 +46,20 @@ export const createBanner = async (req, res) => {
 };
 
 export const deleteBanner = async (req, res) => {
-  const { id } = req.params;
+  // Limpeza extra para remover qualquer sufixo como ":1" se vier do frontend
+  const idStr = String(req.params.id).split(':')[0];
+  const id = parseInt(idStr);
+
   try {
-    const banner = await prisma.banner.findUnique({ where: { id: parseInt(id) } });
+    const banner = await prisma.banner.findUnique({ where: { id } });
     if (banner && banner.image) {
       deleteFile(banner.image);
     }
 
-    await prisma.banner.delete({ where: { id: parseInt(id) } });
+    await prisma.banner.delete({ where: { id } });
     res.json({ message: "Banner removido com sucesso" });
   } catch (error) {
-    res.status(400).json({ message: "Erro ao remover banner" });
+    res.status(400).json({ message: "Erro ao remover banner: " + error.message });
   }
 };
 
@@ -70,7 +73,10 @@ export const updateBanner = async (req, res) => {
    if (req.body.buttonText !== undefined) updateData.buttonText = req.body.buttonText;
    
    try {
-     const oldBanner = await prisma.banner.findUnique({ where: { id: parseInt(id) } });
+     const idStr = String(req.params.id).split(':')[0];
+     const id = parseInt(idStr);
+     
+     const oldBanner = await prisma.banner.findUnique({ where: { id } });
      if (!oldBanner) return res.status(404).json({ message: "Banner não localizado" });
 
      if (req.file) {
@@ -80,8 +86,11 @@ export const updateBanner = async (req, res) => {
         updateData.image = `/midia/${req.file.filename}`;
      }
      
+     const idStr = String(req.params.id).split(':')[0];
+     const id = parseInt(idStr);
+
      const banner = await prisma.banner.update({
-        where: { id: parseInt(id) },
+        where: { id },
         data: updateData
      });
      res.json(banner);

@@ -43,9 +43,11 @@ function getPool() {
   return pool;
 }
 
-// Função de Limpeza Profunda (Garante que nenhum undefined chegue ao MySQL2)
+// Função de Limpeza Profunda (Garante que nenhum undefined chegue ao MySQL2 e converte tipos JS para SQL)
 const scrub = (val) => {
   if (val === undefined) return null;
+  if (val === true) return 1;
+  if (val === false) return 0;
   if (Array.isArray(val)) return val.map(scrub);
   if (val !== null && typeof val === 'object' && !(val instanceof Date)) {
     const next = {};
