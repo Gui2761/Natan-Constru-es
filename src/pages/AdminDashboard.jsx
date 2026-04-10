@@ -70,23 +70,24 @@ export default function AdminDashboard() {
       ]);
 
       const orders = ordersRes.data;
-      const products = productsRes.data;
+      const products = productsRes.data.products || productsRes.data;
 
       // 1. Cálculos de Vendas
       const today = new Date().toISOString().split('T')[0];
       const thisMonth = new Date().getMonth();
       const thisYear = new Date().getFullYear();
 
-      const totalSales = orders.reduce((acc, current) => acc + current.totalAmount, 0);
+      const toISO = (d) => (d instanceof Date ? d.toISOString() : String(d || ''));
+      const totalSales = orders.reduce((acc, current) => acc + (current.totalAmount || 0), 0);
       const dailySales = orders
-        .filter(o => o.createdAt.startsWith(today))
-        .reduce((acc, current) => acc + current.totalAmount, 0);
+        .filter(o => toISO(o.createdAt).startsWith(today))
+        .reduce((acc, current) => acc + (current.totalAmount || 0), 0);
       const monthlySales = orders
         .filter(o => {
           const d = new Date(o.createdAt);
           return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
         })
-        .reduce((acc, current) => acc + current.totalAmount, 0);
+        .reduce((acc, current) => acc + (current.totalAmount || 0), 0);
 
       const pendingOrders = orders.filter(o => o.status === 'PROCESSANDO').length;
       const lowStockItems = products.filter(p => p.stock <= 5);
@@ -117,8 +118,8 @@ export default function AdminDashboard() {
         d.setDate(d.getDate() - (6 - i));
         const dateStr = d.toISOString().split('T')[0];
         const daySales = orders
-          .filter(o => o.createdAt.startsWith(dateStr))
-          .reduce((acc, current) => acc + current.totalAmount, 0);
+          .filter(o => toISO(o.createdAt).startsWith(dateStr))
+          .reduce((acc, current) => acc + (current.totalAmount || 0), 0);
         
         return {
           name: d.toLocaleDateString('pt-BR', { weekday: 'short' }),
@@ -134,7 +135,7 @@ export default function AdminDashboard() {
          const mIdx = d.getMonth();
          const mSales = orders
            .filter(o => new Date(o.createdAt).getMonth() === mIdx)
-           .reduce((acc, current) => acc + current.totalAmount, 0);
+           .reduce((acc, current) => acc + (current.totalAmount || 0), 0);
          
          return {
             name: months[mIdx],

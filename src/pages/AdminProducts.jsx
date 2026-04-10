@@ -34,8 +34,9 @@ export default function AdminProducts() {
       api.get('/products'),
       api.get('/categories')
     ]);
-    setProducts(p.data);
+    setProducts(p.data.products || p.data);
     setCategories(c.data);
+
   };
 
   const handleSubmit = async (e) => {
