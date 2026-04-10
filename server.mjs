@@ -1,5 +1,10 @@
-#!/usr/bin/env node
 import fs from 'fs';
+// Captura de Crash imediata para diagnosticar 503 na Hostinger
+process.on('uncaughtException', (err) => {
+    const errorMsg = `\n[${new Date().toISOString()}] INITIALIZATION ERROR:\n${err.stack}\n`;
+    try { fs.appendFileSync('error_crash.txt', errorMsg); } catch(e) {}
+    console.error(errorMsg);
+});
 import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
@@ -172,9 +177,4 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ [SUCCESS] Servidor escutando em 0.0.0.0:${PORT}`);
 });
 
-// Captura de Crash para Diagonalmente de Erro na Hostinger
-process.on('uncaughtException', (err) => {
-    const errorMsg = `\n[${new Date().toISOString()}] UNCAUGHT EXCEPTION:\n${err.stack}\n`;
-    fs.appendFileSync('error_crash.txt', errorMsg);
-    console.error(errorMsg);
-});
+// Fim do arquivo server.mjs
