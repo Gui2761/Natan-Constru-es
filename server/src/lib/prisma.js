@@ -60,8 +60,16 @@ function sanitizeParams(params) {
 }
 
 async function q(sql, params = []) {
-  const [rows] = await getPool().execute(sql, sanitizeParams(params));
-  return rows;
+  const cleanParams = sanitizeParams(params);
+  try {
+    const [rows] = await getPool().execute(sql, cleanParams);
+    return rows;
+  } catch (err) {
+    const fs = await import('fs');
+    const msg = `\n[${new Date().toISOString()}] SQL ERROR (q):\n${err.message}\nSQL: ${sql}\nParams: ${JSON.stringify(cleanParams)}\n`;
+    try { fs.appendFileSync('error_crash.txt', msg); } catch(e) {}
+    throw err;
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -166,10 +174,18 @@ const userModel = {
 
         if (Object.keys(finalData).length > 0) {
           const setClause = Object.keys(finalData).map(k => `\`${k}\` = ?`).join(', ');
-          await conn.execute(
-            `UPDATE \`User\` SET ${setClause} WHERE \`id\` = ?`,
-            sanitizeParams([...Object.values(finalData), where.id])
-          );
+          const updateParams = sanitizeParams([...Object.values(finalData), where.id]);
+          try {
+            await conn.execute(
+              `UPDATE \`User\` SET ${setClause} WHERE \`id\` = ?`,
+              updateParams
+            );
+          } catch (err) {
+            const fs = await import('fs');
+            const msg = `\n[${new Date().toISOString()}] SQL ERROR (User.update): ${err.message}\nParams: ${JSON.stringify(updateParams)}\n`;
+            try { fs.appendFileSync('error_crash.txt', msg); } catch(e) {}
+            throw err;
+          }
         }
       }
 

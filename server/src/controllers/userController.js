@@ -19,6 +19,9 @@ export const getMe = async (req, res) => {
 };
 
 export const updateMe = async (req, res) => {
+  const userId = req.userId;
+  console.log(`[DEBUG] Iniciando updateMe para Usuário ID: ${userId}`);
+
   let { name, email, password, address } = req.body;
 
   if (typeof address === 'string') {
@@ -46,7 +49,7 @@ export const updateMe = async (req, res) => {
     }
 
     if (req.file) {
-      updateData.avatar = `/uploads/${req.file.filename}`;
+      updateData.avatar = `/midia/${req.file.filename}`;
     }
 
     const user = await prisma.user.update({

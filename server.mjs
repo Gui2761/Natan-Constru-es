@@ -54,21 +54,26 @@ app.use(express.json());
 
 // Resolução de Caminhos Estáticos (A partir da RAIZ)
 const distPath = path.resolve(__dirname, 'dist');
-const uploadsPath = path.join(process.cwd(), 'uploads'); // Mesmo caminho do multer
+const uploadsPath = path.join(process.cwd(), 'midia');
 
 console.log("📂 [CONFIG] Servindo frontend de: " + distPath);
-console.log("📂 [CONFIG] Tentando carregar uploads de: " + uploadsPath);
+console.log("📂 [CONFIG] Tentando carregar mídia de: " + uploadsPath);
 if (!fs.existsSync(uploadsPath)) {
-  console.log("⚠️  [CONFIG] Pasta de uploads não existe, criando...");
+  console.log("⚠️  [CONFIG] Pasta de mídia não existe, criando...");
   fs.mkdirSync(uploadsPath, { recursive: true });
 }
 
 app.use(express.static(distPath));
-app.use('/uploads', express.static(uploadsPath, {
+app.use('/midia', express.static(uploadsPath, {
   setHeaders: (res) => {
     res.set('Access-Control-Allow-Origin', '*');
   }
 }));
+
+// Fallback para quem ainda tentar acessar /uploads
+app.use('/uploads', (req, res) => {
+  res.redirect(301, '/midia' + req.path);
+});
 
 // Rota de Teste (Pre-rotas)
 app.get('/api/health', (req, res) => {
