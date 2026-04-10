@@ -105,6 +105,21 @@ app.get('/api/db-test', async (req, res) => {
   }
 });
 
+// Endpoint de Leitura de Logs (Para Debug Remoto)
+app.get('/api/diag/logs', (req, res) => {
+  try {
+    const logPath = path.join(process.cwd(), 'error_crash.txt');
+    if (fs.existsSync(logPath)) {
+      const logs = fs.readFileSync(logPath, 'utf8');
+      res.send(`<html><body style="background:#111;color:#0f0;padding:20px;font-family:monospace"><h1>Logs de Erro - Natan Construções</h1><pre>${logs}</pre></body></html>`);
+    } else {
+      res.send("Nenhum log de erro encontrado (error_crash.txt não existe).");
+    }
+  } catch (err) {
+    res.status(500).send("Erro ao ler logs: " + err.message);
+  }
+});
+
 
 // Usar Rotas
 app.use('/api/auth', authRoutes);
