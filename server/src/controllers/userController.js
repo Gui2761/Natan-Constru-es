@@ -59,6 +59,7 @@ export const updateMe = async (req, res) => {
                zipCode: (address.zipCode || "").replace(/\D/g, '').substring(0, 8),
                street: (address.street || "").substring(0, 100),
                number: (address.number || "").substring(0, 10),
+               complement: (address.complement || "").substring(0, 50),
                city: (address.city || "").substring(0, 50),
                state: (address.state || "").substring(0, 2)
             },
@@ -66,6 +67,7 @@ export const updateMe = async (req, res) => {
                zipCode: (address.zipCode || "").replace(/\D/g, '').substring(0, 8),
                street: (address.street || "").substring(0, 100),
                number: (address.number || "").substring(0, 10),
+               complement: (address.complement || "").substring(0, 50),
                city: (address.city || "").substring(0, 50),
                state: (address.state || "").substring(0, 2)
             }
@@ -78,7 +80,10 @@ export const updateMe = async (req, res) => {
     const { password: _, ...userData } = user;
     res.status(200).json(userData);
   } catch (error) {
+    const fs = await import('fs');
+    const errorLog = `\n[${new Date().toISOString()}] PROFILE UPDATE ERROR: ${error.message}\nStack: ${error.stack}\nData: ${JSON.stringify({ name, email, hasAddress: !!address })}\n`;
+    fs.appendFileSync('error_crash.txt', errorLog);
     console.error("Erro ao atualizar perfil:", error);
-    res.status(500).json({ message: "Erro ao atualizar perfil" });
+    res.status(500).json({ message: "Erro ao atualizar perfil: " + error.message });
   }
 };

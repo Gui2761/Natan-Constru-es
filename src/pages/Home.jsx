@@ -35,8 +35,10 @@ export default function Home() {
         api.get('/banners'),
         api.get('/products')
       ]);
+      const allProducts = p.data.products || p.data;
+      const discounted = allProducts.filter(prod => prod.salePercentage > 0);
+      setProducts(discounted.length > 0 ? discounted.slice(0, 8) : allProducts.slice(0, 8)); 
       setBanners(b.data);
-      setProducts(p.data.slice(0, 8)); // Mostrar 8 primeiros
     } catch (err) {
       console.error(err);
     }
@@ -103,7 +105,11 @@ export default function Home() {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {products.length === 0 ? (
-            <p className="col-span-4 text-center text-outline italic py-20">Carregando promoções...</p>
+            <div className="col-span-4 text-center py-20 bg-surface-container rounded-3xl border-2 border-dashed border-outline-variant">
+              <Percent size={48} className="mx-auto text-outline mb-4 opacity-20" />
+              <p className="text-outline italic font-medium">Nenhuma oferta ativa no momento.</p>
+              <Button variant="outline" className="mt-4" onClick={() => navigate('/produtos')}>Ver catálogo completo</Button>
+            </div>
           ) : (
             products.map(product => (
               <Card key={product.id} className="group p-0 overflow-hidden relative" hover>
