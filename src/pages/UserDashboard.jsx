@@ -4,13 +4,15 @@ import Footer from '../components/Footer';
 import { Card, Button } from '../components/UI';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { ShoppingBag, ChevronRight, Package, Truck, CheckCircle2, MapPin, User as UserIcon } from 'lucide-react';
+import { ShoppingBag, ChevronRight, Package, Truck, CheckCircle2, MapPin, User as UserIcon, XCircle } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function UserDashboard() {
   const { user, logout } = useAuth();
   const [orders, setOrders] = useState([]);
+  const [expandedOrder, setExpandedOrder] = useState(null);
   const navigate = useNavigate();
+
 
   useEffect(() => {
     if (user) fetchOrders();
@@ -30,6 +32,7 @@ export default function UserDashboard() {
       case 'PROCESSANDO': return <Package className="text-blue-500" />;
       case 'SAIU_ENTREGA': return <Truck className="text-orange-500" />;
       case 'ENTREGUE': return <CheckCircle2 className="text-green-500" />;
+      case 'CANCELADO': return <XCircle className="text-red-500" />;
       default: return <Package />;
     }
   };
@@ -119,11 +122,40 @@ export default function UserDashboard() {
 
                        <div className="flex flex-col items-end gap-3">
                           <span className="text-3xl font-black text-primary tracking-tighter">R$ {order.totalAmount.toFixed(2)}</span>
-                          <Button variant="outline" size="sm" className="font-bold border-primary/10 uppercase text-[10px] tracking-widest">
-                            Ver Itens
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className={`font-bold border-primary/10 uppercase text-[10px] tracking-widest transition-all ${expandedOrder === order.id ? 'bg-primary text-white border-primary' : ''}`}
+                            onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                          >
+                            {expandedOrder === order.id ? 'Fechar Detalhes' : 'Ver Itens'}
                           </Button>
                        </div>
                     </div>
+
+                    {/* Lista Expandida de Itens */}
+                    {expandedOrder === order.id && (
+                      <div className="mt-8 pt-6 border-t border-outline-variant animate-in slide-in-from-top-4 duration-300">
+                         <p className="text-[10px] font-black text-outline uppercase tracking-widest mb-4">Itens do Pedido</p>
+                         <div className="space-y-3">
+                            {JSON.parse(order.items).map((item, idx) => (
+                              <div key={idx} className="flex items-center justify-between p-3 bg-surface-container/30 rounded-xl">
+                                <div className="flex items-center gap-3">
+                                   <div className="w-10 h-10 bg-white rounded-lg border border-outline-variant flex items-center justify-center font-bold text-primary text-xs italic">
+                                      {idx + 1}
+                                   </div>
+                                   <div>
+                                      <p className="font-bold text-sm text-primary">{item.name}</p>
+                                      <p className="text-[10px] text-outline uppercase font-black">{item.quantity} unidades x R$ {item.finalPrice.toFixed(2)}</p>
+                                   </div>
+                                </div>
+                                <span className="font-bold text-primary text-sm">R$ {(item.finalPrice * item.quantity).toFixed(2)}</span>
+                              </div>
+                            ))}
+                         </div>
+                      </div>
+                    )}
+
                   </Card>
                 ))}
               </div>

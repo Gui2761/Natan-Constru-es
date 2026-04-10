@@ -38,3 +38,16 @@ h1, h2, h3, h4, .font-headline {
 .glass {
   @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-blueprint;
 }
+
+/* Image Standardization Utilities */
+.img-standard-product {
+  @apply aspect-square w-full h-full object-cover rounded-xl bg-surface-container;
+}
+
+.img-standard-banner {
+  @apply w-full h-full object-cover bg-surface-container;
+}
+
+.product-card-img-container {
+  @apply relative aspect-square overflow-hidden rounded-2xl bg-surface-container border border-outline-variant;
+}

@@ -4,21 +4,36 @@ import Footer from '../components/Footer';
 import { Card, Button } from '../components/UI';
 import api from '../services/api';
 import { Package, Percent, ShoppingCart } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import useSEO from '../hooks/useSEO';
 
 export default function Products() {
   const [products, setProducts] = useState([]);
+  const [meta, setMeta] = useState({ page: 1, totalPages: 1 });
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [banners, setBanners] = useState([]);
   const navigate = useNavigate();
 
+  useSEO({ 
+    title: "Catálogo", 
+    description: "Confira o catálogo completo da Natan Construções. Tudo para sua reforma e construção com os melhores preços do mercado." 
+  });
+
   useEffect(() => {
-    fetchProducts();
+    fetchData();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      const { data } = await api.get('/products');
-      setProducts(data);
+      const [p, b] = await Promise.all([
+        api.get('/products?page=1&limit=12'),
+        api.get('/banners')
+      ]);
+      setProducts(p.data.products);
+      setMeta(p.data.meta);
+      setBanners(b.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -26,9 +41,43 @@ export default function Products() {
     }
   };
 
+  const loadMore = async () => {
+    if (loadingMore || meta.page >= meta.totalPages) return;
+    setLoadingMore(true);
+    try {
+      const { data } = await api.get(`/products?page=${meta.page + 1}&limit=12`);
+      setProducts(prev => [...prev, ...data.products]);
+      setMeta(data.meta);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  // Lógica de Banner: Fallback para o da Home (com título limpo)
+  const specificBanner = banners.find(b => b.link === '/produtos');
+  const displayBanner = specificBanner 
+    ? specificBanner 
+    : (banners[0] ? { ...banners[0], title: '' } : null);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {displayBanner && (
+        <section className="h-[280px] w-full relative overflow-hidden">
+           <img src={displayBanner.image} className="w-full h-full object-cover" alt="Catálogo" />
+           <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent flex items-center px-10">
+              <div className="max-w-7xl mx-auto w-full">
+                 <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">
+                    Catálogo Completo
+                 </h2>
+                 <p className="text-white/70 text-lg font-bold uppercase mt-4">Qualidade Natan em cada detalhe</p>
+              </div>
+           </div>
+        </section>
+      )}
       
       <main className="max-w-7xl mx-auto py-10 px-4">
         <div className="flex items-center gap-4 mb-10 border-b border-outline-variant pb-6">
@@ -61,9 +110,9 @@ export default function Products() {
                       <Percent size={10} /> {product.salePercentage}% OFF
                    </div>
                  )}
-                 <div className="aspect-square bg-surface-container overflow-hidden">
+                 <div className="product-card-img-container">
                     <img 
-                      src={product.images || 'https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?q=80&w=800'} 
+                      src={product.images ? product.images.split(',')[0] : 'https://placehold.co/800x800/222d42/ffffff?text=Sem+Foto'} 
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                       alt={product.name}
                       onError={(e) => { e.target.src = 'https://placehold.co/800x800/222d42/ffffff?text=Natan+Obras'; }}
@@ -90,6 +139,20 @@ export default function Products() {
               </Card>
             ))}
           </div>
+        )}
+
+        {meta.page < meta.totalPages && (
+           <div className="mt-16 flex justify-center">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="px-10 h-14 uppercase font-black italic tracking-tighter"
+                onClick={loadMore}
+                loading={loadingMore}
+              >
+                 Carregar Mais Produtos
+              </Button>
+           </div>
         )}
       </main>
 

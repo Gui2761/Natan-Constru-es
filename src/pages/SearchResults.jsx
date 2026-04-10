@@ -8,28 +8,50 @@ import { useLocation } from 'react-router-dom';
 
 export default function SearchResults() {
   const [products, setProducts] = useState([]);
+  const [banners, setBanners] = useState([]);
   const query = new URLSearchParams(useLocation().search).get('q');
 
   useEffect(() => {
-    fetchSearch();
+    fetchData();
   }, [query]);
 
-  const fetchSearch = async () => {
+  const fetchData = async () => {
     try {
-      const { data } = await api.get('/products');
-      const filtered = data.filter(p => 
-        p.name.toLowerCase().includes(query.toLowerCase()) || 
-        p.description.toLowerCase().includes(query.toLowerCase())
+      const [p, b] = await Promise.all([
+        api.get('/products'),
+        api.get('/banners')
+      ]);
+      const filtered = p.data.filter(prod => 
+        prod.name.toLowerCase().includes(query.toLowerCase()) || 
+        prod.description.toLowerCase().includes(query.toLowerCase())
       );
       setProducts(filtered);
+      setBanners(b.data);
     } catch (err) {
       console.error(err);
     }
   };
 
+  // Lógica de Banner: Fallback para o da Home (com título limpo)
+  const displayBanner = banners[0] ? { ...banners[0], title: '' } : null;
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
+
+      {displayBanner && (
+        <section className="h-[250px] w-full relative overflow-hidden">
+           <img src={displayBanner.image} className="w-full h-full object-cover" alt="Busca" />
+           <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent flex items-center px-10">
+              <div className="max-w-7xl mx-auto w-full">
+                 <p className="text-[10px] font-black text-white/70 uppercase tracking-widest leading-none mb-2">Mostrando resultados para</p>
+                 <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">
+                    "{query}"
+                 </h2>
+              </div>
+           </div>
+        </section>
+      )}
       
       <main className="max-w-7xl mx-auto py-10 px-4">
         <div className="flex items-center gap-4 mb-10 border-b border-outline-variant pb-6">
@@ -57,8 +79,13 @@ export default function SearchResults() {
                       <Percent size={10} /> {product.salePercentage}% OFF
                    </div>
                  )}
-                 <div className="aspect-square bg-surface-container overflow-hidden">
-                    <img src={product.images} className="w-full h-full object-cover group-hover:scale-110 transition-transform" alt={product.name} />
+                 <div className="product-card-img-container">
+                    <img 
+                      src={product.images ? product.images.split(',')[0] : 'https://placehold.co/800x800/222d42/ffffff?text=Sem+Foto'} 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                      alt={product.name}
+                      onError={(e) => { e.target.src = 'https://placehold.co/800x800/222d42/ffffff?text=Natan+Obras'; }}
+                    />
                  </div>
                  <div className="p-5">
                     <h4 className="font-bold text-lg text-primary mt-1 line-clamp-1 truncate">{product.name}</h4>

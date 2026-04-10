@@ -14,11 +14,13 @@ export default function AdminProducts() {
     name: '',
     description: '',
     basePrice: '',
+    costPrice: '',
     salePercentage: '',
     stock: '',
     weight: '',
     categoryId: ''
   });
+
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [editingId, setEditingId] = useState(null);
@@ -75,11 +77,13 @@ export default function AdminProducts() {
       name: product.name,
       description: product.description,
       basePrice: product.basePrice,
+      costPrice: product.costPrice || '',
       salePercentage: product.salePercentage,
       stock: product.stock,
       weight: product.weight,
       categoryId: product.categoryId
     });
+
     setExistingImages(product.images ? product.images.split(',') : []);
     setSelectedFiles([]); // As imagens existentes são mantidas se n enviarmos uma nova
     setShowForm(true);
@@ -89,7 +93,8 @@ export default function AdminProducts() {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingId(null);
-    setFormData({ name: '', description: '', basePrice: '', salePercentage: '', stock: '', weight: '', categoryId: '' });
+    setFormData({ name: '', description: '', basePrice: '', costPrice: '', salePercentage: '', stock: '', weight: '', categoryId: '' });
+
     setSelectedFiles([]);
     setExistingImages([]);
   };
@@ -137,10 +142,14 @@ export default function AdminProducts() {
             <div className="lg:col-span-4">
               <Input label="Descrição" placeholder="Detalhes técnicos, marca, etc" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
             </div>
-            <Input label="Preço Base (R$)" type="number" step="0.01" required value={formData.basePrice} onChange={e => setFormData({...formData, basePrice: e.target.value})} />
+            <Input label="Preço Base (Venda) (R$)" type="number" step="0.01" required value={formData.basePrice} onChange={e => setFormData({...formData, basePrice: e.target.value})} />
+            <Input label="Preço de Custo (R$)" type="number" step="0.01" required value={formData.costPrice} onChange={e => setFormData({...formData, costPrice: e.target.value})} />
             <Input label="% de Promoção (Opcional)" type="number" value={formData.salePercentage} onChange={e => setFormData({...formData, salePercentage: e.target.value})} />
             <Input label="Estoque Inicial" type="number" required value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
-            <Input label="Peso (kg) (Opcional)" type="number" step="0.1" value={formData.weight} onChange={e => setFormData({...formData, weight: e.target.value})} />
+            <div className="lg:col-span-1">
+               <Input label="Peso (kg) (Opcional)" type="number" step="0.1" value={formData.weight} onChange={e => setFormData({...formData, weight: e.target.value})} />
+            </div>
+
             
             {/* DRAG AND DROP AREA */}
             <div className="lg:col-span-4 mt-2">
@@ -243,7 +252,7 @@ export default function AdminProducts() {
               <tr key={p.id} className="hover:bg-primary/5 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-surface-container overflow-hidden shrink-0 border border-outline-variant">
+                    <div className="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0 border border-outline-variant">
                       {p.images && <img src={p.images.split(',')[0]} alt={p.name} className="w-full h-full object-cover" />}
                     </div>
                     <div>

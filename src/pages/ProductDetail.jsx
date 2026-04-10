@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
+
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, Button, Input } from '../components/UI';
@@ -9,9 +11,13 @@ import { ShoppingCart, MessageCircle, Calculator, Info, Package, ArrowLeft, Perc
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+
   const [product, setProduct] = useState(null);
   const [related, setRelated] = useState([]);
   const [quantity, setQuantity] = useState(1);
+  const [added, setAdded] = useState(false);
+
   const [area, setArea] = useState(''); // Para a calculadora
   const [selectedImage, setSelectedImage] = useState('');
 
@@ -44,6 +50,13 @@ export default function ProductDetail() {
     // Número real da Natan Construções (Placeholder oficial)
     window.open(`https://wa.me/5581988887777?text=${encodeURIComponent(text)}`, '_blank');
   };
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 3000);
+  };
+
 
 
   return (
@@ -113,9 +126,13 @@ export default function ProductDetail() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                <Button size="lg" className="h-16 uppercase font-black text-base italic">
-                  <ShoppingCart className="mr-3" /> Adicionar ao Carrinho
-                </Button>
+                 <Button 
+                   size="lg" 
+                   className={`h-16 uppercase font-black text-base italic transition-all ${added ? 'bg-green-600 scale-95' : ''}`}
+                   onClick={handleAddToCart}
+                 >
+                   <ShoppingCart className="mr-3" /> {added ? 'Adicionado!' : 'Adicionar ao Carrinho'}
+                 </Button>
                 <Button size="lg" variant="outline" className="h-16 uppercase font-black text-base border-primary/20 hover:bg-primary/5 italic" onClick={handleWhatsApp}>
                   <MessageCircle className="mr-3 text-green-600" /> Negociar Lote
                 </Button>

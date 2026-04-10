@@ -31,6 +31,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const register = async (userData) => {
+    // Se userData for FormData, o axios cuida do header multipart
     const { data } = await api.post('/auth/register', userData);
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
@@ -38,8 +39,25 @@ export const AuthProvider = ({ children }) => {
     return data.user;
   };
 
+  const updateProfile = async (formData) => {
+    const { data } = await api.put('/users/me', formData);
+    localStorage.setItem('user', JSON.stringify(data));
+    setUser(data);
+    return data;
+  };
+
+  const refreshUser = async () => {
+    try {
+      const { data } = await api.get('/users/me');
+      localStorage.setItem('user', JSON.stringify(data));
+      setUser(data);
+    } catch (err) {
+      console.error("Erro ao atualizar dados do usuário", err);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, loading, isAdmin: user?.role === 'ADMIN' }}>
+    <AuthContext.Provider value={{ user, login, logout, register, updateProfile, refreshUser, loading, isAdmin: user?.role === 'ADMIN' }}>
       {children}
     </AuthContext.Provider>
   );

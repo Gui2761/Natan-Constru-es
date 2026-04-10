@@ -6,27 +6,48 @@ import jwt from 'jsonwebtoken';
 
 
 export const register = async (req, res) => {
-  const { name, email, password, address } = req.body;
+  let { name, email, password, address } = req.body;
+
+  // Se o address vier como string (FormData), parsear
+  if (typeof address === 'string') {
+    try {
+      address = JSON.parse(address);
+    } catch (e) {
+      return res.status(400).json({ message: "Formato de endereço inválido" });
+    }
+  }
 
   try {
+    // VALIDAÇÕES RIGOROSAS (Master Skill Patterns)
+    if (!name || name.length > 50) return res.status(400).json({ message: "Nome deve ter no máximo 50 caracteres" });
+    if (!email || !email.includes('@')) return res.status(400).json({ message: "E-mail inválido" });
+    if (!password || password.length < 6 || password.length > 20) return res.status(400).json({ message: "Senha deve ter entre 6 e 20 caracteres" });
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) return res.status(400).json({ message: "Usuário já existe" });
 
     const hashedPassword = await bcrypt.hash(password, 12);
+
+    // Gerar URL do avatar se file existir
+    let avatarUrl = null;
+    if (req.file) {
+      avatarUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    }
 
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
+        avatar: avatarUrl,
         address: {
           create: {
-            zipCode: address.zipCode,
-            street: address.street,
-            number: address.number,
-            complement: address.complement,
-            city: address.city,
-            state: address.state
+            zipCode: (address?.zipCode || "").replace(/\D/g, '').substring(0, 8), // Apenas números, max 8
+            street: (address?.street || "").substring(0, 100),
+            number: (address?.number || "").substring(0, 10),
+            complement: (address?.complement || "").substring(0, 50),
+            city: (address?.city || "").substring(0, 50),
+            state: (address?.state || "").substring(0, 2)
           }
         }
       },
@@ -37,6 +58,7 @@ export const register = async (req, res) => {
 
     res.status(201).json({ user, token });
   } catch (error) {
+    console.error("Erro no registro:", error);
     res.status(500).json({ message: "Erro ao registrar usuário", error: error.message });
   }
 };

@@ -1,15 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, Search, ChevronDown } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Search, ChevronDown, LogOut } from 'lucide-react';
+
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
+
 import api from '../services/api';
 
 export default function Header() {
   const [categories, setCategories] = useState([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, logout } = useAuth();
+  const { cart } = useCart();
   const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
 
   useEffect(() => {
     fetchCategories();
@@ -39,7 +48,7 @@ export default function Header() {
     <header className="bg-surface border-b border-outline-variant sticky top-0 z-50">
       {/* Top Bar - Info & Social */}
       <div className="bg-primary text-white text-[10px] py-2 px-10 flex justify-between uppercase font-bold tracking-widest">
-        <span>Atendimento: (11) 99999-9999</span>
+        <span>Atendimento: (81) 98888-7777</span>
         <span>Entregas rápidas para toda a região</span>
       </div>
 
@@ -68,21 +77,51 @@ export default function Header() {
 
         {/* ACÕES */}
         <div className="flex items-center gap-6">
-          <Link to={user ? "/minha-conta" : "/login"} className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center group-hover:bg-primary/5 transition-colors">
-              <User size={20} className="text-primary" />
-            </div>
-            <div className="hidden lg:block text-left">
-              <p className="text-[10px] text-outline font-bold uppercase tracking-widest">Minha Conta</p>
-              <p className="text-xs font-bold text-primary">{user ? user.name.split(' ')[0] : 'Entrar/Criar'}</p>
-            </div>
-          </Link>
+          <div className="flex items-center gap-4">
+            {user ? (
+               <div className="flex items-center gap-4">
+                  <Link to="/minha-conta" className="flex items-center gap-2 group">
+                    <div className="w-10 h-10 rounded-full border-2 border-primary/20 overflow-hidden bg-surface-container group-hover:border-primary transition-colors">
+                       {user.avatar ? (
+                          <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                       ) : (
+                          <div className="w-full h-full flex items-center justify-center text-primary font-bold text-sm">
+                             {user.name.charAt(0)}
+                          </div>
+                       )}
+                    </div>
+                    <span className="hidden md:block text-xs font-black uppercase text-primary italic group-hover:underline">Minha Conta</span>
+                  </Link>
+                  <button 
+                    onClick={handleLogout}
+                    className="p-2 text-outline hover:text-error transition-colors bg-surface-container rounded-full border border-outline-variant"
+                    title="Sair da Conta"
+                  >
+                    <LogOut size={18} />
+                  </button>
+               </div>
+            ) : (
+               <Link to="/login" className="flex items-center gap-2 group">
+                  <div className="w-10 h-10 rounded-full border border-outline-variant flex items-center justify-center group-hover:bg-primary/5 transition-colors">
+                    <User size={20} className="text-primary" />
+                  </div>
+                  <div className="hidden lg:block text-left">
+                    <p className="text-[10px] text-outline font-bold uppercase tracking-widest">Minha Conta</p>
+                    <p className="text-xs font-bold text-primary">Entrar/Criar</p>
+                  </div>
+               </Link>
+            )}
+          </div>
+
 
           <Link to="/carrinho" className="relative group">
             <div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center shadow-blueprint hover:scale-105 transition-transform">
               <ShoppingCart size={20} />
             </div>
-            <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-black">0</span>
+            <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] w-5 h-5 flex items-center justify-center rounded-full border-2 border-white font-black">
+              {cart.reduce((acc, item) => acc + item.quantity, 0)}
+            </span>
+
           </Link>
           
           <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>

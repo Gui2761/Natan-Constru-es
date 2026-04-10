@@ -5,11 +5,25 @@ import { Card, Button } from '../components/UI';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Percent, ArrowRight } from 'lucide-react';
+import useSEO from '../hooks/useSEO';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Autoplay, EffectFade } from 'swiper/modules';
+
+// Import Swiper styles
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import 'swiper/css/effect-fade';
 
 export default function Home() {
   const [banners, setBanners] = useState([]);
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
+
+  useSEO({ 
+    title: "Home", 
+    description: "Natan Construções: Qualidade profissional para sua obra, do alicerce ao acabamento. Confira nossas ofertas exclusivas." 
+  });
 
   useEffect(() => {
     fetchHomeData();
@@ -32,27 +46,44 @@ export default function Home() {
     <div className="min-h-screen">
       <Header />
       
-      {/* Banner/Hero Slider Real */}
-      <section className="bg-surface-container relative overflow-hidden">
+      {/* Banner Carousel Premium */}
+      <section className="bg-surface-container relative">
         {banners.length > 0 ? (
-          <div className="h-[500px] w-full relative">
-            <img 
-              src={banners[0].image || 'https://images.unsplash.com/photo-1541888946425-d81bb19480c5?auto=format&fit=crop&q=80&w=1200'} 
-              className="w-full h-full object-cover" 
-              alt="Oferta" 
-              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=1200'; }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-primary/90 to-transparent flex items-center">
-              <div className="max-w-7xl w-full px-10">
-                <h2 className="text-6xl font-black text-white uppercase italic tracking-tighter max-w-2xl leading-[0.9]">
-                  {banners[0].title}
-                </h2>
-                <Button variant="secondary" size="lg" className="mt-8 text-xl px-12 uppercase italic h-16">
-                  Confira Agora <ArrowRight className="ml-2" />
-                </Button>
-              </div>
-            </div>
-          </div>
+          <Swiper
+            modules={[Navigation, Pagination, Autoplay, EffectFade]}
+            effect="fade"
+            navigation
+            pagination={{ clickable: true }}
+            autoplay={{ delay: 5000 }}
+            className="h-[500px] w-full"
+          >
+            {banners.map(banner => (
+              <SwiperSlide key={banner.id}>
+                <div className="relative h-full w-full">
+                  <img 
+                    src={banner.image} 
+                    className="img-standard-banner" 
+                    alt={banner.title || 'Oferta'} 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/40 to-transparent flex items-center">
+                    <div className="max-w-7xl w-full px-10 mx-auto">
+                      <h2 className="text-6xl font-black text-white uppercase italic tracking-tighter max-w-2xl leading-[0.9] drop-shadow-lg">
+                        {banner.title}
+                      </h2>
+                      <Button 
+                        variant="secondary" 
+                        size="lg" 
+                        className="mt-8 text-xl px-12 uppercase italic h-16 shadow-2xl hover:scale-105 transition-transform"
+                        onClick={() => banner.link && navigate(banner.link)}
+                      >
+                        {banner.buttonText || 'Confira Agora'} <ArrowRight className="ml-2" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         ) : (
           <div className="h-[400px] bg-primary flex flex-col justify-center items-center text-center p-10">
             <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter">Natan Construções</h2>
@@ -81,14 +112,14 @@ export default function Home() {
                       <Percent size={10} /> {product.salePercentage}% OFF
                    </div>
                  )}
-                 <div className="aspect-square bg-surface-container overflow-hidden">
-                    <img 
-                      src={product.images || 'https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?auto=format&fit=crop&q=80&w=800'} 
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                      alt={product.name}
-                      onError={(e) => { e.target.src = 'https://placehold.co/800x800/222d42/ffffff?text=Natan+Obras'; }}
-                    />
-                 </div>
+                  <div className="product-card-img-container">
+                     <img 
+                       src={product.images ? product.images.split(',')[0] : 'https://placehold.co/800x800/222d42/ffffff?text=Sem+Foto'} 
+                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                       alt={product.name}
+                       onError={(e) => { e.target.src = 'https://placehold.co/800x800/222d42/ffffff?text=Natan+Obras'; }}
+                     />
+                  </div>
                  <div className="p-5">
                     <p className="text-[10px] font-black text-outline uppercase tracking-widest">{product.category?.name}</p>
                     <h4 className="font-bold text-lg text-primary mt-1 line-clamp-1">{product.name}</h4>

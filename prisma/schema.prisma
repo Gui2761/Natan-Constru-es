@@ -13,6 +13,7 @@ model User {
   email     String   @unique
   password  String
   role      String   @default("CLIENT") // "ADMIN" or "CLIENT"
+  avatar    String?  // Profile picture URL
   address   Address?
   orders    Order[]
   createdAt DateTime @default(now())
@@ -42,6 +43,7 @@ model Product {
   name           String
   description    String
   basePrice      Float
+  costPrice      Float    @default(0) // Price paid by merchant
   salePercentage Float    @default(0)
   finalPrice     Float
   stock          Int      @default(0)
@@ -53,11 +55,12 @@ model Product {
 }
 
 model Banner {
-  id      Int     @id @default(autoincrement())
-  image   String
-  title   String?
-  link    String?
-  active  Boolean @default(true)
+  id         Int     @id @default(autoincrement())
+  image      String
+  title      String?
+  buttonText String? // Custom CTA text
+  link       String?
+  active     Boolean @default(true)
 }
 
 model Order {

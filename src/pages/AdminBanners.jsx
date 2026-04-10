@@ -5,18 +5,29 @@ import { Image as ImageIcon, Plus, Trash2, ExternalLink, UploadCloud, X, Edit2 }
 
 export default function AdminBanners() {
   const [banners, setBanners] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ title: '', link: '' });
+  const [formData, setFormData] = useState({ title: '', link: '/', buttonText: '' });
   const [selectedFile, setSelectedFile] = useState(null);
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchBanners();
+    fetchCategories();
   }, []);
 
   const fetchBanners = async () => {
     const { data } = await api.get('/banners');
     setBanners(data);
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const { data } = await api.get('/categories');
+      setCategories(data);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -27,6 +38,7 @@ export default function AdminBanners() {
       const formPayload = new FormData();
       if (formData.title) formPayload.append('title', formData.title);
       if (formData.link) formPayload.append('link', formData.link);
+      if (formData.buttonText) formPayload.append('buttonText', formData.buttonText);
       if (selectedFile) formPayload.append('image', selectedFile);
 
       if (editingId) {
@@ -46,12 +58,16 @@ export default function AdminBanners() {
 
   const handleEdit = (banner) => {
      setEditingId(banner.id);
-     setFormData({ title: banner.title || '', link: banner.link || '' });
+     setFormData({ 
+       title: banner.title || '', 
+       link: banner.link || '/', 
+       buttonText: banner.buttonText || '' 
+     });
      setSelectedFile(null);
   };
 
   const resetForm = () => {
-    setFormData({ title: '', link: '' });
+    setFormData({ title: '', link: '/', buttonText: '' });
     setSelectedFile(null);
     setEditingId(null);
   };
@@ -117,7 +133,32 @@ export default function AdminBanners() {
             </div>
 
             <Input label="Título (Opcional)" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
-            <Input label="Link de Destino" placeholder="/produtos/categoria..." value={formData.link} onChange={e => setFormData({...formData, link: e.target.value})} />
+            
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-on-surface/80">Destino do Clique</label>
+              <select 
+                className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-sm text-primary"
+                value={formData.link} 
+                onChange={e => setFormData({...formData, link: e.target.value})}
+              >
+                <option value="/">Página Inicial (Home)</option>
+                <option value="/produtos">Todos os Produtos</option>
+                <optgroup label="Categorias">
+                  {categories.map(cat => (
+                    <option key={cat.id} value={`/produtos?categoria=${cat.slug}`}>
+                      Ir para {cat.name}
+                    </option>
+                  ))}
+                </optgroup>
+              </select>
+            </div>
+
+            <Input 
+              label="Texto do Botão (Ex: Ver Tudo)" 
+              placeholder="Ex: Confira Agora" 
+              value={formData.buttonText} 
+              onChange={e => setFormData({...formData, buttonText: e.target.value})} 
+            />
             <Button className="w-full" disabled={loading}>
                <Plus size={18} className="mr-2"/> {loading ? 'Enviando...' : editingId ? 'Atualizar Banner' : 'Adicionar Banner'}
             </Button>

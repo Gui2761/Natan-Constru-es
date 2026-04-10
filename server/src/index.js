@@ -28,8 +28,11 @@ process.on('unhandledRejection', (reason, promise) => {
 app.use(cors());
 app.use(express.json());
 
-// Servir de arquivos estáticos (Imagens de Upload)
+// Servir arquivos estáticos (Imagens de Upload)
 app.use('/uploads', express.static(path.join(__dirname, '../public/uploads')));
+
+// Servir Frontend (Vite Build)
+app.use(express.static(path.join(__dirname, '../../dist')));
 
 // Importar Rotas
 import authRoutes from './routes/authRoutes.js';
@@ -38,6 +41,7 @@ import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import bannerRoutes from './routes/bannerRoutes.js';
 import couponRoutes from './routes/couponRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 
 // Rota de Teste
@@ -47,6 +51,7 @@ app.get('/api/health', (req, res) => {
 
 // Usar Rotas
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
@@ -74,6 +79,11 @@ app.use((err, req, res, next) => {
   });
 });
 
+// Suporte a Rotas do React (SPA) - Catch-all
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../../dist/index.html'));
+});
+
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor backend rodando em http://localhost:${PORT}`);
+  console.log(`🚀 Servidor unificado rodando em http://localhost:${PORT}`);
 });

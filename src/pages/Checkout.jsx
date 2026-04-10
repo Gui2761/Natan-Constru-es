@@ -83,13 +83,42 @@ export default function Checkout() {
                 <MapPin size={20} className="text-secondary" /> Endereço de Entrega
               </h3>
               <form className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <Input label="CEP" value={formData.zipCode} onChange={e => setFormData({...formData, zipCode: e.target.value})} />
-                 <Input label="Número" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} />
+                 <Input 
+                   label="CEP" 
+                   value={formData.zipCode} 
+                   maxLength={9}
+                   onChange={e => {
+                     const val = e.target.value.replace(/\D/g, '').substring(0, 8);
+                     const formatted = val.length > 5 ? `${val.substring(0, 5)}-${val.substring(5)}` : val;
+                     setFormData({...formData, zipCode: formatted});
+                   }} 
+                 />
+                 <Input 
+                   label="Número" 
+                   value={formData.number} 
+                   maxLength={10}
+                   onChange={e => setFormData({...formData, number: e.target.value})} 
+                 />
                  <div className="md:col-span-2">
-                   <Input label="Rua" value={formData.street} onChange={e => setFormData({...formData, street: e.target.value})} />
+                   <Input 
+                     label="Rua" 
+                     value={formData.street} 
+                     maxLength={100}
+                     onChange={e => setFormData({...formData, street: e.target.value})} 
+                   />
                  </div>
-                 <Input label="Cidade" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} />
-                 <Input label="Estado" value={formData.state} onChange={e => setFormData({...formData, state: e.target.value})} />
+                 <Input 
+                   label="Cidade" 
+                   value={formData.city} 
+                   maxLength={50}
+                   onChange={e => setFormData({...formData, city: e.target.value})} 
+                 />
+                 <Input 
+                   label="Estado" 
+                   value={formData.state} 
+                   maxLength={2}
+                   onChange={e => setFormData({...formData, state: e.target.value.toUpperCase()})} 
+                 />
               </form>
             </Card>
 
@@ -99,12 +128,12 @@ export default function Checkout() {
               </h3>
               <div className="p-4 border-2 border-primary bg-primary/5 rounded-2xl flex items-center justify-between">
                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center">
-                       <Truck size={24} />
+                    <div className="w-12 h-12 bg-[#009EE3] text-white rounded-full flex items-center justify-center font-black italic shadow-lg">
+                       MP
                     </div>
                     <div>
-                       <p className="font-bold text-primary">Pagamento na Entrega / PIX</p>
-                       <p className="text-[10px] text-outline uppercase font-black">Combine com o entregador</p>
+                       <p className="font-bold text-primary">Mercado Pago (Cartão / PIX)</p>
+                       <p className="text-[10px] text-outline uppercase font-black">Processamento 100% Seguro</p>
                     </div>
                  </div>
                  <CheckCircle className="text-primary" />

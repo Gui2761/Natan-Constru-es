@@ -2,10 +2,18 @@ import React, { useState } from 'react';
 import { Button, Input, Card } from '../components/UI';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { LogIn, UserPlus } from 'lucide-react';
+import { LogIn, UserPlus, Eye, EyeOff, Mail, Lock, User as UserIcon, Camera, MapPin, Hash } from 'lucide-react';
+import useSEO from '../hooks/useSEO';
 
 export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
+
+  useSEO({ 
+    title: isLogin ? "Entrar" : "Criar Conta", 
+    description: "Acesse sua conta na Natan Construções para gerenciar seus pedidos e aproveitar ofertas exclusivas." 
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login, register } = useAuth();
   const navigate = useNavigate();
@@ -22,6 +30,8 @@ export default function Login() {
       state: ''
     }
   });
+  const [avatar, setAvatar] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -31,7 +41,17 @@ export default function Login() {
         const user = await login(formData.email, formData.password);
         navigate(user.role === 'ADMIN' ? '/admin' : '/');
       } else {
-        await register(formData);
+        // Enviar como FormData para suportar arquivo
+        const data = new FormData();
+        data.append('name', formData.name);
+        data.append('email', formData.email);
+        data.append('password', formData.password);
+        data.append('address', JSON.stringify(formData.address));
+        if (avatar) {
+          data.append('avatar', avatar);
+        }
+
+        await register(data);
         navigate('/');
       }
     } catch (err) {
@@ -56,10 +76,43 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
+            <div className="flex flex-col items-center gap-4 mb-6 pt-2">
+               <div className="relative group">
+                  <div className="w-24 h-24 rounded-full border-4 border-primary/20 bg-surface-container overflow-hidden relative">
+                    {avatarPreview ? (
+                       <img src={avatarPreview} className="w-full h-full object-cover" alt="Preview" />
+                    ) : (
+                       <div className="w-full h-full flex items-center justify-center text-outline text-xs text-center p-2 font-bold uppercase italic tracking-tighter">
+                          Foto<br/>Opcional
+                       </div>
+                    )}
+                  </div>
+                  <label className="absolute -bottom-1 -right-1 bg-primary text-white p-2 rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform">
+                     <UserPlus size={16} />
+                     <input 
+                       type="file" 
+                       className="hidden" 
+                       accept="image/*"
+                       onChange={e => {
+                         const file = e.target.files[0];
+                         if (file) {
+                           setAvatar(file);
+                           setAvatarPreview(URL.createObjectURL(file));
+                         }
+                       }}
+                     />
+                  </label>
+               </div>
+               <p className="text-[10px] text-outline font-black uppercase tracking-widest italic">Personalize seu perfil</p>
+            </div>
+          )}
+
+          {!isLogin && (
             <Input 
               label="Nome Completo" 
               placeholder="Ex: João da Silva" 
               required 
+              maxLength={50}
               value={formData.name}
               onChange={e => setFormData({...formData, name: e.target.value})}
             />
@@ -70,6 +123,7 @@ export default function Login() {
             type="email" 
             placeholder="seu@email.com" 
             required
+            maxLength={100}
             value={formData.email}
             onChange={e => setFormData({...formData, email: e.target.value})}
           />
@@ -79,6 +133,8 @@ export default function Login() {
             type="password" 
             placeholder="••••••••" 
             required 
+            maxLength={20}
+            minLength={6}
             value={formData.password}
             onChange={e => setFormData({...formData, password: e.target.value})}
           />
@@ -88,12 +144,19 @@ export default function Login() {
               <Input 
                 label="CEP" 
                 placeholder="00000-000" 
+                maxLength={9}
                 value={formData.address.zipCode}
-                onChange={e => setFormData({...formData, address: {...formData.address, zipCode: e.target.value}})}
+                onChange={e => {
+                  const val = e.target.value.replace(/\D/g, '').substring(0, 8);
+                  // Opcional: formatar como 00000-000
+                  const formatted = val.length > 5 ? `${val.substring(0, 5)}-${val.substring(5)}` : val;
+                  setFormData({...formData, address: {...formData.address, zipCode: formatted}});
+                }}
               />
               <Input 
                 label="Número" 
                 placeholder="123" 
+                maxLength={10}
                 value={formData.address.number}
                 onChange={e => setFormData({...formData, address: {...formData.address, number: e.target.value}})}
               />
@@ -101,6 +164,7 @@ export default function Login() {
                 <Input 
                   label="Rua" 
                   placeholder="Nome da avenida ou rua" 
+                  maxLength={100}
                   value={formData.address.street}
                   onChange={e => setFormData({...formData, address: {...formData.address, street: e.target.value}})}
                 />
