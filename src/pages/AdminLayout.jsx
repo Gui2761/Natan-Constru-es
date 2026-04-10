@@ -73,7 +73,7 @@ export default function AdminLayout() {
 
       {/* Main Content */}
       <main className="flex-1 ml-64 min-h-screen">
-        <header className="h-20 bg-surface/80 backdrop-blur-md border-b border-outline-variant flex items-center justify-between px-10 sticky top-0 z-10">
+        <header className="h-20 bg-surface/80 backdrop-blur-md border-b border-outline-variant flex items-center justify-between px-10 sticky top-0 z-50">
           <h1 className="text-lg font-bold text-on-surface">Painel de Controle</h1>
           <div className="flex items-center gap-4">
             <div className="text-right">

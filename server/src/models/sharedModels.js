@@ -31,8 +31,19 @@ export const userModel = {
 // --- CATEGORY MODEL ---
 export const categoryModel = {
   async findMany({ orderBy = {} } = {}) {
-    const order = orderBy.name ? `ORDER BY \`name\` ${orderBy.name.toUpperCase()}` : 'ORDER BY `name` ASC';
-    return q(`SELECT * FROM \`Category\` ${order}`);
+    const order = orderBy.name ? `ORDER BY c.\`name\` ${orderBy.name.toUpperCase()}` : 'ORDER BY c.\`name\` ASC';
+    const rows = await q(`
+      SELECT c.*, COUNT(p.id) as productsCount 
+      FROM \`Category\` c 
+      LEFT JOIN \`Product\` p ON c.id = p.categoryId 
+      GROUP BY c.id
+      ${order}
+    `);
+    
+    return rows.map(r => ({
+      ...r,
+      _count: { products: r.productsCount }
+    }));
   },
   async findUnique({ where = {} } = {}) {
     const keys = Object.keys(where);

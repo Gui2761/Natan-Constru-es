@@ -87,7 +87,8 @@ export const productService = {
       basePrice: bPrice,
       salePercentage: sPercent,
       weight: wVal,
-      stock: cleanData.stock ? parseInt(cleanData.stock) : 0
+      stock: cleanData.stock ? parseInt(cleanData.stock) : 0,
+      categoryId: cleanData.categoryId ? parseInt(cleanData.categoryId) : currentItem.categoryId
     };
 
     if (data.name) updateData.name = data.name.substring(0, 100);

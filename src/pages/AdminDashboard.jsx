@@ -193,7 +193,6 @@ export default function AdminDashboard() {
           value={`R$ ${stats.totalSales.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
           icon={TrendingUp} 
           color="bg-primary" 
-          trend={12}
           loading={loading}
         />
         <StatCard 
@@ -201,7 +200,6 @@ export default function AdminDashboard() {
           value={`R$ ${stats.totalProfit.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`} 
           icon={DollarSign} 
           color="bg-secondary" 
-          trend={8}
           loading={loading}
         />
         <StatCard 
