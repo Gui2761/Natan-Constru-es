@@ -165,15 +165,6 @@ app.use((err, req, res, next) => {
 });
 
 // Fallback para Rotas do React (SPA) - Middleware Universal
-app.get('/api/diag/check-cleanup', async (req, res) => {
-  try {
-    const files = fs.readdirSync(uploadsPath);
-    res.json({ count: files.length, files });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 app.use((req, res) => {
   const indexPath = path.join(distPath, 'index.html');
   if (fs.existsSync(indexPath)) {
