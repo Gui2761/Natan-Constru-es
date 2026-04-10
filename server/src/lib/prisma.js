@@ -40,6 +40,9 @@ function getPool() {
     console.log(`🔌 [DB] Conectando em ${config.host}:${config.port}/${config.database}`);
     pool = mysql.createPool(config);
   }
+  return pool;
+}
+
 // Função de Limpeza Profunda (Garante que nenhum undefined chegue ao MySQL2)
 const scrub = (val) => {
   if (val === undefined) return null;
