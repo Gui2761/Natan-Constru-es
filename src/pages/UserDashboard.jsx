@@ -46,12 +46,20 @@ export default function UserDashboard() {
           
           {/* Sidebar de Perfil */}
           <div className="space-y-6">
-            <Card className="text-center py-10 border-b-8 border-b-secondary">
-               <div className="w-24 h-24 bg-primary text-white rounded-full flex items-center justify-center mx-auto text-4xl font-black mb-4 italic">
-                  {user?.name?.[0]}
+             <Card className="text-center py-10 border-b-8 border-b-secondary">
+               <div className="w-24 h-24 rounded-full border-4 border-primary/20 bg-surface-container overflow-hidden mx-auto flex items-center justify-center relative mb-4">
+                  {user?.avatar ? (
+                    <img src={user.avatar} className="w-full h-full object-cover" alt={user.name} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-primary text-white text-4xl font-black italic">
+                      {user?.name?.[0]}
+                    </div>
+                  )}
                </div>
                <h3 className="text-xl font-bold text-primary truncate">{user?.name}</h3>
-               <p className="text-xs text-outline uppercase font-black tracking-widest mt-1">Cliente Natan</p>
+               <p className="text-xs text-outline uppercase font-black tracking-widest mt-1">
+                 {user?.role === 'ADMIN' ? '🛠️ Administrador' : '👷 Cliente Natan'}
+               </p>
                
                <div className="mt-8 space-y-2 text-left">
                   <Link to="/perfil" className="flex items-center justify-between p-4 bg-surface-container rounded-xl hover:bg-primary/5 transition-colors group">
