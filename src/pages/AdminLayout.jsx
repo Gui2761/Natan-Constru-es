@@ -41,7 +41,7 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className="w-64 bg-surface border-r border-outline-variant flex flex-col fixed h-full z-20">
         <div className="p-6 border-b border-outline-variant flex justify-center">
-          <img src="/logo_horizontal.png" alt="Admin Natan" className="h-10 w-auto object-contain" />
+          <img src="/logo_horizontal.png" alt="Admin Natan" className="h-16 w-auto object-contain" />
         </div>
 
         <nav className="flex-1 mt-6">
