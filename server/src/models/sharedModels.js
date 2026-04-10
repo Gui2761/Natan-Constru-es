@@ -38,6 +38,19 @@ export const categoryModel = {
     const keys = Object.keys(where);
     const clause = 'WHERE ' + keys.map(k => `\`${k}\` = ?`).join(' AND ');
     return q(`SELECT * FROM \`Category\` ${clause} LIMIT 1`, keys.map(k => where[k])).then(r => r[0] || null);
+  },
+  async create({ data = {} } = {}) {
+    const [res] = await q('INSERT INTO `Category` (`name`) VALUES (?)', [data.name], true);
+    return this.findUnique({ where: { id: res.insertId } });
+  },
+  async update({ where = {}, data = {} } = {}) {
+    const setClause = Object.keys(data).map(k => `\`${k}\` = ?`).join(', ');
+    await q(`UPDATE \`Category\` SET ${setClause} WHERE \`id\` = ?`, [...Object.values(data), where.id]);
+    return this.findUnique({ where });
+  },
+  async delete({ where = {} } = {}) {
+    await q('DELETE FROM `Category` WHERE `id` = ?', [where.id]);
+    return { success: true };
   }
 };
 
@@ -60,6 +73,15 @@ export const orderModel = {
       true
     );
     return q('SELECT * FROM `Order` WHERE `id` = ?', [res.insertId]).then(r => r[0]);
+  },
+  async update({ where = {}, data = {} } = {}) {
+    const setClause = Object.keys(data).map(k => `\`${k}\` = ?`).join(', ');
+    await q(`UPDATE \`Order\` SET ${setClause} WHERE \`id\` = ?`, [...Object.values(data), where.id]);
+    return this.findUnique({ where });
+  },
+  async delete({ where = {} } = {}) {
+    await q('DELETE FROM `Order` WHERE `id` = ?', [where.id]);
+    return { success: true };
   }
 };
 
@@ -78,5 +100,19 @@ export const couponModel = {
     const clause = keys.length ? 'WHERE ' + keys.map(k => `\`${k}\` = ?`).join(' AND ') : '';
     const params = keys.map(k => (where[k] === true ? 1 : where[k] === false ? 0 : where[k]));
     return q(`SELECT * FROM \`Coupon\` ${clause} LIMIT 1`, params).then(r => r[0] || null);
+  },
+  async create({ data = {} } = {}) {
+    const [res] = await q('INSERT INTO `Coupon` (`code`, `discount`, `active`) VALUES (?,?,?)', 
+      [data.code, data.discount, data.active !== false ? 1 : 0], true);
+    return this.findUnique({ where: { id: res.insertId } });
+  },
+  async update({ where = {}, data = {} } = {}) {
+    const setClause = Object.keys(data).map(k => `\`${k}\` = ?`).join(', ');
+    await q(`UPDATE \`Coupon\` SET ${setClause} WHERE \`id\` = ?`, [...Object.values(data), where.id]);
+    return this.findUnique({ where });
+  },
+  async delete({ where = {} } = {}) {
+    await q('DELETE FROM `Coupon` WHERE `id` = ?', [where.id]);
+    return { success: true };
   }
 };
