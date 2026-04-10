@@ -52,11 +52,14 @@ const distPath = path.resolve(__dirname, 'dist');
 const uploadsPath = path.join(process.cwd(), 'uploads'); // Mesmo caminho do multer
 
 console.log("📂 [CONFIG] Servindo frontend de: " + distPath);
-console.log("📂 [CONFIG] Servindo uploads de: " + uploadsPath);
+console.log("📂 [CONFIG] Tentando carregar uploads de: " + uploadsPath);
+if (!fs.existsSync(uploadsPath)) {
+  console.log("⚠️  [CONFIG] Pasta de uploads não existe, criando...");
+  fs.mkdirSync(uploadsPath, { recursive: true });
+}
 
 app.use(express.static(distPath));
 app.use('/uploads', express.static(uploadsPath, {
-  fallthrough: false,
   setHeaders: (res) => {
     res.set('Access-Control-Allow-Origin', '*');
   }

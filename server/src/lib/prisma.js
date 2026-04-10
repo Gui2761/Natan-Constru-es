@@ -43,8 +43,13 @@ function getPool() {
   return pool;
 }
 
+function sanitizeParams(params) {
+  if (!Array.isArray(params)) return params;
+  return params.map(p => (p === undefined ? null : p));
+}
+
 async function q(sql, params = []) {
-  const [rows] = await getPool().execute(sql, params);
+  const [rows] = await getPool().execute(sql, sanitizeParams(params));
   return rows;
 }
 
@@ -142,17 +147,19 @@ const userModel = {
       const { address, ...uData } = data;
 
       if (Object.keys(uData).length > 0) {
-        // Remove undefined values to avoid "Bind parameters must not contain undefined"
+        // Filtragem completa de undefined para evitar crash no UPDATE
         const finalData = {};
         Object.entries(uData).forEach(([k, v]) => {
           if (v !== undefined) finalData[k] = v;
         });
 
-        const setClause = Object.keys(finalData).map(k => `\`${k}\` = ?`).join(', ');
-        await conn.execute(
-          `UPDATE \`User\` SET ${setClause} WHERE \`id\` = ?`,
-          [...Object.values(finalData), where.id]
-        );
+        if (Object.keys(finalData).length > 0) {
+          const setClause = Object.keys(finalData).map(k => `\`${k}\` = ?`).join(', ');
+          await conn.execute(
+            `UPDATE \`User\` SET ${setClause} WHERE \`id\` = ?`,
+            sanitizeParams([...Object.values(finalData), where.id])
+          );
+        }
       }
 
       if (address && address.upsert) {
@@ -161,12 +168,12 @@ const userModel = {
         if (existing.length > 0) {
           await conn.execute(
             'UPDATE `Address` SET `zipCode`=?, `street`=?, `number`=?, `complement`=?, `city`=?, `state`=? WHERE `userId`=?',
-            [aData.zipCode||'', aData.street||'', aData.number||'', aData.complement||null, aData.city||'', aData.state||'', where.id]
+            sanitizeParams([aData.zipCode||'', aData.street||'', aData.number||'', aData.complement||null, aData.city||'', aData.state||'', where.id])
           );
         } else {
           await conn.execute(
             'INSERT INTO `Address` (`userId`, `zipCode`, `street`, `number`, `complement`, `city`, `state`) VALUES (?,?,?,?,?,?,?)',
-            [where.id, aData.zipCode||'', aData.street||'', aData.number||'', aData.complement||null, aData.city||'', aData.state||'']
+            sanitizeParams([where.id, aData.zipCode||'', aData.street||'', aData.number||'', aData.complement||null, aData.city||'', aData.state||''])
           );
         }
       }
@@ -241,11 +248,18 @@ const productModel = {
   },
 
   async update({ where = {}, data = {} } = {}) {
-    const setClause = Object.keys(data).map(k => `\`${k}\` = ?`).join(', ');
+    // Filtragem de undefined para evitar falha fatal no mysql2
+    const finalData = {};
+    Object.entries(data).forEach(([k, v]) => {
+      if (v !== undefined) finalData[k] = v;
+    });
+
+    if (Object.keys(finalData).length === 0) return this.findUnique({ where });
+
+    const setClause = Object.keys(finalData).map(k => `\`${k}\` = ?`).join(', ');
     const { clause, params: whereParams } = buildWhere(where);
-    await q(`UPDATE \`Product\` SET ${setClause} ${clause}`, [...Object.values(data), ...whereParams]);
-    const rows = await q(`SELECT * FROM \`Product\` ${clause}`, whereParams);
-    return rows[0] || null;
+    await q(`UPDATE \`Product\` SET ${setClause} ${clause}`, [...Object.values(finalData), ...whereParams]);
+    return this.findUnique({ where });
   },
 
   async delete({ where = {} } = {}) {
@@ -281,11 +295,16 @@ const categoryModel = {
   },
 
   async update({ where = {}, data = {} } = {}) {
-    const setClause = Object.keys(data).map(k => `\`${k}\` = ?`).join(', ');
+    const finalData = {};
+    Object.entries(data).forEach(([k, v]) => {
+      if (v !== undefined) finalData[k] = v;
+    });
+    if (Object.keys(finalData).length === 0) return this.findUnique({ where });
+
+    const setClause = Object.keys(finalData).map(k => `\`${k}\` = ?`).join(', ');
     const { clause, params: whereParams } = buildWhere(where);
-    await q(`UPDATE \`Category\` SET ${setClause} ${clause}`, [...Object.values(data), ...whereParams]);
-    const rows = await q(`SELECT * FROM \`Category\` ${clause}`, whereParams);
-    return rows[0] || null;
+    await q(`UPDATE \`Category\` SET ${setClause} ${clause}`, [...Object.values(finalData), ...whereParams]);
+    return this.findUnique({ where });
   },
 
   async delete({ where = {} } = {}) {
@@ -359,9 +378,15 @@ const bannerModel = {
   },
 
   async update({ where = {}, data = {} } = {}) {
-    const setClause = Object.keys(data).map(k => `\`${k}\` = ?`).join(', ');
+    const finalData = {};
+    Object.entries(data).forEach(([k, v]) => {
+      if (v !== undefined) finalData[k] = v;
+    });
+    if (Object.keys(finalData).length === 0) return q(`SELECT * FROM \`Banner\` WHERE id = ?`, [where.id]).then(r => r[0]);
+
+    const setClause = Object.keys(finalData).map(k => `\`${k}\` = ?`).join(', ');
     const { clause, params: whereParams } = buildWhere(where);
-    await q(`UPDATE \`Banner\` SET ${setClause} ${clause}`, [...Object.values(data), ...whereParams]);
+    await q(`UPDATE \`Banner\` SET ${setClause} ${clause}`, [...Object.values(finalData), ...whereParams]);
     const rows = await q(`SELECT * FROM \`Banner\` ${clause}`, whereParams);
     return rows[0] || null;
   },
