@@ -22,20 +22,42 @@ import { execSync } from 'child_process';
 // Carregar Variáveis de Ambiente
 dotenv.config();
 
-// FUNÇÃO DE SINCRONIZAÇÃO AUTOMÁTICA (Para Hostinger)
+// FUNÇÃO DE SINCRONIZAÇÃO AUTOMÁTICA (Diagnóstico Profundo)
 const syncDatabase = () => {
-  console.log("🔄 [DB] Sincronizando banco de dados MySQL...");
+  const logFile = path.join(__dirname, 'logs_db.txt');
+  const log = (msg) => {
+    const entry = `[${new Date().toISOString()}] ${msg}\n`;
+    fs.appendFileSync(logFile, entry);
+    console.log(msg);
+  };
+
+  log("-----------------------------------------");
+  log("🔄 [DB] Iniciando Sincronização...");
+  
   try {
     const prismaBinary = path.join(__dirname, 'node_modules/prisma/build/index.js');
-    console.log(`📂 [DB] Usando binário em: ${prismaBinary}`);
+    log(`📂 [DB] Binário exists: ${fs.existsSync(prismaBinary)} (${prismaBinary})`);
     
-    // Tenta gerar o cliente e fazer o push das tabelas usando o caminho absoluto do Node
-    execSync(`"${process.execPath}" "${prismaBinary}" generate`, { stdio: 'inherit' });
-    execSync(`"${process.execPath}" "${prismaBinary}" db push --accept-data-loss`, { stdio: 'inherit' });
+    if (process.env.DATABASE_URL) {
+      log(`🌐 [DB] DATABASE_URL encontrada (Inicia com: ${process.env.DATABASE_URL.substring(0, 15)}...)`);
+    } else {
+      log("❌ [DB] DATABASE_URL NÃO ENCONTRADA! Verifique o painel Hostinger.");
+      return;
+    }
+
+    log("🛰️ [DB] Executando Generate...");
+    const genOut = execSync(`"${process.execPath}" "${prismaBinary}" generate`, { encoding: 'utf-8' });
+    log("✅ [DB] Generate OK: " + genOut.substring(0, 100));
+
+    log("🛰️ [DB] Executando DB Push...");
+    const pushOut = execSync(`"${process.execPath}" "${prismaBinary}" db push --accept-data-loss`, { encoding: 'utf-8' });
+    log("✅ [DB] DB Push OK: " + pushOut.substring(0, 100));
     
-    console.log("✅ [DB] Tabelas sincronizadas com sucesso!");
+    log("🏁 [DB] Sincronização concluída com sucesso!");
   } catch (error) {
-    console.error("❌ [DB ERROR] Falha ao sincronizar banco de dados:", error.message);
+    log("❌ [DB ERROR] Falha Crítica: " + error.message);
+    if (error.stdout) log("📋 STDOUT: " + error.stdout.toString());
+    if (error.stderr) log("📋 STDERR: " + error.stderr.toString());
   }
 };
 
