@@ -34,7 +34,16 @@ export const productService = {
       productModel.count({ where })
     ]);
 
-    return { products, total };
+    return { 
+      products, 
+      total,
+      meta: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
   },
 
   async create(data, files) {
