@@ -17,8 +17,12 @@ const storage = multer.diskStorage({
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    // Limpa o nome do arquivo original para evitar problemas com caracteres especiais
-    const cleanName = file.originalname.replace(/[^a-zA-Z0-9.]/g, '_');
+    // Higienização profunda: minúsculas, remove parênteses, espaços e caracteres especiais
+    const cleanName = file.originalname
+      .toLowerCase()
+      .replace(/[^a-z0-9.]/g, '-') // Apenas letras, números e pontos
+      .replace(/-+/g, '-')          // Evita múltiplos traços seguidos
+      .replace(/^-|-$/g, '');       // Remove traços no início ou fim
     cb(null, uniqueSuffix + '-' + cleanName);
   }
 });

@@ -62,15 +62,19 @@ export const deleteBanner = async (req, res) => {
 
 export const updateBanner = async (req, res) => {
    const { id } = req.params;
-   const { title, link, buttonText } = req.body;
    
-   let updateData = { title, link, buttonText };
+   // Construir updateData dinamicamente para evitar campos 'undefined'
+   const updateData = {};
+   if (req.body.title !== undefined) updateData.title = req.body.title;
+   if (req.body.link !== undefined) updateData.link = req.body.link;
+   if (req.body.buttonText !== undefined) updateData.buttonText = req.body.buttonText;
    
    try {
      const oldBanner = await prisma.banner.findUnique({ where: { id: parseInt(id) } });
+     if (!oldBanner) return res.status(404).json({ message: "Banner não localizado" });
 
      if (req.file) {
-        if (oldBanner && oldBanner.image) {
+        if (oldBanner.image) {
           deleteFile(oldBanner.image);
         }
         updateData.image = `/midia/${req.file.filename}`;
@@ -82,6 +86,6 @@ export const updateBanner = async (req, res) => {
      });
      res.json(banner);
    } catch (error) {
-     res.status(400).json({ message: "Erro ao editar banner" });
+     res.status(400).json({ message: "Erro ao editar banner: " + error.message });
    }
 };
