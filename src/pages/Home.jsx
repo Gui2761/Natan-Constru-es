@@ -3,11 +3,13 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, Button } from '../components/UI';
 import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Percent, ArrowRight } from 'lucide-react';
 
 export default function Home() {
   const [banners, setBanners] = useState([]);
   const [products, setProducts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchHomeData();
@@ -98,7 +100,11 @@ export default function Home() {
                        <span className="text-2xl font-black text-primary leading-none">R$ {product.finalPrice.toFixed(2)}</span>
                     </div>
 
-                    <Button variant="outline" className="w-full mt-6 rounded-lg uppercase text-xs font-black">
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-6 rounded-lg uppercase text-xs font-black"
+                      onClick={() => navigate(`/produto/${product.id}`)}
+                    >
                        Ver Detalhes
                     </Button>
                  </div>

@@ -18,6 +18,10 @@ import CategoryResults from './pages/CategoryResults'
 import SearchResults from './pages/SearchResults'
 import UserDashboard from './pages/UserDashboard'
 import Profile from './pages/Profile'
+import AdminCoupons from './pages/AdminCoupons'
+import About from './pages/About'
+import ContactFAQ from './pages/ContactFAQ'
+import Policy from './pages/Policy'
 
 const PrivateRoute = ({ children, adminOnly = false }) => {
   const { user, loading, isAdmin } = useAuth();
@@ -46,6 +50,7 @@ function App() {
               <Route path="produtos" element={<AdminProducts />} />
               <Route path="pedidos" element={<AdminOrders />} />
               <Route path="banners" element={<AdminBanners />} />
+              <Route path="cupons" element={<AdminCoupons />} />
             </Route>
 
             <Route path="/" element={<Home />} />
@@ -65,6 +70,10 @@ function App() {
                 <Profile />
               </PrivateRoute>
             } />
+            <Route path="/sobre" element={<About />} />
+            <Route path="/ajuda" element={<ContactFAQ />} />
+            <Route path="/contato" element={<ContactFAQ />} />
+            <Route path="/politica" element={<Policy />} />
           </Routes>
         </div>
       </Router>

@@ -6,6 +6,7 @@ import { Trash2, Plus, Layers } from 'lucide-react';
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
   const [newName, setNewName] = useState('');
+  const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -22,14 +23,28 @@ export default function AdminCategories() {
     if (!newName.trim()) return;
     setLoading(true);
     try {
-      await api.post('/categories', { name: newName });
-      setNewName('');
+      if (editingId) {
+        await api.put(`/categories/${editingId}`, { name: newName });
+      } else {
+        await api.post('/categories', { name: newName });
+      }
+      resetForm();
       fetchCategories();
     } catch (err) {
-      alert('Erro ao criar categoria');
+      alert('Erro ao salvar categoria');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = (cat) => {
+    setEditingId(cat.id);
+    setNewName(cat.name);
+  };
+
+  const resetForm = () => {
+    setEditingId(null);
+    setNewName('');
   };
 
   const handleDelete = async (id) => {
@@ -53,7 +68,12 @@ export default function AdminCategories() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Formulário Novo */}
         <Card className="h-fit">
-          <h4 className="font-bold mb-4 uppercase text-sm tracking-widest text-outline">Novo Departamento</h4>
+          <div className="flex justify-between items-center mb-4">
+             <h4 className="font-bold uppercase text-sm tracking-widest text-outline">
+                {editingId ? 'Editar Departamento' : 'Novo Departamento'}
+             </h4>
+             {editingId && <Button variant="ghost" size="sm" onClick={resetForm}>Cancelar</Button>}
+          </div>
           <form onSubmit={handleAdd} className="space-y-4">
             <Input 
               label="Nome da Categoria" 
@@ -63,7 +83,7 @@ export default function AdminCategories() {
               required
             />
             <Button className="w-full" disabled={loading}>
-              <Plus size={18} className="mr-2"/> {loading ? 'Criando...' : 'Adicionar'}
+              <Plus size={18} className="mr-2"/> {loading ? 'Salvando...' : editingId ? 'Atualizar' : 'Adicionar'}
             </Button>
           </form>
         </Card>
@@ -81,9 +101,14 @@ export default function AdminCategories() {
                     {cat._count?.products || 0} PRODUTOS VINCULADOS
                   </p>
                 </div>
-                <Button variant="ghost" className="text-error hover:bg-error/10" onClick={() => handleDelete(cat.id)}>
-                  <Trash2 size={20} />
-                </Button>
+                <div className="flex gap-2">
+                   <Button variant="ghost" className="text-secondary hover:bg-secondary/10" onClick={() => handleEdit(cat)}>
+                     Editar
+                   </Button>
+                   <Button variant="ghost" className="text-error hover:bg-error/10" onClick={() => handleDelete(cat.id)}>
+                     <Trash2 size={20} />
+                   </Button>
+                </div>
               </Card>
             ))
           )}

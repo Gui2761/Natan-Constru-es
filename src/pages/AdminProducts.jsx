@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../components/UI';
 import api from '../services/api';
-import { Trash2, Plus, Package, Search, Percent } from 'lucide-react';
+import { Trash2, Plus, Package, Search, Percent, UploadCloud, X } from 'lucide-react';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -14,12 +14,14 @@ export default function AdminProducts() {
     name: '',
     description: '',
     basePrice: '',
-    salePercentage: '0',
+    salePercentage: '',
     stock: '',
     weight: '',
-    images: '',
     categoryId: ''
   });
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -38,15 +40,59 @@ export default function AdminProducts() {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/products', formData);
-      setShowForm(false);
-      setFormData({ name: '', description: '', basePrice: '', salePercentage: '0', stock: '', weight: '', images: '', categoryId: '' });
+      const formPayload = new FormData();
+      Object.keys(formData).forEach(key => {
+         if (formData[key] !== '') {
+            formPayload.append(key, formData[key]);
+         }
+      });
+      
+      selectedFiles.forEach(file => {
+         formPayload.append('images', file);
+      });
+
+      if (editingId) {
+         if (existingImages.length > 0) {
+            formPayload.append('keptImages', existingImages.join(','));
+         }
+         await api.put(`/products/${editingId}`, formPayload);
+      } else {
+        await api.post('/products', formPayload);
+      }
+      
+      handleCloseForm();
       fetchData();
     } catch (err) {
-      alert('Erro ao cadastrar produto');
+      alert('Erro ao salvar produto');
+      console.error(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEdit = (product) => {
+    setEditingId(product.id);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      basePrice: product.basePrice,
+      salePercentage: product.salePercentage,
+      stock: product.stock,
+      weight: product.weight,
+      categoryId: product.categoryId
+    });
+    setExistingImages(product.images ? product.images.split(',') : []);
+    setSelectedFiles([]); // As imagens existentes são mantidas se n enviarmos uma nova
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setFormData({ name: '', description: '', basePrice: '', salePercentage: '', stock: '', weight: '', categoryId: '' });
+    setSelectedFiles([]);
+    setExistingImages([]);
   };
 
   const handleDelete = async (id) => {
@@ -66,8 +112,8 @@ export default function AdminProducts() {
         <h2 className="text-2xl font-black uppercase italic tracking-tighter text-primary flex items-center gap-2">
           <Package /> Gestão de Produtos
         </h2>
-        <Button onClick={() => setShowForm(!showForm)}>
-          <Plus size={18} className="mr-2"/> {showForm ? 'Fechar' : 'Novo Produto'}
+        <Button onClick={showForm ? handleCloseForm : () => setShowForm(true)}>
+          <Plus size={18} className="mr-2"/> {showForm ? 'Fechar Formulário' : 'Novo Produto'}
         </Button>
       </div>
 
@@ -93,15 +139,76 @@ export default function AdminProducts() {
               <Input label="Descrição" placeholder="Detalhes técnicos, marca, etc" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
             </div>
             <Input label="Preço Base (R$)" type="number" step="0.01" required value={formData.basePrice} onChange={e => setFormData({...formData, basePrice: e.target.value})} />
-            <Input label="% de Promoção" type="number" value={formData.salePercentage} onChange={e => setFormData({...formData, salePercentage: e.target.value})} />
+            <Input label="% de Promoção (Opcional)" type="number" value={formData.salePercentage} onChange={e => setFormData({...formData, salePercentage: e.target.value})} />
             <Input label="Estoque Inicial" type="number" required value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} />
-            <Input label="Peso (kg)" type="number" step="0.1" value={formData.weight} onChange={e => setFormData({...formData, weight: e.target.value})} />
-            <div className="lg:col-span-4">
-              <Input label="URL da Imagem" placeholder="Link da foto do produto" value={formData.images} onChange={e => setFormData({...formData, images: e.target.value})} />
+            <Input label="Peso (kg) (Opcional)" type="number" step="0.1" value={formData.weight} onChange={e => setFormData({...formData, weight: e.target.value})} />
+            
+            {/* DRAG AND DROP AREA */}
+            <div className="lg:col-span-4 mt-2">
+              <label className="text-sm font-medium text-on-surface/80 block mb-1">Imagens do Produto</label>
+              <div 
+                className="w-full border-2 border-dashed border-primary/20 rounded-2xl p-10 flex flex-col items-center justify-center bg-surface-container/50 hover:bg-primary/5 transition-colors cursor-pointer relative"
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                     setSelectedFiles([...selectedFiles, ...Array.from(e.dataTransfer.files)]);
+                  }
+                }}
+              >
+                 <input 
+                   type="file" 
+                   multiple 
+                   accept="image/png, image/jpeg, image/webp" 
+                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                   onChange={(e) => setSelectedFiles([...selectedFiles, ...Array.from(e.target.files)])}
+                 />
+                 <UploadCloud className="text-secondary mb-4" size={40} />
+                 <p className="font-bold text-primary text-sm uppercase tracking-widest text-center">
+                   Arraste suas imagens aqui ou Clique
+                 </p>
+                 <p className="text-[10px] uppercase font-bold text-outline mt-1 text-center">PNG, JPG ou WEBP permitidos</p>
+              </div>
+
+              {/* IMAGE PREVIEWS */}
+              {(selectedFiles.length > 0 || existingImages.length > 0) && (
+                 <div className="mt-4 flex gap-4 overflow-x-auto pb-4">
+                   {existingImages.map((imgUrl, idx) => (
+                     <div key={`exist-${idx}`} className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-outline-variant shrink-0 group">
+                       <img src={imgUrl} alt="preview" className="w-full h-full object-cover" />
+                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button 
+                            type="button"
+                            onClick={() => setExistingImages(existingImages.filter((_, i) => i !== idx))}
+                            className="bg-error text-white rounded-full p-2 hover:scale-110 transition-transform"
+                          >
+                            <X size={16} />
+                          </button>
+                       </div>
+                       <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[8px] font-bold px-1 rounded uppercase">Salva no Banco</div>
+                     </div>
+                   ))}
+                   {selectedFiles.map((file, idx) => (
+                     <div key={`new-${idx}`} className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-outline-variant shrink-0 group">
+                       <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button 
+                            type="button"
+                            onClick={() => setSelectedFiles(selectedFiles.filter((_, i) => i !== idx))}
+                            className="bg-error text-white rounded-full p-2 hover:scale-110 transition-transform"
+                          >
+                            <X size={16} />
+                          </button>
+                       </div>
+                       <div className="absolute bottom-1 left-1 bg-secondary text-white text-[8px] font-bold px-1 rounded uppercase">Nova Foto</div>
+                     </div>
+                   ))}
+                 </div>
+              )}
             </div>
             <div className="lg:col-span-4 flex justify-end">
               <Button size="lg" disabled={loading} className="w-full lg:w-fit px-12">
-                {loading ? 'Salvando...' : 'Cadastrar Produto'}
+                {loading ? 'Salvando...' : editingId ? 'Atualizar Produto' : 'Cadastrar Produto'}
               </Button>
             </div>
           </form>
@@ -137,8 +244,8 @@ export default function AdminProducts() {
               <tr key={p.id} className="hover:bg-primary/5 transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-surface-container overflow-hidden">
-                      {p.images && <img src={p.images} alt={p.name} className="w-full h-full object-cover" />}
+                    <div className="w-10 h-10 rounded-lg bg-surface-container overflow-hidden shrink-0 border border-outline-variant">
+                      {p.images && <img src={p.images.split(',')[0]} alt={p.name} className="w-full h-full object-cover" />}
                     </div>
                     <div>
                       <p className="font-bold text-primary">{p.name}</p>
@@ -166,7 +273,10 @@ export default function AdminProducts() {
                     {p.stock} un
                   </span>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-6 py-4 flex items-center gap-2">
+                  <Button variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => handleEdit(p)}>
+                    Editar
+                  </Button>
                   <Button variant="ghost" className="text-error" onClick={() => handleDelete(p.id)}>
                     <Trash2 size={18} />
                   </Button>

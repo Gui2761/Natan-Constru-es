@@ -11,9 +11,18 @@ export const getBanners = async (req, res) => {
 };
 
 export const createBanner = async (req, res) => {
-  const { image, title, link } = req.body;
+  const { title, link } = req.body;
+  
+  let imageUrl = '';
+  if (req.file) {
+     imageUrl = `/uploads/${req.file.filename}`;
+  } else if (req.body.image) {
+     // Fallback para URL na transição
+     imageUrl = req.body.image;
+  }
+
   try {
-    const banner = await prisma.banner.create({ data: { image, title, link } });
+    const banner = await prisma.banner.create({ data: { image: imageUrl, title, link } });
     res.status(201).json(banner);
   } catch (error) {
     res.status(400).json({ message: "Erro ao criar banner" });
@@ -28,4 +37,25 @@ export const deleteBanner = async (req, res) => {
   } catch (error) {
     res.status(400).json({ message: "Erro ao remover banner" });
   }
+};
+
+export const updateBanner = async (req, res) => {
+   const { id } = req.params;
+   const { title, link } = req.body;
+   
+   let updateData = { title, link };
+   
+   if (req.file) {
+      updateData.image = `/uploads/${req.file.filename}`;
+   }
+   
+   try {
+     const banner = await prisma.banner.update({
+        where: { id: parseInt(id) },
+        data: updateData
+     });
+     res.json(banner);
+   } catch (error) {
+     res.status(400).json({ message: "Erro ao editar banner" });
+   }
 };

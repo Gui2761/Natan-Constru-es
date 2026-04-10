@@ -17,7 +17,23 @@ export const createCategory = async (req, res) => {
     const category = await prisma.category.create({ data: { name, slug } });
     res.status(201).json(category);
   } catch (error) {
-    res.status(400).json({ message: "Erro ao criar categoria (já existe?)" });
+    res.status(400).json({ message: "Erro ao criar categoria" });
+  }
+};
+
+export const updateCategory = async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  const slug = name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, '-');
+  
+  try {
+    const category = await prisma.category.update({ 
+       where: { id: parseInt(id) },
+       data: { name, slug } 
+    });
+    res.json(category);
+  } catch (error) {
+    res.status(400).json({ message: "Erro ao editar categoria" });
   }
 };
 

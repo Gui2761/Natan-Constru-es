@@ -13,6 +13,7 @@ export default function ProductDetail() {
   const [related, setRelated] = useState([]);
   const [quantity, setQuantity] = useState(1);
   const [area, setArea] = useState(''); // Para a calculadora
+  const [selectedImage, setSelectedImage] = useState('');
 
   useEffect(() => {
     fetchProduct();
@@ -23,6 +24,11 @@ export default function ProductDetail() {
       const { data } = await api.get(`/products`);
       const item = data.find(p => p.id === parseInt(id));
       setProduct(item);
+      if (item && item.images) {
+        setSelectedImage(item.images.split(',')[0]);
+      } else {
+        setSelectedImage('https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?q=80&w=1000');
+      }
       
       const relatedItems = data.filter(p => p.categoryId === item.categoryId && p.id !== item.id).slice(0, 4);
       setRelated(relatedItems);
@@ -56,8 +62,23 @@ export default function ProductDetail() {
                   <Percent size={16} /> Promoção {product.salePercentage}%
                 </div>
               )}
-              <img src={product.images || 'https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?q=80&w=1000'} className="w-full h-full object-cover" alt={product.name} />
+              <img src={selectedImage} className="w-full h-full object-cover" alt={product.name} />
             </div>
+            
+            {/* Miniaturas das imagens */}
+            {product.images && product.images.split(',').length > 1 && (
+              <div className="flex gap-4 overflow-x-auto pb-2">
+                {product.images.split(',').map((imgUrl, idx) => (
+                  <button 
+                    key={idx} 
+                    onClick={() => setSelectedImage(imgUrl)}
+                    className={`w-20 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${selectedImage === imgUrl ? 'border-primary ring-2 ring-primary/20 scale-105' : 'border-outline-variant hover:border-primary/50 opacity-70 hover:opacity-100'}`}
+                  >
+                    <img src={imgUrl} alt={`${product.name} thumbnail ${idx}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Informações de Compra */}
