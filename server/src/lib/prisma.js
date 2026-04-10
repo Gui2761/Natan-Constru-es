@@ -40,12 +40,20 @@ function getPool() {
     console.log(`🔌 [DB] Conectando em ${config.host}:${config.port}/${config.database}`);
     pool = mysql.createPool(config);
   }
-  return pool;
-}
+// Função de Limpeza Profunda (Garante que nenhum undefined chegue ao MySQL2)
+const scrub = (val) => {
+  if (val === undefined) return null;
+  if (Array.isArray(val)) return val.map(scrub);
+  if (val !== null && typeof val === 'object' && !(val instanceof Date)) {
+    const next = {};
+    for (const k in val) next[k] = scrub(val[k]);
+    return next;
+  }
+  return val;
+};
 
 function sanitizeParams(params) {
-  if (!Array.isArray(params)) return params;
-  return params.map(p => (p === undefined ? null : p));
+  return scrub(params) || [];
 }
 
 async function q(sql, params = []) {

@@ -129,6 +129,19 @@ app.get('/api/diag/logs', (req, res) => {
 });
 
 
+// Rota para Limpar Imagens Antigas (Solicitado pelo Usuário)
+app.get('/api/diag/clear-images', async (req, res) => {
+  try {
+    const prisma = (await import('./server/src/lib/prisma.js')).default;
+    await prisma.$queryRaw('UPDATE `Product` SET `images` = ""');
+    await prisma.$queryRaw('UPDATE `Banner` SET `image` = ""');
+    await prisma.$queryRaw('UPDATE `User` SET `avatar` = NULL');
+    res.send("✅ Imagens antigas removidas de Produtos, Banners e Perfis com sucesso!");
+  } catch (err) {
+    res.status(500).send("❌ Erro ao limpar imagens: " + err.message);
+  }
+});
+
 // Usar Rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
