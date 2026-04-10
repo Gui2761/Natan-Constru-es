@@ -4,7 +4,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
+
 
 // Configurações de Caminho (ESM)
 const __filename = fileURLToPath(import.meta.url);
@@ -17,10 +17,7 @@ console.log("🕒 Horário: " + new Date().toISOString());
 console.log("📂 Diretório Raiz: " + process.cwd());
 console.log("-----------------------------------------");
 
-import { execSync } from 'child_process';
-
-// Carregar Variáveis de Ambiente
-dotenv.config();
+// Variáveis de Ambiente já injetadas pela Hostinger no process.env
 
 // VERIFICAÇÃO DE BANCO (Diagnóstico Rápido)
 if (process.env.DATABASE_URL) {
