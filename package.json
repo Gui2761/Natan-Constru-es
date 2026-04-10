@@ -2,8 +2,7 @@
   "name": "natan-construcoes-2",
   "private": true,
   "version": "2.0.0",
-  "type": "module",
-  "main": "server.js",
+  "main": "server.mjs",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,7 +10,7 @@
     "preview": "vite preview",
     "server": "node server/src/index.js",
     "server:dev": "nodemon server/src/index.js",
-    "start": "node server.js",
+    "start": "node server.mjs",
     "postinstall": "npx prisma generate && npx prisma db push --accept-data-loss"
   },
   "engines": {
