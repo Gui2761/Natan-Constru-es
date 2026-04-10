@@ -10,13 +10,14 @@
     "preview": "vite preview",
     "server": "node server/src/index.js",
     "server:dev": "nodemon server/src/index.js",
-    "start": "node server.mjs",
-    "postinstall": "npx prisma generate && npx prisma db push --accept-data-loss"
+    "start": "npx prisma generate && npx prisma db push --accept-data-loss && node server.mjs"
   },
   "engines": {
     "node": ">=18.0.0"
   },
   "dependencies": {
+    "@humanwhocodes/config-array": "^0.13.0",
+    "@humanwhocodes/object-schema": "^2.0.3",
     "@prisma/client": "^5.22.0",
     "axios": "^1.6.7",
     "bcryptjs": "^3.0.3",
@@ -24,6 +25,8 @@
     "cors": "^2.8.6",
     "dotenv": "^17.4.1",
     "express": "^5.2.1",
+    "glob": "^13.0.6",
+    "inflight": "^1.0.6",
     "jsonwebtoken": "^9.0.3",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
@@ -33,6 +36,7 @@
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.22.1",
     "recharts": "^3.8.1",
+    "rimraf": "^6.1.3",
     "swiper": "^12.1.3",
     "tailwind-merge": "^2.2.1"
   },
@@ -41,7 +45,7 @@
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.17",
-    "eslint": "^8.56.0",
+    "eslint": "^10.2.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
