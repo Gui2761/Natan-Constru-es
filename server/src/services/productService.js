@@ -78,17 +78,19 @@ export const productService = {
     const currentItem = await productModel.findUnique({ where: { id: parseInt(id) } });
     if (!currentItem) throw new Error("Produto não encontrado");
 
-    const sPercent = parseResilientFloat(data.salePercentage);
-    const bPrice = parseResilientFloat(data.basePrice);
-    const wVal = parseResilientFloat(data.weight);
+    const { keptImages, ...cleanData } = data;
+
+    const sPercent = parseResilientFloat(cleanData.salePercentage);
+    const bPrice = parseResilientFloat(cleanData.basePrice);
+    const wVal = parseResilientFloat(cleanData.weight);
 
     const updateData = {
-      ...data,
+      ...cleanData,
       finalPrice: calculateFinalPrice(bPrice, sPercent),
       basePrice: bPrice,
       salePercentage: sPercent,
       weight: wVal,
-      stock: data.stock ? parseInt(data.stock) : 0
+      stock: cleanData.stock ? parseInt(cleanData.stock) : 0
     };
 
     if (data.name) updateData.name = data.name.substring(0, 100);
@@ -97,9 +99,9 @@ export const productService = {
     // Gestão de Imagens (Mantidas vs Novas)
     let finalImages = currentItem.images || '';
     
-    if (data.keptImages !== undefined) {
+    if (keptImages !== undefined) {
        const oldImages = currentItem.images ? currentItem.images.split(',') : [];
-       const keptImagesArr = data.keptImages ? data.keptImages.split(',') : [];
+       const keptImagesArr = keptImages ? keptImages.split(',') : [];
        
        // Limpeza física das fotos descartadas
        oldImages.forEach(oldImg => {
@@ -107,7 +109,7 @@ export const productService = {
            deletePhysicalFile(oldImg.trim());
          }
        });
-       finalImages = data.keptImages;
+       finalImages = keptImages;
     }
 
     if (files && files.length > 0) {
