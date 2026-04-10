@@ -55,7 +55,12 @@ console.log("📂 [CONFIG] Servindo frontend de: " + distPath);
 console.log("📂 [CONFIG] Servindo uploads de: " + uploadsPath);
 
 app.use(express.static(distPath));
-app.use('/uploads', express.static(uploadsPath));
+app.use('/uploads', express.static(uploadsPath, {
+  fallthrough: false,
+  setHeaders: (res) => {
+    res.set('Access-Control-Allow-Origin', '*');
+  }
+}));
 
 // Rota de Teste (Pre-rotas)
 app.get('/api/health', (req, res) => {

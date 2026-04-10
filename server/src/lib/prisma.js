@@ -142,10 +142,16 @@ const userModel = {
       const { address, ...uData } = data;
 
       if (Object.keys(uData).length > 0) {
-        const setClause = Object.keys(uData).map(k => `\`${k}\` = ?`).join(', ');
+        // Remove undefined values to avoid "Bind parameters must not contain undefined"
+        const finalData = {};
+        Object.entries(uData).forEach(([k, v]) => {
+          if (v !== undefined) finalData[k] = v;
+        });
+
+        const setClause = Object.keys(finalData).map(k => `\`${k}\` = ?`).join(', ');
         await conn.execute(
           `UPDATE \`User\` SET ${setClause} WHERE \`id\` = ?`,
-          [...Object.values(uData), where.id]
+          [...Object.values(finalData), where.id]
         );
       }
 
