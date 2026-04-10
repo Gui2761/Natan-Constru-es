@@ -53,7 +53,7 @@ export const createProduct = async (req, res) => {
 
     let imageUrls = '';
     if (req.files && req.files.length > 0) {
-       imageUrls = req.files.map(file => `/uploads/${file.filename}`).join(',');
+       imageUrls = req.files.map(file => `/midia/${file.filename}`).join(',');
     }
 
     const product = await prisma.product.create({
@@ -120,7 +120,7 @@ export const updateProduct = async (req, res) => {
     }
     
     if (req.files && req.files.length > 0) {
-       const newUrls = req.files.map(file => `/uploads/${file.filename}`).join(',');
+       const newUrls = req.files.map(file => `/midia/${file.filename}`).join(',');
        finalImages = finalImages ? `${finalImages},${newUrls}` : newUrls;
     }
 

@@ -10,6 +10,7 @@ export const auth = (req, res, next) => {
   try {
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     req.user = verified;
+    req.userId = verified.id || verified.userId; // Garante que req.userId esteja disponível
     next();
   } catch (error) {
     res.status(401).json({ message: "Token inválido" });

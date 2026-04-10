@@ -14,7 +14,7 @@ export const createBanner = async (req, res) => {
   
   let imageUrl = '';
   if (req.file) {
-     imageUrl = `/uploads/${req.file.filename}`;
+     imageUrl = `/midia/${req.file.filename}`;
   } else if (req.body.image) {
      // Fallback para URL na transição
      imageUrl = req.body.image;
