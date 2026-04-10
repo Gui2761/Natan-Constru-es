@@ -6,12 +6,19 @@ export const getProducts = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const skip = (page - 1) * limit;
+    const query = req.query.q ? req.query.q.trim() : '';
     const categoryId = req.query.categoryId ? parseInt(req.query.categoryId) : undefined;
 
-    const where = {};
+    let where = {};
     if (categoryId) where.categoryId = categoryId;
+    if (query) {
+      where.OR = [
+        { name: { contains: query } },
+        { description: { contains: query } }
+      ];
+    }
 
-    const [products, total] = await Promise.all([
+    let [products, total] = await Promise.all([
       prisma.product.findMany({ 
         where,
         skip,
@@ -22,8 +29,21 @@ export const getProducts = async (req, res) => {
       prisma.product.count({ where })
     ]);
 
+    // Lógica de "Itens Relacionados" (Se a busca for vazia, sugerir destaques)
+    let isSearchFallback = false;
+    if (query && products.length === 0) {
+      isSearchFallback = true;
+      products = await prisma.product.findMany({
+        take: 4,
+        include: { category: true },
+        orderBy: { createdAt: 'desc' }
+      });
+      total = products.length;
+    }
+
     res.json({
       products,
+      isSearchFallback,
       meta: {
         total,
         page,

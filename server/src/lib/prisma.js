@@ -77,10 +77,36 @@ async function q(sql, params = []) {
 // ─────────────────────────────────────────────
 
 function buildWhere(where = {}) {
-  const keys = Object.keys(where);
+  const keys = Object.keys(where).filter(k => where[k] !== undefined);
   if (keys.length === 0) return { clause: '', params: [] };
-  const clause = 'WHERE ' + keys.map(k => `\`${k}\` = ?`).join(' AND ');
-  return { clause, params: Object.values(where) };
+  
+  const clauses = [];
+  const params = [];
+
+  keys.forEach(k => {
+    if (k === 'OR' && Array.isArray(where[k])) {
+      const orParts = where[k].map(cond => {
+        const subKeys = Object.keys(cond);
+        return subKeys.map(sk => {
+          if (cond[sk] && typeof cond[sk] === 'object' && cond[sk].contains) {
+            params.push(`%${cond[sk].contains}%`);
+            return `\`${sk}\` LIKE ?`;
+          }
+          params.push(cond[sk]);
+          return `\`${sk}\` = ?`;
+        }).join(' AND ');
+      });
+      clauses.push(`(${orParts.join(' OR ')})`);
+    } else if (where[k] && typeof where[k] === 'object' && where[k].contains) {
+      clauses.push(`\`${k}\` LIKE ?`);
+      params.push(`%${where[k].contains}%`);
+    } else {
+      clauses.push(`\`${k}\` = ?`);
+      params.push(where[k]);
+    }
+  });
+
+  return { clause: 'WHERE ' + clauses.join(' AND '), params };
 }
 
 function buildOrderBy(orderBy = {}) {

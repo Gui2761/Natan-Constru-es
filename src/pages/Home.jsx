@@ -72,14 +72,16 @@ export default function Home() {
                       <h2 className="text-6xl font-black text-white uppercase italic tracking-tighter max-w-2xl leading-[0.9] drop-shadow-lg">
                         {banner.title}
                       </h2>
-                      <Button 
-                        variant="secondary" 
-                        size="lg" 
-                        className="mt-8 text-xl px-12 uppercase italic h-16 shadow-2xl hover:scale-105 transition-transform"
-                        onClick={() => banner.link && navigate(banner.link)}
-                      >
-                        {banner.buttonText || 'Confira Agora'} <ArrowRight className="ml-2" />
-                      </Button>
+                      {banner.buttonText && (
+                        <Button 
+                          variant="secondary" 
+                          size="lg" 
+                          className="mt-8 text-xl px-12 uppercase italic h-16 shadow-2xl hover:scale-105 transition-transform"
+                          onClick={() => banner.link && navigate(banner.link)}
+                        >
+                          {banner.buttonText} <ArrowRight className="ml-2" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>

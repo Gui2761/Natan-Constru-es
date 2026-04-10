@@ -9,6 +9,8 @@ import { useLocation } from 'react-router-dom';
 export default function SearchResults() {
   const [products, setProducts] = useState([]);
   const [banners, setBanners] = useState([]);
+  const [isFallback, setIsFallback] = useState(false);
+  const [loading, setLoading] = useState(true);
   const query = new URLSearchParams(useLocation().search).get('q');
 
   useEffect(() => {
@@ -16,19 +18,20 @@ export default function SearchResults() {
   }, [query]);
 
   const fetchData = async () => {
+    setLoading(true);
     try {
       const [p, b] = await Promise.all([
-        api.get('/products'),
+        api.get(`/products?q=${encodeURIComponent(query)}`),
         api.get('/banners')
       ]);
-      const filtered = p.data.filter(prod => 
-        prod.name.toLowerCase().includes(query.toLowerCase()) || 
-        prod.description.toLowerCase().includes(query.toLowerCase())
-      );
-      setProducts(filtered);
+      
+      setProducts(p.data.products || []);
+      setIsFallback(p.data.isSearchFallback || false);
       setBanners(b.data);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -65,6 +68,14 @@ export default function SearchResults() {
               </h2>
            </div>
         </div>
+        
+        {isFallback && (
+          <div className="bg-secondary/10 border-l-4 border-secondary p-4 mb-8 rounded-r-xl animate-in fade-in slide-in-from-left duration-500">
+            <p className="text-primary font-bold">
+               🤔 Não encontramos resultados exatos para "{query}", mas preparamos estas sugestões que podem te interessar:
+            </p>
+          </div>
+        )}
 
         {products.length === 0 ? (
           <div className="text-center py-20 bg-surface-container/30 rounded-3xl border-2 border-dashed border-outline-variant">

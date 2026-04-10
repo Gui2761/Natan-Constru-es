@@ -145,7 +145,7 @@ export default function AdminBanners() {
                 <option value="/produtos">Todos os Produtos</option>
                 <optgroup label="Categorias">
                   {categories.map(cat => (
-                    <option key={cat.id} value={`/produtos?categoria=${cat.slug}`}>
+                    <option key={cat.id} value={`/categoria/${cat.slug}`}>
                       Ir para {cat.name}
                     </option>
                   ))}
