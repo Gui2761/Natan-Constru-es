@@ -7,6 +7,12 @@ export const bannerModel = {
     return q(`SELECT * FROM \`Banner\` ${clause} ${order}`, params);
   },
 
+  async findUnique({ where = {} } = {}) {
+    const { clause, params } = buildWhere(where);
+    const rows = await q(`SELECT * FROM \`Banner\` ${clause} LIMIT 1`, params);
+    return rows[0] || null;
+  },
+
   async create({ data = {} } = {}) {
     const [res] = await q('INSERT INTO `Banner` (`image`, `title`, `buttonText`, `link`, `active`) VALUES (?,?,?,?,?)',
       [data.image, data.title || null, data.buttonText || null, data.link || null, data.active !== false ? 1 : 0],
