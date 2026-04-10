@@ -1,3 +1,4 @@
+console.log("⚡ [CORE] Carregando núcleo do servidor...");
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -17,11 +18,11 @@ const PORT = process.env.PORT || 3001;
 
 // Capturar erros que acontecem fora do ciclo de vida normal do Express
 process.on('uncaughtException', (err) => {
-  console.error('!!! UNCAUGHT EXCEPTION - O SERVIDOR IA CAIR:', err);
+  console.error('!!! [CORE] UNCAUGHT EXCEPTION:', err);
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('!!! UNHANDLED REJECTION:', reason);
+  console.error('!!! [CORE] UNHANDLED REJECTION:', reason);
 });
 
 
@@ -90,7 +91,7 @@ app.get('*', (req, res) => {
   res.sendFile(indexPath);
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor unificado rodando em http://localhost:${PORT}`);
-  console.log(`📂 Servindo frontend de: ${distPath}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 [SUCCESS] Servidor rodando em 0.0.0.0:${PORT}`);
+  console.log(`📂 [INFO] Servindo frontend de: ${distPath}`);
 });
