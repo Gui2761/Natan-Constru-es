@@ -62,9 +62,49 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     message: 'Servidor Unificado Natan Construções Online!',
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    nodeVersion: process.version,
+    dbUrl: process.env.DATABASE_URL 
+      ? process.env.DATABASE_URL.substring(0, 20) + '...' 
+      : 'NÃO DEFINIDA'
   });
 });
+
+// Endpoint de Diagnóstico de Banco (Temporário)
+app.get('/api/db-test', async (req, res) => {
+  try {
+    const mysql = await import('mysql2/promise');
+    const url = process.env.DATABASE_URL;
+    if (!url) return res.json({ error: 'DATABASE_URL não encontrada no ambiente' });
+
+    const u = new URL(url);
+    const config = {
+      host: u.hostname,
+      port: parseInt(u.port) || 3306,
+      user: u.username,
+      password: decodeURIComponent(u.password),
+      database: u.pathname.replace(/^\//, ''),
+    };
+
+    const conn = await mysql.default.createConnection(config);
+    const [rows] = await conn.execute('SHOW TABLES');
+    await conn.end();
+    res.json({ 
+      status: 'CONECTADO!', 
+      host: config.host,
+      user: config.user,
+      database: config.database,
+      tables: rows 
+    });
+  } catch (err) {
+    res.json({ 
+      status: 'ERRO DE CONEXÃO',
+      error: err.message,
+      dbUrlPrefix: process.env.DATABASE_URL ? process.env.DATABASE_URL.substring(0, 25) : 'undefined'
+    });
+  }
+});
+
 
 // Usar Rotas
 app.use('/api/auth', authRoutes);
