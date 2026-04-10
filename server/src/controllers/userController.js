@@ -46,7 +46,7 @@ export const updateMe = async (req, res) => {
     }
 
     if (req.file) {
-      updateData.avatar = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+      updateData.avatar = `/uploads/${req.file.filename}`;
     }
 
     const user = await prisma.user.update({

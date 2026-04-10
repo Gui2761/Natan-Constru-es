@@ -31,7 +31,7 @@ export const register = async (req, res) => {
     // Gerar URL do avatar se file existir
     let avatarUrl = null;
     if (req.file) {
-      avatarUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+      avatarUrl = `/uploads/${req.file.filename}`;
     }
 
     const user = await prisma.user.create({

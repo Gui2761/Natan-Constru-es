@@ -3,10 +3,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const uploadDir = path.join(__dirname, '../../public/uploads');
+// Usa process.cwd() para garantir o caminho absoluto correto na Hostinger
+const uploadDir = path.join(process.cwd(), 'uploads');
 
 // Garante que a pasta existe
 if (!fs.existsSync(uploadDir)) {

@@ -49,7 +49,7 @@ app.use(express.json());
 
 // Resolução de Caminhos Estáticos (A partir da RAIZ)
 const distPath = path.resolve(__dirname, 'dist');
-const uploadsPath = path.resolve(__dirname, 'server/public/uploads');
+const uploadsPath = path.join(process.cwd(), 'uploads'); // Mesmo caminho do multer
 
 console.log("📂 [CONFIG] Servindo frontend de: " + distPath);
 console.log("📂 [CONFIG] Servindo uploads de: " + uploadsPath);
