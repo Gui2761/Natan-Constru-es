@@ -1,4 +1,13 @@
 import mysql from 'mysql2/promise';
+import dotenv from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Carrega as variáveis de ambiente da raiz do projeto (server/.env)
+dotenv.config({ path: path.join(__dirname, '../../.env') });
 
 function parseDatabaseUrl(url) {
   if (!url || url.startsWith('file:')) {
@@ -50,6 +59,7 @@ export function sanitizeParams(params) {
 // Modelos (Importados para manter compatibilidade)
 import { bannerModel } from '../models/bannerModel.js';
 import { productModel } from '../models/productModel.js';
+import { mediaModel } from '../models/mediaModel.js';
 import { userModel, categoryModel, orderModel, couponModel } from '../models/sharedModels.js';
 
 /**
@@ -81,7 +91,8 @@ const prismaProxy = {
   category: categoryModel,
   order: orderModel,
   banner: bannerModel,
-  coupon: couponModel
+  coupon: couponModel,
+  media: mediaModel
 };
 
 export default prismaProxy;

@@ -1,4 +1,5 @@
 import { productModel } from '../models/productModel.js';
+import { mediaService } from './mediaService.js';
 import { parseResilientFloat, calculateFinalPrice } from '../utils/math.js';
 import fs from 'fs';
 import path from 'path';
@@ -6,23 +7,6 @@ import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-// Helper privado para gestão de arquivos
-const deletePhysicalFile = (relativeUrl) => {
-  if (!relativeUrl) return;
-  const fileName = relativeUrl.split('/').pop();
-  if (!fileName) return;
-  
-  // Trava o caminho absoluto na raiz do projeto
-  const filePath = path.resolve(__dirname, '../../../midia', fileName);
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-    } catch (e) {
-      console.error("Erro ao deletar arquivo:", filePath, e);
-    }
-  }
-};
 
 export const productService = {
   async getPaginated({ page = 1, limit = 12, q = '', categoryId }) {
@@ -64,7 +48,7 @@ export const productService = {
        imageUrls = files.map(file => `/midia/${file.filename}`).join(',');
     }
 
-    return productModel.create({
+    const product = await productModel.create({
       data: {
         ...data,
         name: (data.name || 'Produto Sem Nome').substring(0, 100),
@@ -78,6 +62,13 @@ export const productService = {
         categoryId: parseInt(data.categoryId)
       }
     });
+
+    // Registra os IDs de mídia
+    if (files && files.length > 0) {
+      await mediaService.registerMedia(files, 'PRODUCT', product.id);
+    }
+
+    return product;
   },
 
   async update(id, data, files) {
@@ -102,23 +93,26 @@ export const productService = {
     if (data.name) updateData.name = data.name.substring(0, 100);
     if (data.description) updateData.description = data.description.substring(0, 1000);
 
-    // Gestão de Imagens (Mantidas vs Novas)
+    // Gestão de Imagens via MediaRepository
     let finalImages = currentItem.images || '';
     
     if (keptImages !== undefined) {
-       const oldImages = currentItem.images ? currentItem.images.split(',') : [];
-       const keptImagesArr = keptImages ? keptImages.split(',') : [];
+       // Sincroniza a tabela Media (remover o que não foi "mantido")
+       // Localizamos os registros Media atuais do produto
+       const currentMedias = await mediaService.getEntityMedia('PRODUCT', id);
+       const keptFilenames = (keptImages || '').split(',').map(f => f.split('/').pop());
        
-       // Limpeza física das fotos descartadas
-       oldImages.forEach(oldImg => {
-         if (!keptImagesArr.includes(oldImg.trim())) {
-           deletePhysicalFile(oldImg.trim());
-         }
-       });
+       const keptIds = currentMedias
+         .filter(m => keptFilenames.includes(m.filename))
+         .map(m => m.id);
+       
+       await mediaService.syncMedia('PRODUCT', id, keptIds);
        finalImages = keptImages;
     }
 
     if (files && files.length > 0) {
+       // Registra novos arquivos na tabela Media
+       await mediaService.registerMedia(files, 'PRODUCT', id);
        const newUrls = files.map(file => `/midia/${file.filename}`).join(',');
        finalImages = finalImages ? `${finalImages},${newUrls}` : newUrls;
     }
@@ -132,11 +126,8 @@ export const productService = {
   },
 
   async delete(id) {
-    const product = await productModel.findUnique({ where: { id: parseInt(id) } });
-    if (product && product.images) {
-      const allImages = product.images.split(',');
-      allImages.forEach(img => deletePhysicalFile(img.trim()));
-    }
+    // 1. Limpeza total de mídias (física e banco) via MediaService
+    await mediaService.syncMedia('PRODUCT', id, []);
 
     return productModel.delete({ where: { id: parseInt(id) } });
   }

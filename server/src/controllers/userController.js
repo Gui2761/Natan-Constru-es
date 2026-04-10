@@ -1,21 +1,8 @@
 import prisma from '../lib/prisma.js';
+import { mediaService } from '../services/mediaService.js';
 import fs from 'fs';
 import path from 'path';
 
-// Helper para deletar arquivo físico
-const deleteFile = (relativeUrl) => {
-  if (!relativeUrl) return;
-  const fileName = relativeUrl.split('/').pop();
-  if (!fileName) return;
-  const filePath = path.join(process.cwd(), 'midia', fileName);
-  if (fs.existsSync(filePath)) {
-    try {
-      fs.unlinkSync(filePath);
-    } catch (e) {
-      console.error("Erro ao deletar arquivo:", filePath, e);
-    }
-  }
-};
 import bcrypt from 'bcryptjs';
 import { cleanNumbers } from '../utils/math.js';
 
@@ -66,11 +53,8 @@ export const updateMe = async (req, res) => {
     }
 
     if (req.file) {
-      // Buscar avatar antigo para remover do disco
-      const currentUser = await prisma.user.findUnique({ where: { id: req.userId } });
-      if (currentUser && currentUser.avatar) {
-        deleteFile(currentUser.avatar);
-      }
+      // Sincronização via ID de mídia
+      await mediaService.syncMedia('USER', userId, []);
       updateData.avatar = `/midia/${req.file.filename}`;
     }
 
@@ -101,6 +85,11 @@ export const updateMe = async (req, res) => {
       },
       include: { address: true }
     });
+
+    // Registra o ID da nova mídia para o usuário
+    if (req.file) {
+      await mediaService.registerMedia([req.file], 'USER', userId);
+    }
 
     const { password: _, ...userData } = user;
     res.status(200).json(userData);

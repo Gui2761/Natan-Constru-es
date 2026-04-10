@@ -1,0 +1,42 @@
+
+[2026-04-10T19:15:44.147Z] SQL ERROR:
+DATABASE_URL inválida. Configure mysql:// no painel da Hostinger.
+SQL: 
+      CREATE TABLE IF NOT EXISTS Media (
+        id INT NOT NULL AUTO_INCREMENT,
+        filename VARCHAR(255) NOT NULL,
+        entityType VARCHAR(50) NOT NULL,
+        entityId INT NOT NULL,
+        createdAt DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+Params: []
+
+[2026-04-10T19:16:31.951Z] SQL ERROR:
+dotenv is not defined
+SQL: 
+      CREATE TABLE IF NOT EXISTS Media (
+        id INT NOT NULL AUTO_INCREMENT,
+        filename VARCHAR(255) NOT NULL,
+        entityType VARCHAR(50) NOT NULL,
+        entityId INT NOT NULL,
+        createdAt DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+Params: []
+
+[2026-04-10T19:17:10.415Z] SQL ERROR:
+DATABASE_URL inválida. Configure mysql:// no painel da Hostinger.
+SQL: 
+      CREATE TABLE IF NOT EXISTS Media (
+        id INT NOT NULL AUTO_INCREMENT,
+        filename VARCHAR(255) NOT NULL,
+        entityType VARCHAR(50) NOT NULL,
+        entityId INT NOT NULL,
+        createdAt DATETIME(3) DEFAULT CURRENT_TIMESTAMP(3),
+        PRIMARY KEY (id)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    
+Params: []
