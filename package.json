@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "server": "node server/src/index.js",
     "server:dev": "nodemon server/src/index.js",
-    "start": "npx prisma generate && npx prisma db push --accept-data-loss && node server.mjs"
+    "start": "node server.mjs",
+    "postinstall": "prisma generate"
   },
   "engines": {
     "node": ">=18.0.0"

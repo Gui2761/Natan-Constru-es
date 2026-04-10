@@ -22,49 +22,18 @@ import { execSync } from 'child_process';
 // Carregar Variáveis de Ambiente
 dotenv.config();
 
-// FUNÇÃO DE SINCRONIZAÇÃO AUTOMÁTICA (Diagnóstico Profundo)
-const syncDatabase = () => {
-  const logFile = path.join(__dirname, 'logs_db.txt');
-  const log = (msg) => {
-    const entry = `[${new Date().toISOString()}] ${msg}\n`;
-    fs.appendFileSync(logFile, entry);
-    console.log(msg);
-  };
-
-  log("-----------------------------------------");
-  log("🔄 [DB] Iniciando Sincronização...");
-  
-  try {
-    const prismaBinary = path.join(__dirname, 'node_modules/prisma/build/index.js');
-    log(`📂 [DB] Binário exists: ${fs.existsSync(prismaBinary)} (${prismaBinary})`);
-    
-    if (process.env.DATABASE_URL) {
-      log(`🌐 [DB] DATABASE_URL encontrada (Inicia com: ${process.env.DATABASE_URL.substring(0, 15)}...)`);
-    } else {
-      log("❌ [DB] DATABASE_URL NÃO ENCONTRADA! Verifique o painel Hostinger.");
-      return;
-    }
-
-    log("🛰️ [DB] Executando Generate...");
-    const genOut = execSync(`"${process.execPath}" "${prismaBinary}" generate`, { encoding: 'utf-8' });
-    log("✅ [DB] Generate OK: " + genOut.substring(0, 100));
-
-    log("🛰️ [DB] Executando DB Push...");
-    const pushOut = execSync(`"${process.execPath}" "${prismaBinary}" db push --accept-data-loss`, { encoding: 'utf-8' });
-    log("✅ [DB] DB Push OK: " + pushOut.substring(0, 100));
-    
-    log("🏁 [DB] Sincronização concluída com sucesso!");
-  } catch (error) {
-    log("❌ [DB ERROR] Falha Crítica: " + error.message);
-    if (error.stdout) log("📋 STDOUT: " + error.stdout.toString());
-    if (error.stderr) log("📋 STDERR: " + error.stderr.toString());
+// VERIFICAÇÃO DE BANCO (Diagnóstico Rápido)
+if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL.startsWith('file:')) {
+    console.log("⚠️ [ALERTA] Você ainda está usando SQLITE! Troque a DATABASE_URL no painel para mysql://");
+  } else {
+    console.log("🌐 [DB] Conexão MySQL configurada no ambiente.");
   }
-};
+} else {
+  console.log("❌ [ERRO] DATABASE_URL não encontrada. O site vai falhar.");
+}
 
-// Executar Sincronização
-syncDatabase();
-
-// Importar Rotas e Libs (Após o sync para garantir que o cliente exista)
+// Importar Rotas e Libs
 import prisma from './server/src/lib/prisma.js';
 import authRoutes from './server/src/routes/authRoutes.js';
 // ... demais imports ...
