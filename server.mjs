@@ -17,12 +17,31 @@ console.log("🕒 Horário: " + new Date().toISOString());
 console.log("📂 Diretório Raiz: " + process.cwd());
 console.log("-----------------------------------------");
 
+import { execSync } from 'child_process';
+
 // Carregar Variáveis de Ambiente
 dotenv.config();
 
-// Importar Rotas e Libs (Caminhos relativos atualizados)
+// FUNÇÃO DE SINCRONIZAÇÃO AUTOMÁTICA (Para Hostinger)
+const syncDatabase = () => {
+  console.log("🔄 [DB] Sincronizando banco de dados MySQL...");
+  try {
+    // Tenta gerar o cliente e fazer o push das tabelas
+    execSync('npx prisma generate', { stdio: 'inherit' });
+    execSync('npx prisma db push --accept-data-loss', { stdio: 'inherit' });
+    console.log("✅ [DB] Tabelas sincronizadas com sucesso!");
+  } catch (error) {
+    console.error("❌ [DB ERROR] Falha ao sincronizar banco de dados:", error.message);
+  }
+};
+
+// Executar Sincronização
+syncDatabase();
+
+// Importar Rotas e Libs (Após o sync para garantir que o cliente exista)
 import prisma from './server/src/lib/prisma.js';
 import authRoutes from './server/src/routes/authRoutes.js';
+// ... demais imports ...
 import categoryRoutes from './server/src/routes/categoryRoutes.js';
 import productRoutes from './server/src/routes/productRoutes.js';
 import orderRoutes from './server/src/routes/orderRoutes.js';
