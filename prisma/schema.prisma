@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -13,7 +13,7 @@ model User {
   email     String   @unique
   password  String
   role      String   @default("CLIENT") // "ADMIN" or "CLIENT"
-  avatar    String?  // Profile picture URL
+  avatar    String?  @db.Text
   address   Address?
   orders    Order[]
   createdAt DateTime @default(now())
@@ -41,14 +41,14 @@ model Category {
 model Product {
   id             Int      @id @default(autoincrement())
   name           String
-  description    String
+  description    String   @db.Text
   basePrice      Float
-  costPrice      Float    @default(0) // Price paid by merchant
+  costPrice      Float    @default(0)
   salePercentage Float    @default(0)
   finalPrice     Float
   stock          Int      @default(0)
-  weight         Float    @default(0) // in kg for freight
-  images         String   // JSON or comma separated URLs
+  weight         Float    @default(0)
+  images         String   @db.Text
   categoryId     Int
   category       Category @relation(fields: [categoryId], references: [id])
   createdAt      DateTime @default(now())
@@ -56,10 +56,10 @@ model Product {
 
 model Banner {
   id         Int     @id @default(autoincrement())
-  image      String
+  image      String  @db.Text
   title      String?
-  buttonText String? // Custom CTA text
-  link       String?
+  buttonText String?
+  link       String? @db.Text
   active     Boolean @default(true)
 }
 
@@ -67,17 +67,17 @@ model Order {
   id          Int      @id @default(autoincrement())
   userId      Int
   user        User     @relation(fields: [userId], references: [id])
-  items       String   // JSON list of items
+  items       String   @db.LongText
   totalAmount Float
-  status      String   @default("PENDENTE") // "PROCESSANDO", "SAIU_ENTREGA", "ENTREGUE"
-  pdfBudget   String?  // URL for the PDF if generated
+  status      String   @default("PENDENTE")
+  pdfBudget   String?  @db.Text
   createdAt   DateTime @default(now())
 }
 
 model Coupon {
-  id         Int      @id @default(autoincrement())
-  code       String   @unique
-  discount   Float    // Percentage
-  active     Boolean  @default(true)
+  id         Int       @id @default(autoincrement())
+  code       String    @unique
+  discount   Float
+  active     Boolean   @default(true)
   expiresAt  DateTime?
 }
