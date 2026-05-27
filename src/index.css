@@ -8,12 +8,12 @@
   font-family: 'Inter', system-ui, sans-serif;
   
   /* --- LIGHT MODE DESIGN SYSTEM --- */
-  --color-background: #f8fafc;
+  --color-background: #f9f9fd;
   --color-surface: #ffffff;
-  --color-surface-container: #f1f5f9;
-  --color-on-surface: #0f172a;
-  --color-outline: #64748b;
-  --color-outline-variant: #cbd5e1;
+  --color-surface-container: #eeedf2;
+  --color-on-surface: #1a1c1f;
+  --color-outline: #737780;
+  --color-outline-variant: #c2c6d0;
   
   --color-primary: #00345f; /* Blue */
   --color-secondary: #fd8121; /* Orange */
@@ -58,15 +58,21 @@ h1, h2, h3, h4, .font-headline {
   @apply mx-auto px-4 sm:px-6 lg:px-8;
 }
 
-/* Glassmorphism Blueprint with Dark Gradient Glow */
+/* Glassmorphism Blueprint - Fixed compiler issue by using standard CSS */
 .glass {
-  @apply bg-surface/80 backdrop-blur-lg border border-outline-variant/60 shadow-blueprint;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-outline-variant);
+  box-shadow: 0 4px 14px 0 rgba(0, 52, 95, 0.1);
 }
 
 .dark .glass {
   background: linear-gradient(135deg, rgba(10, 17, 32, 0.85) 0%, rgba(16, 26, 48, 0.8) 100%);
   border: 1px solid rgba(255, 126, 26, 0.15); /* Glowing electric orange accent borders */
   box-shadow: 0 8px 32px 0 rgba(2, 132, 199, 0.1); /* Soft cyan blueprint glow */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 /* Image Standardization Utilities */
