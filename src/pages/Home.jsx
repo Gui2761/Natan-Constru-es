@@ -89,9 +89,31 @@ export default function Home() {
             ))}
           </Swiper>
         ) : (
-          <div className="h-[400px] bg-primary flex flex-col justify-center items-center text-center p-10">
-            <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter">Natan Construções</h2>
-            <p className="text-white/60 mt-4 max-w-xl">Qualidade profissional para sua obra, do alicerce ao acabamento.</p>
+          <div className="h-[460px] bg-blueprint-grid relative overflow-hidden flex flex-col justify-center items-center text-center p-10 shadow-blueprint">
+            <div className="absolute inset-0 radial-blueprint-glow pointer-events-none"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.05)_1px,transparent_0)] bg-[size:10px_10px] animate-blueprint-pulse pointer-events-none"></div>
+            
+            <div className="relative z-10 max-w-2xl space-y-4">
+              <span className="bg-secondary text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full tracking-widest shadow-md">
+                Blueprint da Engenharia à sua Obra
+              </span>
+              <h2 className="text-6xl lg:text-7xl font-black text-white uppercase italic tracking-tighter leading-none drop-shadow-xl">
+                NATAN <br className="lg:hidden" /> <span className="text-secondary">CONSTRUÇÕES</span>
+              </h2>
+              <p className="text-white/80 text-sm font-medium tracking-wide uppercase max-w-xl mx-auto leading-relaxed border-t border-b border-white/10 py-3">
+                Qualidade profissional para sua obra, do alicerce ao acabamento.
+              </p>
+              <div className="pt-4 flex gap-4 justify-center">
+                <Button 
+                  variant="secondary" 
+                  size="md" 
+                  className="uppercase font-black italic tracking-wider hover:scale-105 transition-transform"
+                  onClick={() => navigate('/produtos')}
+                >
+                  Ver Catálogo Completo
+                </Button>
+              </div>
+            </div>
           </div>
         )}
       </section>
@@ -114,7 +136,7 @@ export default function Home() {
             </div>
           ) : (
             products.map(product => (
-              <Card key={product.id} className="group p-0 overflow-hidden relative" hover>
+              <Card key={product.id} className="group p-0 overflow-hidden relative hover-premium" hover>
                  {product.salePercentage > 0 && (
                    <div className="absolute top-4 left-4 z-10 bg-secondary text-white text-[10px] font-black uppercase px-2 py-1 rounded flex items-center gap-0.5">
                       <Percent size={10} /> {product.salePercentage}% OFF

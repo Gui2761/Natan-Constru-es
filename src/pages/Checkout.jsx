@@ -4,7 +4,8 @@ import Footer from '../components/Footer';
 import { Card, Button, Input } from '../components/UI';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import { CheckCircle, Truck, MapPin, CreditCard, ArrowRight, Ticket, Tag } from 'lucide-react';
+import { CheckCircle, Truck, MapPin, CreditCard, ArrowRight, Ticket, Tag, Download, MessageCircle } from 'lucide-react';
+import { generateBlueprintPDF } from '../utils/pdfGenerator';
 
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +18,7 @@ export default function Checkout() {
   const [success, setSuccess] = useState(false);
   const [couponCode, setCouponCode] = useState('');
   const [couponResult, setCouponResult] = useState(null);
-
+  const [createdOrder, setCreatedOrder] = useState(null);
 
   // Pre-fill address if user is logged in
   const [formData, setFormData] = useState({
@@ -29,17 +30,47 @@ export default function Checkout() {
     state: user?.address?.state || ''
   });
 
+  // Calculate Shipping based on totalWeight and State (UF)
+  const calculateShipping = () => {
+    if (!formData.state || totalWeight === 0) return 0;
+    const base = 15.0;
+    const weightFee = totalWeight * 1.20;
+    
+    const state = formData.state.toUpperCase().trim();
+    let multiplier = 2.2; // default outer state
+    if (state === 'SP') multiplier = 1.0;
+    else if (['RJ', 'MG', 'ES'].includes(state)) multiplier = 1.5;
+    
+    return base + (weightFee * multiplier);
+  };
+
+  const shippingCost = calculateShipping();
+  const grandTotal = total + shippingCost;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return navigate('/login');
     setLoading(true);
     try {
-      await api.post('/orders', {
+      const { data } = await api.post('/orders', {
         items: JSON.stringify(cart),
-        totalAmount: total,
+        totalAmount: grandTotal,
         userId: user.id
       });
 
+      // Attach full details for successful order summary
+      const orderSummary = {
+        ...data,
+        items: cart,
+        totalWeight,
+        shippingCost,
+        user: {
+          ...user,
+          address: formData
+        }
+      };
+
+      setCreatedOrder(orderSummary);
       setSuccess(true);
       clearCart();
     } catch (err) {
@@ -50,17 +81,67 @@ export default function Checkout() {
   };
 
   if (success) {
+    const generateWhatsAppLink = () => {
+      if (!createdOrder) return '';
+      const orderId = createdOrder.id || 'N/A';
+      const itemsList = createdOrder.items.map(item => `• ${item.name} (x${item.quantity}) - R$ ${(item.finalPrice * item.quantity).toFixed(2)}`).join('\n');
+      
+      const text = `*NOVO PEDIDO - NATAN CONSTRUÇÕES* 🏗️\n\n` +
+        `*Pedido:* #${orderId}\n` +
+        `*Cliente:* ${createdOrder.user.name}\n` +
+        `*Endereço:* ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n\n` +
+        `*Itens do Pedido:*\n${itemsList}\n\n` +
+        `*Peso da Carga:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
+        `*Frete Logístico:* R$ ${createdOrder.shippingCost.toFixed(2)}\n` +
+        `*VALOR TOTAL:* R$ ${createdOrder.totalAmount.toFixed(2)}\n\n` +
+        `*Gostaria de agendar a entrega do meu material!*`;
+      
+      return `https://wa.me/5511999999999?text=${encodeURIComponent(text)}`;
+    };
+
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-background">
         <Header />
-        <main className="flex-1 flex items-center justify-center p-10">
-           <Card className="max-w-md text-center py-16 space-y-6 glass">
-              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
+        <main className="flex-1 flex items-center justify-center p-10 bg-blueprint-grid relative overflow-hidden">
+          <div className="absolute inset-0 radial-blueprint-glow pointer-events-none"></div>
+           <Card className="max-w-md w-full text-center py-12 px-8 space-y-6 shadow-2xl relative z-10 hover-premium bg-white">
+              <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-md">
                  <CheckCircle size={48} />
               </div>
-              <h2 className="text-3xl font-black text-primary uppercase italic tracking-tighter">Pedido Realizado!</h2>
-              <p className="text-outline">Seu pedido foi encaminhado para nossa equipe. Você pode acompanhar o status no seu painel.</p>
-              <Button size="lg" className="w-full" onClick={() => navigate('/')}>Voltar para a Loja</Button>
+              <div className="space-y-2">
+                <span className="bg-secondary/10 text-secondary text-[10px] font-black uppercase px-2 py-1 rounded">
+                  Status: Processando Orçamento
+                </span>
+                <h2 className="text-3xl font-black text-primary uppercase italic tracking-tighter">Pedido Realizado!</h2>
+              </div>
+              <p className="text-outline text-sm">
+                Seu pedido foi encaminhado no sistema. Para garantir o melhor prazo de frete e separação rápida, faça o download do orçamento e envie ao nosso atendimento no WhatsApp!
+              </p>
+              
+              <div className="flex flex-col gap-3 pt-4">
+                <Button 
+                  size="md" 
+                  className="w-full bg-[#25D366] text-white hover:bg-[#20ba5a] font-black uppercase italic tracking-wider flex items-center justify-center gap-2 h-14" 
+                  onClick={() => window.open(generateWhatsAppLink(), '_blank')}
+                >
+                  <MessageCircle size={20} /> Agendar via WhatsApp
+                </Button>
+
+                <Button 
+                  size="md" 
+                  variant="outline" 
+                  className="w-full font-black uppercase italic tracking-wider flex items-center justify-center gap-2 h-14" 
+                  onClick={() => generateBlueprintPDF(createdOrder)}
+                >
+                  <Download size={20} /> Baixar Orçamento PDF
+                </Button>
+              </div>
+
+              <div className="border-t border-outline-variant pt-6">
+                <Button variant="ghost" size="sm" className="w-full text-xs font-bold uppercase" onClick={() => navigate('/')}>
+                  Voltar para a Loja
+                </Button>
+              </div>
            </Card>
         </main>
         <Footer />
@@ -194,6 +275,10 @@ export default function Checkout() {
                      <span className="text-outline uppercase font-black text-[10px]">Peso Total da Carga</span>
                      <span className="font-black">{totalWeight.toFixed(2)} kg</span>
                   </div>
+                  <div className="flex justify-between text-sm">
+                     <span className="text-outline uppercase font-black text-[10px] flex items-center gap-1"><Truck size={14} /> Frete Logístico</span>
+                     <span className="font-black">{shippingCost > 0 ? `R$ ${shippingCost.toFixed(2)}` : 'Digite o Estado'}</span>
+                  </div>
                   {coupon && (
                     <div className="flex justify-between text-sm text-green-600 py-2 border-y border-green-100 italic font-bold">
                        <span className="flex items-center gap-1"><Tag size={14} /> Desconto ({coupon.discount}%)</span>
@@ -202,12 +287,11 @@ export default function Checkout() {
                   )}
                   <div className="flex justify-between items-center text-4xl font-black text-primary pt-2">
                      <span className="italic uppercase tracking-tighter">Total</span>
-                     <span>R$ {total.toFixed(2)}</span>
+                     <span>R$ {grandTotal.toFixed(2)}</span>
                   </div>
                 </div>
 
-
-               <Button size="lg" className="w-full mt-8 h-16 font-black uppercase italic text-lg" disabled={loading || cart.length === 0} onClick={handleSubmit}>
+               <Button size="lg" className="w-full mt-8 h-16 font-black uppercase italic text-lg shadow-blueprint hover-premium" disabled={loading || cart.length === 0} onClick={handleSubmit}>
                   {loading ? 'Processando...' : <><CheckCircle className="mr-2" /> Confirmar Pedido</>}
                </Button>
                <p className="text-[10px] text-center text-outline mt-4 font-medium px-4">

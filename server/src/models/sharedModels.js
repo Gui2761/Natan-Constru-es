@@ -51,7 +51,7 @@ export const categoryModel = {
     return q(`SELECT * FROM \`Category\` ${clause} LIMIT 1`, keys.map(k => where[k])).then(r => r[0] || null);
   },
   async create({ data = {} } = {}) {
-    const [res] = await q('INSERT INTO `Category` (`name`) VALUES (?)', [data.name], true);
+    const [res] = await q('INSERT INTO `Category` (`name`, `slug`) VALUES (?, ?)', [data.name, data.slug], true);
     return this.findUnique({ where: { id: res.insertId } });
   },
   async update({ where = {}, data = {} } = {}) {
@@ -65,11 +65,44 @@ export const categoryModel = {
   }
 };
 
+// Helpers internos para cláusulas dinâmicas
+function buildWhere(where = {}) {
+  const keys = Object.keys(where).filter(k => where[k] !== undefined);
+  if (keys.length === 0) return { clause: '', params: [] };
+  const clauses = keys.map(k => `\`${k}\` = ?`);
+  const params = keys.map(k => where[k]);
+  return { clause: 'WHERE ' + clauses.join(' AND '), params };
+}
+
 // --- ORDER MODEL ---
 export const orderModel = {
   async findMany({ where = {}, include = {}, orderBy = {} } = {}) {
+    const { clause, params } = buildWhere(where);
     const order = orderBy.createdAt ? `ORDER BY \`createdAt\` ${orderBy.createdAt.toUpperCase()}` : 'ORDER BY `createdAt` DESC';
-    const rows = await q(`SELECT * FROM \`Order\` ${order}`); 
+    const rows = await q(`SELECT * FROM \`Order\` ${clause} ${order}`, params); 
+
+    if (include.user && rows.length) {
+      const userIds = [...new Set(rows.map(r => r.userId))];
+      const users = await q(`SELECT * FROM \`User\` WHERE \`id\` IN (${userIds.map(() => '?').join(',')})`, userIds);
+      
+      const includeAddress = include.user.include && include.user.include.address;
+      let addressMap = {};
+      if (includeAddress && users.length) {
+        const addresses = await q(`SELECT * FROM \`Address\` WHERE \`userId\` IN (${userIds.map(() => '?').join(',')})`, userIds);
+        addressMap = Object.fromEntries(addresses.map(a => [a.userId, a]));
+      }
+
+      const userMap = Object.fromEntries(users.map(u => {
+        if (includeAddress) {
+          u.address = addressMap[u.id] || null;
+        }
+        return [u.id, u];
+      }));
+
+      for (const o of rows) {
+        o.user = userMap[o.userId] || null;
+      }
+    }
     return rows;
   },
   async findUnique({ where = {} } = {}) {
@@ -113,8 +146,8 @@ export const couponModel = {
     return q(`SELECT * FROM \`Coupon\` ${clause} LIMIT 1`, params).then(r => r[0] || null);
   },
   async create({ data = {} } = {}) {
-    const [res] = await q('INSERT INTO `Coupon` (`code`, `discount`, `active`) VALUES (?,?,?)', 
-      [data.code, data.discount, data.active !== false ? 1 : 0], true);
+    const [res] = await q('INSERT INTO `Coupon` (`code`, `discount`, `active`, `expiresAt`) VALUES (?,?,?,?)', 
+      [data.code, data.discount, data.active !== false ? 1 : 0, data.expiresAt || null], true);
     return this.findUnique({ where: { id: res.insertId } });
   },
   async update({ where = {}, data = {} } = {}) {
