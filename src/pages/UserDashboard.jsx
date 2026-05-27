@@ -27,6 +27,30 @@ export default function UserDashboard() {
     }
   };
 
+  const handleCancelOrder = async (order) => {
+    if (!window.confirm(`Tem certeza que deseja solicitar o cancelamento do pedido #${order.id}?`)) {
+      return;
+    }
+    
+    try {
+      await api.patch(`/orders/${order.id}/status`, { status: 'CANCELADO' });
+      
+      const text = `*SOLICITAÇÃO DE CANCELAMENTO - NATAN CONSTRUÇÕES* ❌\n\n` +
+        `*Pedido:* #${order.id}\n` +
+        `*Cliente:* ${user.name}\n` +
+        `*Valor do Pedido:* R$ ${order.totalAmount.toFixed(2)}\n\n` +
+        `*Gostaria de formalizar o cancelamento do meu pedido e alinhar o estorno/reembolso do Pix ou do pagamento combinado.*`;
+      
+      const whatsappUrl = `https://wa.me/5579999999999?text=${encodeURIComponent(text)}`;
+      window.open(whatsappUrl, '_blank');
+      
+      fetchOrders();
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao solicitar cancelamento do pedido. Por favor, tente novamente.');
+    }
+  };
+
   const getStatusIcon = (status) => {
     switch(status) {
       case 'PROCESSANDO': return <Package className="text-blue-500" />;
@@ -161,6 +185,33 @@ export default function UserDashboard() {
                               </div>
                             ))}
                          </div>
+
+                          {/* Seção de Cancelamento */}
+                          <div className="mt-8 pt-6 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
+                            {order.status === 'PROCESSANDO' ? (
+                              <>
+                                <p className="text-xs text-outline font-bold">
+                                  Precisa cancelar? Você pode cancelar seu pedido enquanto ele está em processamento de logística.
+                                </p>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="text-error border-error/20 hover:bg-error/5 uppercase text-[10px] tracking-widest font-black shrink-0"
+                                  onClick={() => handleCancelOrder(order)}
+                                >
+                                  Solicitar Cancelamento
+                                </Button>
+                              </>
+                            ) : order.status === 'CANCELADO' ? (
+                              <p className="text-xs text-error font-black uppercase tracking-wider bg-error/10 px-4 py-3 rounded-xl border border-error/20 w-full text-center">
+                                Este pedido foi cancelado comercialmente. Entre em contato no WhatsApp se precisar alinhar reembolso ou nova cotação.
+                              </p>
+                            ) : (
+                              <p className="text-xs text-outline italic">
+                                Este pedido já está em rota ou foi entregue. Em caso de trocas, devoluções ou direito de arrependimento (CDC - 7 dias), por favor entre em contato direto via WhatsApp comercial.
+                              </p>
+                            )}
+                          </div>
                       </div>
                     )}
 

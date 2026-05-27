@@ -28,7 +28,7 @@ export default function ContactFAQ() {
                 {[
                   { q: 'Qual o prazo de entrega?', a: 'Para entregas em Nossa Senhora da Glória e região, garantimos a entrega dos materiais em até 24h a 48h úteis após a aprovação. Para outros estados, o prazo e o custo são simulados em tempo real na tela de finalização de compra (via Correios PAC ou SEDEX).' },
                   { q: 'Posso fazer orçamento para minha obra?', a: 'Sim! Ao adicionar seus itens ao carrinho, você pode ir para o checkout e clicar em "Baixar Orçamento PDF" para obter um orçamento profissional detalhado para sua construtora ou equipe de obras.' },
-                  { q: 'Quais as formas de pagamento?', a: 'Aceitamos PIX e Cartão de Crédito em até 12x. Todos os nossos pagamentos são processados com a segurança absoluta e criptografia garantida do Mercado Pago.' },
+                  { q: 'Quais as formas de pagamento?', a: 'Aceitamos PIX, Cartão de Crédito (via link seguro ou na maquininha durante a entrega) e boleto para faturamento de CNPJ. Todos os pagamentos e prazos de entrega são combinados de forma direta e transparente no WhatsApp de nosso atendimento comercial após a simulação de frete.' },
                   { q: 'Como funcionam as trocas de materiais?', a: 'Em alinhamento com o Código de Defesa do Consumidor, você tem até 7 dias corridos para devolução por arrependimento. Caso algum material chegue quebrado ou avariado, recuse no ato da entrega para reposição imediata.' }
                 ].map((item, idx) => (
                  <details key={idx} className="group bg-surface border border-outline-variant rounded-xl overflow-hidden [&_summary::-webkit-details-marker]:hidden">
