@@ -246,7 +246,7 @@ export default function Checkout() {
                     </div>
                   </div>
                   <span className="font-black text-primary">
-                    {formData.state ? `R$ ${(15.0 + totalWeight * 1.20 * (formData.state === 'SP' ? 1.0 : ['RJ','MG','ES'].includes(formData.state) ? 1.5 : 2.2)).toFixed(2)}` : 'Preencha o CEP'}
+                    {formData.state ? `R$ ${(15.0 + totalWeight * 1.20 * (formData.state === 'SE' ? 1.0 : ['AL','BA','PE'].includes(formData.state) ? 1.5 : 2.2)).toFixed(2)}` : 'Preencha o CEP'}
                   </span>
                 </div>
 
@@ -262,7 +262,7 @@ export default function Checkout() {
                     </div>
                   </div>
                   <span className="font-black text-primary">
-                    {formData.state ? `R$ ${(28.0 + totalWeight * 2.10 * (formData.state === 'SP' ? 1.0 : ['RJ','MG','ES'].includes(formData.state) ? 1.5 : 2.2)).toFixed(2)}` : 'Preencha o CEP'}
+                    {formData.state ? `R$ ${(28.0 + totalWeight * 2.10 * (formData.state === 'SE' ? 1.0 : ['AL','BA','PE'].includes(formData.state) ? 1.5 : 2.2)).toFixed(2)}` : 'Preencha o CEP'}
                   </span>
                 </div>
               </div>
@@ -270,16 +270,16 @@ export default function Checkout() {
 
             <Card>
                <h3 className="text-lg font-black uppercase italic tracking-tighter text-primary mb-6 flex items-center gap-2">
-                <CreditCard size={20} className="text-secondary" /> Forma de Pagamento
+                <CreditCard size={20} className="text-secondary" /> Pagamento & Fechamento
               </h3>
               <div className="p-4 border-2 border-primary bg-primary/5 rounded-2xl flex items-center justify-between">
                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-[#009EE3] text-white rounded-full flex items-center justify-center font-black italic shadow-lg">
-                       MP
+                    <div className="w-12 h-12 bg-secondary text-white rounded-full flex items-center justify-center font-black italic shadow-lg">
+                       W
                     </div>
                     <div>
-                       <p className="font-bold text-primary">Mercado Pago (Cartão / PIX)</p>
-                       <p className="text-[10px] text-outline uppercase font-black">Processamento 100% Seguro</p>
+                       <p className="font-bold text-primary">A Combinar no WhatsApp</p>
+                       <p className="text-[10px] text-outline uppercase font-black">PIX, Link de Pagamento ou Maquininha na Entrega</p>
                     </div>
                  </div>
                  <CheckCircle className="text-primary" />

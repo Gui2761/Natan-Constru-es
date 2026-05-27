@@ -36,20 +36,20 @@ export default function Policy() {
            </div>
 
            <div>
-             <h3 className="text-xl font-black uppercase text-primary mb-3">3. Reembolsos, Estornos e Cancelamentos (Políticas do Mercado Pago)</h3>
+             <h3 className="text-xl font-black uppercase text-primary mb-3">3. Reembolsos, Estornos e Cancelamentos</h3>
              <p className="leading-relaxed text-sm text-outline">
-               Todo o processamento financeiro e transacional do nosso e-commerce é efetuado de forma 100% criptografada e segura através do gateway do **Mercado Pago**. Em caso de cancelamentos e devoluções aceitas, o estorno será realizado exclusivamente através do mesmo método de pagamento utilizado na compra:
+               Como nosso e-commerce opera no modelo de fechamento de pedido e agendamento de entrega via **WhatsApp**, as transações e pagamentos são combinados diretamente com o nosso atendimento comercial (via Pix, link de cobrança seguro ou cartão na maquininha durante a entrega). Em caso de desistência ou cancelamento aprovado:
              </p>
              <ul className="list-disc pl-6 space-y-1 text-sm text-outline mt-2">
-               <li>**PIX**: O estorno do valor integral será creditado diretamente na conta do pagador pelo Mercado Pago em até **24 horas** após a validação física dos produtos retornados.</li>
-               <li>**Cartão de Crédito**: O cancelamento e estorno da transação serão solicitados junto à administradora do cartão de crédito pelo Mercado Pago. O lançamento do crédito na fatura do cliente depende das regras do banco emissor, ocorrendo geralmente em até 1 ou 2 faturas subsequentes.</li>
+               <li>**PIX**: O estorno do valor integral será devolvido via Pix para a conta informada pelo cliente em até **24 horas** após a validação física dos produtos retornados.</li>
+               <li>**Cartão de Crédito (Maquininha/Link)**: O estorno será solicitado diretamente na nossa credenciadora de cartões. O lançamento do crédito na fatura do cliente depende das regras do banco emissor do cartão, ocorrendo geralmente em até 1 ou 2 faturas subsequentes.</li>
              </ul>
            </div>
 
            <div>
              <h3 className="text-xl font-black uppercase text-primary mb-3">4. Segurança de Dados e Privacidade (LGPD)</h3>
              <p className="leading-relaxed text-sm text-outline">
-               A Natan Construções preza pela privacidade dos seus dados. As informações cadastrais coletadas (como nome, endereço e e-mail) são utilizadas unicamente para emissão de notas fiscais, entrega das mercadorias e contato pós-venda. Seus dados de pagamento (como números de cartões de crédito e chaves de segurança) são digitados diretamente em ambiente seguro do **Mercado Pago** e não passam nem ficam armazenados em nossos servidores.
+               A Natan Construções preza pela privacidade e segurança total dos seus dados. As informações cadastrais coletadas (como nome, endereço e e-mail) são utilizadas exclusivamente para fins de faturamento e entrega das mercadorias. Não compartilhamos suas informações com terceiros, e todo o fechamento de pagamento é conduzido de forma direta e segura no canal de WhatsApp oficial.
              </p>
            </div>
 
