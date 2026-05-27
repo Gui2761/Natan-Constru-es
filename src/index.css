@@ -6,10 +6,34 @@
 
 :root {
   font-family: 'Inter', system-ui, sans-serif;
+  
+  /* --- LIGHT MODE DESIGN SYSTEM --- */
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-surface-container: #f1f5f9;
+  --color-on-surface: #0f172a;
+  --color-outline: #64748b;
+  --color-outline-variant: #cbd5e1;
+  
+  --color-primary: #00345f; /* Blue */
+  --color-secondary: #fd8121; /* Orange */
+}
+
+/* --- DARK MODE DESIGN SYSTEM (Vibrant "Jogo de Cores") --- */
+.dark {
+  --color-background: #030812; /* Deep space black-navy */
+  --color-surface: #0a1120; /* Vibrant blueprint dark card */
+  --color-surface-container: #101a30; /* Lighter slate-blue card container */
+  --color-on-surface: #f8fafc; /* Crisp white slate */
+  --color-outline: #64748b; /* Soft slate grey */
+  --color-outline-variant: #1e293b; /* Sleek borders */
+  
+  --color-primary: #0284c7; /* Electric Cyan-Blue in dark mode */
+  --color-secondary: #ff7e1a; /* Glowing Electric Orange */
 }
 
 body {
-  @apply bg-background text-on-surface antialiased;
+  @apply bg-background text-on-surface antialiased transition-colors duration-500;
 }
 
 h1, h2, h3, h4, .font-headline {
@@ -34,9 +58,15 @@ h1, h2, h3, h4, .font-headline {
   @apply mx-auto px-4 sm:px-6 lg:px-8;
 }
 
-/* Glassmorphism Blueprint */
+/* Glassmorphism Blueprint with Dark Gradient Glow */
 .glass {
-  @apply bg-surface/70 backdrop-blur-md border border-outline-variant/60 shadow-blueprint;
+  @apply bg-surface/80 backdrop-blur-lg border border-outline-variant/60 shadow-blueprint;
+}
+
+.dark .glass {
+  background: linear-gradient(135deg, rgba(10, 17, 32, 0.85) 0%, rgba(16, 26, 48, 0.8) 100%);
+  border: 1px solid rgba(255, 126, 26, 0.15); /* Glowing electric orange accent borders */
+  box-shadow: 0 8px 32px 0 rgba(2, 132, 199, 0.1); /* Soft cyan blueprint glow */
 }
 
 /* Image Standardization Utilities */
@@ -54,16 +84,16 @@ h1, h2, h3, h4, .font-headline {
 
 /* Background Blueprint Drafting Grid Pattern */
 .bg-blueprint-grid {
-  background-color: #040b14;
+  background-color: var(--color-background);
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(2, 132, 199, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(2, 132, 199, 0.05) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
 /* Light overlay effect to look like dynamic drafting lighting */
 .radial-blueprint-glow {
-  background: radial-gradient(circle at 50% 50%, rgba(253, 129, 33, 0.1) 0%, rgba(4, 11, 20, 0) 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(255, 126, 26, 0.08) 0%, rgba(3, 8, 18, 0) 70%);
 }
 
 /* Subtle Watermarked Brand Symbol Background Utility */
