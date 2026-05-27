@@ -38,11 +38,13 @@ export default function Policy() {
            <div>
              <h3 className="text-xl font-black uppercase text-primary mb-3">3. Reembolsos, Estornos e Cancelamentos</h3>
              <p className="leading-relaxed text-sm text-outline">
-               Como nosso e-commerce opera no modelo de fechamento de pedido e agendamento de entrega via **WhatsApp**, as transações e pagamentos são combinados diretamente com o nosso atendimento comercial (via Pix, link de cobrança seguro ou cartão na maquininha durante a entrega). Em caso de desistência ou cancelamento aprovado:
+               Como nosso e-commerce opera no modelo de fechamento de pedido e agendamento de entrega via **WhatsApp**, as transações e pagamentos são combinados diretamente com o nosso atendimento comercial. Para solicitar o cancelamento de um pedido:
              </p>
-             <ul className="list-disc pl-6 space-y-1 text-sm text-outline mt-2">
-               <li>**PIX**: O estorno do valor integral será devolvido via Pix para a conta informada pelo cliente em até **24 horas** após a validação física dos produtos retornados.</li>
-               <li>**Cartão de Crédito (Maquininha/Link)**: O estorno será solicitado diretamente na nossa credenciadora de cartões. O lançamento do crédito na fatura do cliente depende das regras do banco emissor do cartão, ocorrendo geralmente em até 1 ou 2 faturas subsequentes.</li>
+             <ul className="list-disc pl-6 space-y-2 text-sm text-outline mt-2">
+               <li>**Antes do Envio (Pedido em Processamento)**: O cliente pode solicitar o cancelamento diretamente no painel **"Meus Pedidos"**, sendo **obrigatório preencher a justificativa/motivo**. A solicitação entrará no status de **`Pendente de Cancelamento`** para que nossa equipe comercial valide se a carga já foi montada ou carregada. O cliente é direcionado ao suporte no WhatsApp para formalização.</li>
+               <li>**Carga em Trânsito ou Entregue**: Uma vez que o status do pedido foi alterado para **`Saiu para Entrega`**, não serão aceitos cancelamentos automáticos ou unilaterais devido aos custos logísticos de frete pesado em rota. Caso haja desistência, o cliente deverá acionar diretamente nosso suporte no WhatsApp para alinhar a devolução física (sujeito à cobrança ou retenção proporcional dos custos de frete de ida/volta, exceto em casos de avaria comprovada no ato do descarregamento).</li>
+               <li>**Processamento do Estorno (PIX)**: Em cancelamentos aprovados, o valor integral será devolvido via Pix para a conta informada pelo cliente em até **24 horas** após a validação física dos produtos retornados ao galpão.</li>
+               <li>**Processamento do Estorno (Cartão/Link)**: O estorno será solicitado à credenciadora em até **48 horas**. O lançamento do crédito na fatura depende exclusivamente do banco emissor do cartão do cliente, ocorrendo geralmente em até 1 ou 2 faturas subsequentes.</li>
              </ul>
            </div>
 
