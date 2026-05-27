@@ -14,8 +14,48 @@ export default function Login() {
   });
 
   const [loading, setLoading] = useState(false);
-  const { login, register } = useAuth();
+  const { login, register, googleLogin } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleCallback = async (response) => {
+    setLoading(true);
+    try {
+      const user = await googleLogin(response.credential);
+      navigate(user.role === 'ADMIN' ? '/admin' : '/');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erro ao entrar com o Google');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    script.onload = () => {
+      if (window.google) {
+        window.google.accounts.id.initialize({
+          client_id: '502014169727-vavh0uikv8c2n6jge41afl7rm4kpgbnd.apps.googleusercontent.com',
+          callback: handleGoogleCallback,
+        });
+
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-btn'),
+          { theme: 'outline', size: 'large', width: 384, text: 'signin_with' }
+        );
+      }
+    };
+
+    return () => {
+      try {
+        document.body.removeChild(script);
+      } catch (e) {}
+    };
+  }, [isLogin]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -180,10 +220,7 @@ export default function Login() {
             <div className="relative flex justify-center text-xs uppercase"><span className="bg-white px-2 text-outline">Ou continue com</span></div>
           </div>
 
-          <Button variant="outline" className="w-full h-12 flex items-center justify-center gap-3">
-            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" className="w-5 h-5" alt="Google" />
-            Entrar com Google
-          </Button>
+          <div id="google-signin-btn" className="w-full flex justify-center mt-2"></div>
         </form>
 
         <p className="text-center mt-6 text-sm text-outline">

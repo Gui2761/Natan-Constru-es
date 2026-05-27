@@ -1,6 +1,7 @@
 import prisma from '../lib/prisma.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import axios from 'axios';
 
 // prisma instance coming from lib/prisma.js singleton
 
@@ -81,5 +82,64 @@ export const login = async (req, res) => {
     res.status(200).json({ user, token });
   } catch (error) {
     res.status(500).json({ message: "Erro ao fazer login" });
+  }
+};
+
+export const googleLogin = async (req, res) => {
+  const { token } = req.body;
+
+  try {
+    if (!token) return res.status(400).json({ message: "Token do Google não fornecido" });
+
+    // Validar token com o Google OAuth API
+    const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+    const payload = googleRes.data;
+
+    if (!payload.email) {
+      return res.status(400).json({ message: "E-mail não retornado pelo Google" });
+    }
+
+    const email = payload.email.toLowerCase();
+    let user = await prisma.user.findUnique({
+      where: { email },
+      include: { address: true }
+    });
+
+    if (!user) {
+      // Registrar novo usuário com dados do Google
+      const randomPassword = Math.random().toString(36).slice(-10);
+      const hashedPassword = await bcrypt.hash(randomPassword, 12);
+      
+      user = await prisma.user.create({
+        data: {
+          name: (payload.name || "Usuário Google").substring(0, 50),
+          email: email,
+          password: hashedPassword,
+          avatar: payload.picture || null,
+          address: {
+            create: {
+              zipCode: '',
+              street: '',
+              number: '',
+              complement: '',
+              city: '',
+              state: ''
+            }
+          }
+        },
+        include: { address: true }
+      });
+    }
+
+    const sessionToken = jwt.sign(
+      { email: user.email, id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(200).json({ user, token: sessionToken });
+  } catch (error) {
+    console.error("Erro no Google Login:", error.message);
+    res.status(400).json({ message: "Falha na validação do Google Login", error: error.message });
   }
 };
