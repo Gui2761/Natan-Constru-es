@@ -120,7 +120,7 @@ export default function Checkout() {
         `*VALOR TOTAL:* R$ ${createdOrder.totalAmount.toFixed(2)}\n\n` +
         `*Gostaria de agendar a entrega do meu material!*`;
       
-      return `https://wa.me/5579999999999?text=${encodeURIComponent(text)}`;
+      return `https://wa.me/5579996741307?text=${encodeURIComponent(text)}`;
     };
 
     return (

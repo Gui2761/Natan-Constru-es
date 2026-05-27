@@ -156,7 +156,7 @@ export default function Policy() {
                       <p className="text-[10px] font-black uppercase text-outline flex items-center gap-1">
                         <Phone size={10} className="text-secondary" /> Telefone/WhatsApp
                       </p>
-                      <p className="font-bold text-primary">(79) 99999-9999</p>
+                      <p className="font-bold text-primary">(79) 99674-1307</p>
                     </div>
                  </div>
               </Card>

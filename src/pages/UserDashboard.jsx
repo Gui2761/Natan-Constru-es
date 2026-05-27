@@ -45,7 +45,7 @@ export default function UserDashboard() {
         `*Justificativa do Cliente:*\n"${cancelReason}"\n\n` +
         `*Gostaria de formalizar o cancelamento do meu pedido com o suporte comercial.*`;
       
-      const whatsappUrl = `https://wa.me/5579999999999?text=${encodeURIComponent(text)}`;
+      const whatsappUrl = `https://wa.me/5579996741307?text=${encodeURIComponent(text)}`;
       window.open(whatsappUrl, '_blank');
       
       setCancellingOrderId(null);

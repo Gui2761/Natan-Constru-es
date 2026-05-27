@@ -49,7 +49,7 @@ export default function ProductDetail() {
   const handleWhatsApp = () => {
     const text = `Olá! Tenho interesse no produto: ${product.name}. Gostaria de negociar um lote.`;
     // Número real da Natan Construções (Placeholder oficial)
-    window.open(`https://wa.me/5579999999999?text=${encodeURIComponent(text)}`, '_blank');
+    window.open(`https://wa.me/5579996741307?text=${encodeURIComponent(text)}`, '_blank');
   };
 
   const handleAddToCart = () => {

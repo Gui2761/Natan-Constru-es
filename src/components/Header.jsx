@@ -48,7 +48,7 @@ export default function Header() {
     <header className="bg-surface border-b border-outline-variant sticky top-0 z-50">
       {/* Top Bar - Info & Social */}
       <div className="bg-primary text-white text-[10px] py-2 px-10 flex justify-between uppercase font-bold tracking-widest">
-        <span>Atendimento: (79) 99999-9999</span>
+        <span>Atendimento: (79) 99674-1307</span>
         <span>Entregas rápidas para toda a região</span>
       </div>
 
