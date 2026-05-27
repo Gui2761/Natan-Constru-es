@@ -56,7 +56,7 @@ export default function AdminOrders() {
         <div className="bg-blue-50 border border-blue-200 p-3 rounded-xl flex items-center gap-3">
            <Info className="text-blue-500" size={20} />
            <p className="text-[10px] font-bold text-blue-800 uppercase leading-tight">
-             Para estornos financeiros, acesse seu painel <br /> comercial do <strong>Mercado Pago</strong>.
+             Para estornos financeiros, realize o estorno na conta <br /> bancária Pix ou credenciadora de cartões utilizada.
            </p>
         </div>
       </div>
