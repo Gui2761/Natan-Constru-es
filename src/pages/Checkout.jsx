@@ -19,6 +19,7 @@ export default function Checkout() {
   const [couponCode, setCouponCode] = useState('');
   const [couponResult, setCouponResult] = useState(null);
   const [createdOrder, setCreatedOrder] = useState(null);
+  const [shippingService, setShippingService] = useState('PAC');
 
   // Pre-fill address if user is logged in
   const [formData, setFormData] = useState({
@@ -30,11 +31,33 @@ export default function Checkout() {
     state: user?.address?.state || ''
   });
 
-  // Calculate Shipping based on totalWeight and State (UF)
+  // Dynamic CEP auto-fill via ViaCEP API
+  const handleCepLookup = async (cep) => {
+    const cleanCep = cep.replace(/\D/g, '');
+    if (cleanCep.length === 8) {
+      try {
+        const res = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
+        const data = await res.json();
+        if (!data.erro) {
+          setFormData(prev => ({
+            ...prev,
+            street: data.logradouro || '',
+            city: data.localidade || '',
+            state: data.uf || ''
+          }));
+        }
+      } catch (err) {
+        console.error("Erro ao consultar CEP", err);
+      }
+    }
+  };
+
+  // Calculate Shipping based on totalWeight, State (UF) and Service (PAC vs SEDEX)
   const calculateShipping = () => {
     if (!formData.state || totalWeight === 0) return 0;
-    const base = 15.0;
-    const weightFee = totalWeight * 1.20;
+    const base = shippingService === 'SEDEX' ? 28.0 : 15.0;
+    const rate = shippingService === 'SEDEX' ? 2.10 : 1.20;
+    const weightFee = totalWeight * rate;
     
     const state = formData.state.toUpperCase().trim();
     let multiplier = 2.2; // default outer state
@@ -64,6 +87,7 @@ export default function Checkout() {
         items: cart,
         totalWeight,
         shippingCost,
+        shippingService,
         user: {
           ...user,
           address: formData
@@ -92,7 +116,7 @@ export default function Checkout() {
         `*Endereço:* ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n\n` +
         `*Itens do Pedido:*\n${itemsList}\n\n` +
         `*Peso da Carga:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
-        `*Frete Logístico:* R$ ${createdOrder.shippingCost.toFixed(2)}\n` +
+        `*Frete Logístico (${createdOrder.shippingService}):* R$ ${createdOrder.shippingCost.toFixed(2)}\n` +
         `*VALOR TOTAL:* R$ ${createdOrder.totalAmount.toFixed(2)}\n\n` +
         `*Gostaria de agendar a entrega do meu material!*`;
       
@@ -172,6 +196,7 @@ export default function Checkout() {
                      const val = e.target.value.replace(/\D/g, '').substring(0, 8);
                      const formatted = val.length > 5 ? `${val.substring(0, 5)}-${val.substring(5)}` : val;
                      setFormData({...formData, zipCode: formatted});
+                     handleCepLookup(val);
                    }} 
                  />
                  <Input 
@@ -201,6 +226,46 @@ export default function Checkout() {
                    onChange={e => setFormData({...formData, state: e.target.value.toUpperCase()})} 
                  />
               </form>
+            </Card>
+
+            {/* Seletor de Frete Correios */}
+            <Card>
+               <h3 className="text-lg font-black uppercase italic tracking-tighter text-primary mb-6 flex items-center gap-2">
+                <Truck size={20} className="text-secondary" /> Opção de Frete (Correios)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div 
+                  className={`p-4 border-2 rounded-2xl cursor-pointer transition-all flex items-center justify-between ${shippingService === 'PAC' ? 'border-primary bg-primary/5 shadow-md scale-[1.01]' : 'border-outline-variant hover:border-primary/50'}`}
+                  onClick={() => setShippingService('PAC')}
+                >
+                  <div className="flex items-center gap-3">
+                    <Truck className="text-primary" />
+                    <div>
+                      <p className="font-bold text-primary">Correios PAC</p>
+                      <p className="text-[10px] text-outline uppercase font-black">Entrega Normal Logística</p>
+                    </div>
+                  </div>
+                  <span className="font-black text-primary">
+                    {formData.state ? `R$ ${(15.0 + totalWeight * 1.20 * (formData.state === 'SP' ? 1.0 : ['RJ','MG','ES'].includes(formData.state) ? 1.5 : 2.2)).toFixed(2)}` : 'Preencha o CEP'}
+                  </span>
+                </div>
+
+                <div 
+                  className={`p-4 border-2 rounded-2xl cursor-pointer transition-all flex items-center justify-between ${shippingService === 'SEDEX' ? 'border-primary bg-primary/5 shadow-md scale-[1.01]' : 'border-outline-variant hover:border-primary/50'}`}
+                  onClick={() => setShippingService('SEDEX')}
+                >
+                  <div className="flex items-center gap-3">
+                    <Truck className="text-secondary" />
+                    <div>
+                      <p className="font-bold text-primary">Correios SEDEX</p>
+                      <p className="text-[10px] text-outline uppercase font-black">Entrega Rápida Expressa</p>
+                    </div>
+                  </div>
+                  <span className="font-black text-primary">
+                    {formData.state ? `R$ ${(28.0 + totalWeight * 2.10 * (formData.state === 'SP' ? 1.0 : ['RJ','MG','ES'].includes(formData.state) ? 1.5 : 2.2)).toFixed(2)}` : 'Preencha o CEP'}
+                  </span>
+                </div>
+              </div>
             </Card>
 
             <Card>

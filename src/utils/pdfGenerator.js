@@ -100,7 +100,7 @@ export const generateBlueprintPDF = (order) => {
   doc.text(`Peso Total da Carga: ${(order.totalWeight || 0).toFixed(2)} kg`, 15, finalY);
 
   if (order.shippingCost > 0) {
-    doc.text(`Frete Logístico (Simulado por Peso): R$ ${order.shippingCost.toFixed(2)}`, 15, finalY + 6);
+    doc.text(`Frete Logístico (${order.shippingService || 'PAC'}): R$ ${order.shippingCost.toFixed(2)}`, 15, finalY + 6);
   }
 
   doc.setFontSize(16);
