@@ -127,7 +127,7 @@ export default function Login() {
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-background relative overflow-hidden">
       
       {/* PAINEL DA ESQUERDA: Blueprint Técnico (Exibido apenas em Desktop) */}
-      <div className="hidden lg:flex flex-col justify-between p-16 bg-blueprint-grid relative overflow-hidden border-r border-outline-variant/30">
+      <div className="hidden lg:flex flex-col justify-between p-16 bg-blueprint-grid relative overflow-hidden border-r border-outline-variant/30 bg-symbol-watermark">
         <div className="absolute inset-0 radial-blueprint-glow pointer-events-none"></div>
         
         {/* Topo do Painel Esquerdo */}
@@ -192,11 +192,11 @@ export default function Login() {
       </div>
 
       {/* PAINEL DA DIREITA: Formulário com Visual Glassmorphism */}
-      <div className="flex items-center justify-center p-6 bg-blueprint-grid lg:bg-background relative overflow-hidden">
+      <div className="flex items-center justify-center p-6 bg-blueprint-grid lg:bg-background relative overflow-hidden bg-symbol-watermark">
         <div className="absolute inset-0 radial-blueprint-glow pointer-events-none lg:hidden"></div>
         <div className="absolute inset-0 bg-blueprint-grid opacity-10 pointer-events-none hidden lg:block"></div>
 
-        <Card className="w-full max-w-md relative z-10 shadow-2xl bg-white border border-outline-variant/60 rounded-3xl p-8 hover-premium">
+        <Card className="w-full max-w-md relative z-10 shadow-2xl rounded-3xl p-8 hover-premium glass">
           <div className="text-center mb-8">
             <div className="lg:hidden text-2xl font-black text-primary uppercase italic tracking-tighter mb-2">
               NATAN <span className="text-secondary">CONSTRUÇÕES</span>
@@ -315,7 +315,7 @@ export default function Login() {
 
             <div className="relative my-6">
               <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-outline-variant"></div></div>
-              <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest"><span className="bg-white px-2 text-outline">Ou continue com</span></div>
+              <div className="relative flex justify-center text-[10px] uppercase font-black tracking-widest"><span className="bg-surface px-2 text-outline">Ou continue com</span></div>
             </div>
 
             <div id="google-signin-btn" className="w-full flex justify-center mt-2"></div>

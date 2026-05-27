@@ -36,7 +36,7 @@ h1, h2, h3, h4, .font-headline {
 
 /* Glassmorphism Blueprint */
 .glass {
-  @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-blueprint;
+  @apply bg-surface/70 backdrop-blur-md border border-outline-variant/60 shadow-blueprint;
 }
 
 /* Image Standardization Utilities */
@@ -54,16 +54,33 @@ h1, h2, h3, h4, .font-headline {
 
 /* Background Blueprint Drafting Grid Pattern */
 .bg-blueprint-grid {
-  background-color: #00345f;
+  background-color: #040b14;
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
 /* Light overlay effect to look like dynamic drafting lighting */
 .radial-blueprint-glow {
-  background: radial-gradient(circle at 50% 50%, rgba(253, 129, 33, 0.15) 0%, rgba(0, 52, 95, 0) 70%);
+  background: radial-gradient(circle at 50% 50%, rgba(253, 129, 33, 0.1) 0%, rgba(4, 11, 20, 0) 70%);
+}
+
+/* Subtle Watermarked Brand Symbol Background Utility */
+.bg-symbol-watermark {
+  position: relative;
+}
+.bg-symbol-watermark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/logo_square.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: min(400px, 80%);
+  opacity: 0.04; /* Marca d'água super discreta */
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* Modern Blueprint Pulse */
@@ -80,4 +97,3 @@ h1, h2, h3, h4, .font-headline {
 .hover-premium {
   @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-secondary/30;
 }
-

@@ -7,24 +7,24 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Design System: The Architectural Blueprint
-        primary: '#00345f', // Azul Deep
+        // Design System: The Premium Dark Blueprint
+        primary: '#00345f', // Azul Deep Natan
         secondary: '#fd8121', // Laranja Blueprint
-        background: '#f9f9fd',
-        surface: '#ffffff',
-        'surface-container': '#eeedf2',
+        background: '#040b14', // Deep Dark Slate Navy (Fundo geral)
+        surface: '#091321', // Dark Navy Card (Superfície)
+        'surface-container': '#0f1f33', // Container secundário mais claro
         'on-primary': '#ffffff',
         'on-secondary': '#ffffff',
-        'on-surface': '#1a1c1f',
-        'outline': '#737780',
-        'outline-variant': '#c2c6d0',
+        'on-surface': '#f1f5f9', // Texto claro (Slate 100)
+        'outline': '#94a3b8', // Texto secundário (Slate 400)
+        'outline-variant': '#1e293b', // Bordas escuras (Slate 800)
       },
       fontFamily: {
         headline: ['Work Sans', 'sans-serif'],
         body: ['Inter', 'sans-serif'],
       },
       boxShadow: {
-        'blueprint': '0 4px 14px 0 rgba(0, 52, 95, 0.1)',
+        'blueprint': '0 4px 20px 0 rgba(0, 52, 95, 0.25)',
       }
     },
   },
