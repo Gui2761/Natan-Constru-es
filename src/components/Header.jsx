@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingCart, User, Menu, X, Search, ChevronDown, LogOut, UserPlus, Sun, Moon } from 'lucide-react';
+import { ShoppingCart, User, Menu, X, Search, ChevronDown, LogOut, UserPlus } from 'lucide-react';
 
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -14,23 +14,6 @@ export default function Header() {
   const { user, isAdmin, logout } = useAuth();
   const { cart } = useCart();
   const navigate = useNavigate();
-  
-  // Theme state logic (persist to localStorage)
-  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'light' ? 'dark' : 'light');
-  };
 
   const handleLogout = () => {
     logout();
@@ -133,16 +116,6 @@ export default function Header() {
                </Link>
             )}
           </div>
-
-
-          {/* BOTÃO DE TEMA (MODO ESCURO / CLARO) */}
-          <button 
-            onClick={toggleTheme} 
-            className="w-10 h-10 rounded-full bg-surface-container border border-outline-variant text-primary hover:text-secondary flex items-center justify-center hover:scale-105 transition-all shadow-sm"
-            title={theme === 'light' ? 'Ativar Modo Escuro' : 'Ativar Modo Claro'}
-          >
-            {theme === 'light' ? <Moon size={18} /> : <Sun size={18} />}
-          </button>
 
           <Link to="/carrinho" className="relative group">
             <div className="w-10 h-10 rounded-full bg-secondary text-white flex items-center justify-center shadow-blueprint hover:scale-105 transition-transform">
