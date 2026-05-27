@@ -15,7 +15,7 @@ export default function About() {
              A Fundação da sua <br/> <span className="text-secondary">Conquista</span>
           </h1>
           <p className="text-white/80 text-lg max-w-2xl mx-auto">
-            Desde 2016, a Natan Construções tem sido a parceira número um de engenheiros, arquitetos e famílias que buscam construir com excelência, preço justo e garantia de entrega.
+            A Natan Construções nasceu em Nossa Senhora da Glória (SE) para ser a parceira número um de engenheiros, arquitetos e famílias que buscam construir com tecnologia, preço justo e garantia de entrega ágil.
           </p>
         </div>
       </section>

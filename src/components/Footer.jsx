@@ -12,7 +12,7 @@ export default function Footer() {
             Natan <span className="text-secondary">Construções</span>
           </h2>
           <p className="text-white/60 text-sm leading-relaxed">
-            Há mais de 10 anos sendo a fundação de confiança das suas obras. Materiais de qualidade e atendimento especializado.
+            A sua nova e mais completa parceira de confiança para todas as suas obras. Materiais de altíssima qualidade e atendimento técnico especializado.
           </p>
           <div className="flex gap-4">
             <Facebook className="hover:text-secondary cursor-pointer transition-colors" />
@@ -49,11 +49,11 @@ export default function Footer() {
           <ul className="space-y-6">
             <li className="flex gap-3 items-start">
               <MapPin className="text-secondary shrink-0" size={20} />
-              <p className="text-sm text-white/80">Nossa Senhora da Glória - Sergipe (SE)</p>
+              <p className="text-sm text-white/80">Rodovia Glória Feira Nova, S/N - Nossa Senhora da Glória - SE, 49680-000</p>
             </li>
             <li className="flex gap-3 items-center">
               <Phone className="text-secondary shrink-0" size={20} />
-              <p className="text-sm font-bold">(11) 99999-9999</p>
+              <p className="text-sm font-bold">(79) 99999-9999</p>
             </li>
             <li className="flex gap-3 items-center">
               <Mail className="text-secondary shrink-0" size={20} />

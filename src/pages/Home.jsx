@@ -180,23 +180,23 @@ export default function Home() {
         <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-20">
           <div className="flex-1 space-y-6">
             <h3 className="text-4xl font-black text-primary uppercase italic tracking-tighter leading-none">
-              Há 10 anos construindo <br /> <span className="text-secondary underline decoration-primary">sonhos reais</span>
+              Inovando para construir <br /> <span className="text-secondary underline decoration-primary">sonhos reais</span>
             </h3>
             <p className="text-on-surface/70 leading-relaxed text-lg">
-              A Natan Construções nasceu para oferecer não apenas materiais, mas as ferramentas e o conhecimento necessário para que cada obra seja um sucesso absoluto. Trabalhamos apenas com marcas líderes e atendimento técnico especializado.
+              A Natan Construções chegou em Nossa Senhora da Glória (SE) para oferecer não apenas materiais, mas as ferramentas e o suporte técnico necessário para que cada etapa da sua obra seja um sucesso absoluto. Trabalhamos com marcas líderes do mercado e entrega rápida.
             </p>
             <div className="grid grid-cols-3 gap-6 pt-6">
                <div className="text-center">
-                  <p className="text-3xl font-black text-primary">+10k</p>
-                  <p className="text-[10px] font-bold text-outline uppercase tracking-widest">Obras Atendidas</p>
+                  <p className="text-3xl font-black text-primary">+1k</p>
+                  <p className="text-[10px] font-bold text-outline uppercase tracking-widest">Obras Planejadas</p>
                </div>
                <div className="text-center">
-                  <p className="text-3xl font-black text-primary">+5k</p>
-                  <p className="text-[10px] font-bold text-outline uppercase tracking-widest">Produtos em Estoque</p>
+                  <p className="text-3xl font-black text-primary">+2k</p>
+                  <p className="text-[10px] font-bold text-outline uppercase tracking-widest">Itens a Pronta-Entrega</p>
                </div>
                <div className="text-center">
-                  <p className="text-3xl font-black text-primary">10</p>
-                  <p className="text-[10px] font-bold text-outline uppercase tracking-widest">Anos de Fundação</p>
+                  <p className="text-3xl font-black text-primary">100%</p>
+                  <p className="text-[10px] font-bold text-outline uppercase tracking-widest">Compromisso & Qualidade</p>
                </div>
             </div>
           </div>

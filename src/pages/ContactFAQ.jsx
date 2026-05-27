@@ -25,12 +25,12 @@ export default function ContactFAQ() {
                <HelpCircle className="text-secondary" /> Dúvidas Frequentes
             </h2>
             <div className="space-y-4">
-               {[
-                 { q: 'Qual o prazo de entrega?', a: 'Para entregas na região metropolitana, garantimos a chegada dos materiais em até 48 horas úteis após a aprovação do pagamento.' },
-                 { q: 'Posso fazer orçamento para construtora?', a: 'Sim! Utilize nossa ferramenta de "Gerar Orçamento em PDF" no carrinho de compras ou entre em contato com nosso setor B2B.' },
-                 { q: 'Quais as formas de pagamento?', a: 'Aceitamos PIX (com desconto), Cartão de Crédito em até 12x e Boleto Bancário para pessoas jurídicas pré-aprovadas.' },
-                 { q: 'Como fucionam as trocas de materiais quebrados?', a: 'Se o material chegou avariado, recuse no ato da entrega ou entre em contato no mesmo dia. Faremos a reposição imediata sem custos.' }
-               ].map((item, idx) => (
+                {[
+                  { q: 'Qual o prazo de entrega?', a: 'Para entregas em Nossa Senhora da Glória e região, garantimos a entrega dos materiais em até 24h a 48h úteis após a aprovação. Para outros estados, o prazo e o custo são simulados em tempo real na tela de finalização de compra (via Correios PAC ou SEDEX).' },
+                  { q: 'Posso fazer orçamento para minha obra?', a: 'Sim! Ao adicionar seus itens ao carrinho, você pode ir para o checkout e clicar em "Baixar Orçamento PDF" para obter um orçamento profissional detalhado para sua construtora ou equipe de obras.' },
+                  { q: 'Quais as formas de pagamento?', a: 'Aceitamos PIX e Cartão de Crédito em até 12x. Todos os nossos pagamentos são processados com a segurança absoluta e criptografia garantida do Mercado Pago.' },
+                  { q: 'Como funcionam as trocas de materiais?', a: 'Em alinhamento com o Código de Defesa do Consumidor, você tem até 7 dias corridos para devolução por arrependimento. Caso algum material chegue quebrado ou avariado, recuse no ato da entrega para reposição imediata.' }
+                ].map((item, idx) => (
                  <details key={idx} className="group bg-surface border border-outline-variant rounded-xl overflow-hidden [&_summary::-webkit-details-marker]:hidden">
                    <summary className="flex items-center justify-between p-6 font-bold text-primary cursor-pointer bg-surface hover:bg-surface-container transition-colors">
                      {item.q}
