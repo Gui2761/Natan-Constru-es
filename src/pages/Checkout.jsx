@@ -61,8 +61,8 @@ export default function Checkout() {
     
     const state = formData.state.toUpperCase().trim();
     let multiplier = 2.2; // default outer state
-    if (state === 'SP') multiplier = 1.0;
-    else if (['RJ', 'MG', 'ES'].includes(state)) multiplier = 1.5;
+    if (state === 'SE') multiplier = 1.0; // Local rate for Sergipe
+    else if (['AL', 'BA', 'PE'].includes(state)) multiplier = 1.5; // Regional rate for neighboring Northeast states
     
     return base + (weightFee * multiplier);
   };

@@ -49,7 +49,7 @@ export default function Footer() {
           <ul className="space-y-6">
             <li className="flex gap-3 items-start">
               <MapPin className="text-secondary shrink-0" size={20} />
-              <p className="text-sm text-white/80">Av. Principal das Construções, 1500 - Centro, Cidade/UF</p>
+              <p className="text-sm text-white/80">Nossa Senhora da Glória - Sergipe (SE)</p>
             </li>
             <li className="flex gap-3 items-center">
               <Phone className="text-secondary shrink-0" size={20} />
