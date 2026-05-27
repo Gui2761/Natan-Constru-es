@@ -11,6 +11,8 @@ export default function UserDashboard() {
   const { user, logout } = useAuth();
   const [orders, setOrders] = useState([]);
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [cancellingOrderId, setCancellingOrderId] = useState(null);
+  const [cancelReason, setCancelReason] = useState('');
   const navigate = useNavigate();
 
 
@@ -27,23 +29,27 @@ export default function UserDashboard() {
     }
   };
 
-  const handleCancelOrder = async (order) => {
-    if (!window.confirm(`Tem certeza que deseja solicitar o cancelamento do pedido #${order.id}?`)) {
+  const handleCancelRequest = async (order) => {
+    if (!cancelReason.trim()) {
+      alert('Por favor, informe a justificativa do cancelamento.');
       return;
     }
     
     try {
-      await api.patch(`/orders/${order.id}/status`, { status: 'CANCELADO' });
+      await api.patch(`/orders/${order.id}/status`, { status: 'PENDENTE_CANCELAMENTO' });
       
       const text = `*SOLICITAÇÃO DE CANCELAMENTO - NATAN CONSTRUÇÕES* ❌\n\n` +
         `*Pedido:* #${order.id}\n` +
         `*Cliente:* ${user.name}\n` +
         `*Valor do Pedido:* R$ ${order.totalAmount.toFixed(2)}\n\n` +
-        `*Gostaria de formalizar o cancelamento do meu pedido e alinhar o estorno/reembolso do Pix ou do pagamento combinado.*`;
+        `*Justificativa do Cliente:*\n"${cancelReason}"\n\n` +
+        `*Gostaria de formalizar o cancelamento do meu pedido com o suporte comercial.*`;
       
       const whatsappUrl = `https://wa.me/5579999999999?text=${encodeURIComponent(text)}`;
       window.open(whatsappUrl, '_blank');
       
+      setCancellingOrderId(null);
+      setCancelReason('');
       fetchOrders();
     } catch (err) {
       console.error(err);
@@ -54,6 +60,7 @@ export default function UserDashboard() {
   const getStatusIcon = (status) => {
     switch(status) {
       case 'PROCESSANDO': return <Package className="text-blue-500" />;
+      case 'PENDENTE_CANCELAMENTO': return <XCircle className="text-yellow-600 animate-pulse" />;
       case 'SAIU_ENTREGA': return <Truck className="text-orange-500" />;
       case 'ENTREGUE': return <CheckCircle2 className="text-green-500" />;
       case 'CANCELADO': return <XCircle className="text-red-500" />;
@@ -187,28 +194,65 @@ export default function UserDashboard() {
                          </div>
 
                           {/* Seção de Cancelamento */}
-                          <div className="mt-8 pt-6 border-t border-outline-variant flex flex-col sm:flex-row justify-between items-center gap-4">
+                          <div className="mt-8 pt-6 border-t border-outline-variant flex flex-col gap-4">
                             {order.status === 'PROCESSANDO' ? (
-                              <>
-                                <p className="text-xs text-outline font-bold">
-                                  Precisa cancelar? Você pode cancelar seu pedido enquanto ele está em processamento de logística.
-                                </p>
-                                <Button 
-                                  variant="outline" 
-                                  size="sm" 
-                                  className="text-error border-error/20 hover:bg-error/5 uppercase text-[10px] tracking-widest font-black shrink-0"
-                                  onClick={() => handleCancelOrder(order)}
-                                >
-                                  Solicitar Cancelamento
-                                </Button>
-                              </>
+                              cancellingOrderId === order.id ? (
+                                <div className="bg-surface-container/60 p-5 rounded-2xl border border-outline-variant w-full space-y-4 animate-in fade-in duration-200">
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-outline">Justificativa do Cancelamento</label>
+                                    <textarea
+                                      className="w-full bg-white border border-outline-variant rounded-xl p-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent mt-1"
+                                      rows="3"
+                                      placeholder="Ex: Errei a quantidade de materiais / Vou comprar outros produtos..."
+                                      value={cancelReason}
+                                      onChange={(e) => setCancelReason(e.target.value)}
+                                    />
+                                  </div>
+                                  <div className="flex justify-end gap-3">
+                                    <Button 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      className="text-outline uppercase text-[10px] tracking-widest font-black"
+                                      onClick={() => { setCancellingOrderId(null); setCancelReason(''); }}
+                                    >
+                                      Voltar
+                                    </Button>
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm" 
+                                      className="bg-error text-white hover:bg-error/90 uppercase text-[10px] tracking-widest font-black border-transparent"
+                                      onClick={() => handleCancelRequest(order)}
+                                    >
+                                      Confirmar e Abrir WhatsApp
+                                    </Button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex flex-col sm:flex-row justify-between items-center gap-4 w-full">
+                                  <p className="text-xs text-outline font-bold">
+                                    Precisa cancelar? Solicite o cancelamento para análise comercial antes do carregamento da carga.
+                                  </p>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="text-error border-error/20 hover:bg-error/5 uppercase text-[10px] tracking-widest font-black shrink-0"
+                                    onClick={() => setCancellingOrderId(order.id)}
+                                  >
+                                    Solicitar Cancelamento
+                                  </Button>
+                                </div>
+                              )
+                            ) : order.status === 'PENDENTE_CANCELAMENTO' ? (
+                              <p className="text-xs text-yellow-700 font-black uppercase tracking-wider bg-yellow-100 px-4 py-3 rounded-xl border border-yellow-200 w-full text-center">
+                                Solicitação de cancelamento enviada. Aguardando retorno da equipe de atendimento no WhatsApp comercial.
+                              </p>
                             ) : order.status === 'CANCELADO' ? (
                               <p className="text-xs text-error font-black uppercase tracking-wider bg-error/10 px-4 py-3 rounded-xl border border-error/20 w-full text-center">
                                 Este pedido foi cancelado comercialmente. Entre em contato no WhatsApp se precisar alinhar reembolso ou nova cotação.
                               </p>
                             ) : (
                               <p className="text-xs text-outline italic">
-                                Este pedido já está em rota ou foi entregue. Em caso de trocas, devoluções ou direito de arrependimento (CDC - 7 dias), por favor entre em contato direto via WhatsApp comercial.
+                                Este pedido já está em rota ou foi entregue. Para trocas ou devoluções dentro do prazo legal de 7 dias (CDC), por favor entre em contato direto via WhatsApp comercial.
                               </p>
                             )}
                           </div>
