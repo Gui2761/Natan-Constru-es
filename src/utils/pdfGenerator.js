@@ -108,13 +108,13 @@ export const generateBlueprintPDF = (order) => {
     doc.text(`Opção de Entrega: Buscar na Loja (Grátis)`, 15, finalY + 6);
   } else {
     doc.text(`Opção de Entrega: Caminhão da Empresa`, 15, finalY + 6);
-    doc.text(`Frete Logístico: R$ ${order.shippingCost.toFixed(2)}`, 15, finalY + 12);
+    doc.text(`Frete Logístico: R$ ${order.shippingCost?.toFixed(2) || '0.00'}`, 15, finalY + 12);
   }
 
   doc.setFontSize(16);
   doc.setTextColor(...primaryColor);
   const totalOffset = order.shippingService === 'PICKUP' ? 5 : 8;
-  doc.text(`VALOR TOTAL: R$ ${order.totalAmount.toFixed(2)}`, 120, finalY + totalOffset);
+  doc.text(`VALOR TOTAL: R$ ${order.totalAmount?.toFixed(2) || '0.00'}`, 120, finalY + totalOffset);
 
   // Termos de Compromisso / Assinatura
   const termsY = finalY + 25;
