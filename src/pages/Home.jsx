@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, Button } from '../components/UI';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Percent, ArrowRight } from 'lucide-react';
 import useSEO from '../hooks/useSEO';
@@ -63,7 +63,7 @@ export default function Home() {
               <SwiperSlide key={banner.id}>
                 <div className="relative h-full w-full">
                   <img 
-                    src={banner.image} 
+                    src={getImageUrl(banner.image)} 
                     className="img-standard-banner" 
                     alt={banner.title || 'Oferta'} 
                   />
@@ -144,7 +144,7 @@ export default function Home() {
                  )}
                   <div className="product-card-img-container">
                      <img 
-                       src={product.images ? product.images.split(',')[0] : 'https://placehold.co/800x800/222d42/ffffff?text=Sem+Foto'} 
+                       src={getImageUrl(product.images ? product.images.split(',')[0] : '')} 
                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                        alt={product.name}
                        onError={(e) => { e.target.src = 'https://placehold.co/800x800/222d42/ffffff?text=Natan+Obras'; }}

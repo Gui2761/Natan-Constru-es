@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../components/UI';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 import { Image as ImageIcon, Plus, Trash2, ExternalLink, UploadCloud, X, Edit2 } from 'lucide-react';
 
 export default function AdminBanners() {
@@ -209,7 +209,7 @@ export default function AdminBanners() {
           ) : (
             banners.map(banner => (
               <Card key={banner.id} className="p-0 overflow-hidden relative group">
-                <img src={banner.image} alt={banner.title} className="w-full h-48 object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                <img src={getImageUrl(banner.image)} alt={banner.title} className="w-full h-48 object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex flex-col justify-end p-6">
                   <h3 className="text-white font-black text-xl uppercase italic tracking-tighter">{banner.title || 'Banner Sem Título'}</h3>
                   <p className="text-white/70 text-xs flex items-center gap-1 mt-1"><ExternalLink size={12}/> {banner.link || 'Sem Link'}</p>

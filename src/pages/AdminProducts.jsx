@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../components/UI';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 import { Trash2, Plus, Package, Search, Percent, UploadCloud, X } from 'lucide-react';
 
 export default function AdminProducts() {
@@ -184,7 +184,7 @@ export default function AdminProducts() {
                  <div className="mt-4 flex gap-4 overflow-x-auto pb-4">
                    {existingImages.map((imgUrl, idx) => (
                      <div key={`exist-${idx}`} className="relative w-24 h-24 rounded-lg overflow-hidden border-2 border-outline-variant shrink-0 group">
-                       <img src={imgUrl} alt="preview" className="w-full h-full object-cover" />
+                       <img src={getImageUrl(imgUrl)} alt="preview" className="w-full h-full object-cover" />
                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <button 
                             type="button"
@@ -254,25 +254,34 @@ export default function AdminProducts() {
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0 border border-outline-variant">
-                      {p.images && <img src={p.images.split(',')[0]} alt={p.name} className="w-full h-full object-cover" />}
+                      {p.images && <img src={getImageUrl(p.images.split(',')[0])} alt={p.name} className="w-full h-full object-cover" />}
                     </div>
                     <div>
                       <p className="font-bold text-primary">{p.name}</p>
                       <p className="text-[10px] text-outline">ID: #{p.id}</p>
+                      {p.description && (
+                        <p className="text-[10px] text-outline/80 mt-1 max-w-[240px] truncate" title={p.description}>
+                          {p.description}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <span className="px-2 py-1 bg-surface-container rounded-md text-[10px] font-black uppercase text-outline">
-                    {p.category?.name}
-                  </span>
+                  <div className="flex flex-col gap-1">
+                    <span className="w-fit px-2 py-1 bg-surface-container rounded-md text-[10px] font-black uppercase text-outline">
+                      {p.category?.name}
+                    </span>
+                    <span className="text-[10px] text-outline font-medium">Peso: {p.weight ? `${p.weight} kg` : '0 kg'}</span>
+                  </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="font-bold">
-                    R$ {p.finalPrice.toFixed(2)}
+                  <div className="flex flex-col gap-0.5">
+                    <span className="font-bold text-primary text-sm">Venda: R$ {p.basePrice?.toFixed(2)}</span>
+                    <span className="text-[10px] text-outline">Custo: R$ {p.costPrice ? p.costPrice.toFixed(2) : '0.00'}</span>
                     {p.salePercentage > 0 && (
-                      <span className="ml-2 text-[10px] text-secondary flex items-center gap-0.5">
-                        <Percent size={10} /> {p.salePercentage}% OFF
+                      <span className="text-secondary font-black text-[11px] flex items-center gap-0.5 mt-0.5">
+                        <Percent size={10} /> Promo: R$ {p.finalPrice?.toFixed(2)} ({p.salePercentage}% OFF)
                       </span>
                     )}
                   </div>
