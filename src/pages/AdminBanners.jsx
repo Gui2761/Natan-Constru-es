@@ -11,6 +11,8 @@ export default function AdminBanners() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [editingId, setEditingId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteConfirmTitle, setDeleteConfirmTitle] = useState('');
 
   useEffect(() => {
     fetchBanners();
@@ -90,10 +92,27 @@ export default function AdminBanners() {
     setEditingId(null);
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Deseja remover este banner?')) return;
-    await api.delete(`/banners/${id}`);
-    fetchBanners();
+  const handleDeleteTrigger = (banner) => {
+    setDeleteConfirmId(banner.id);
+    setDeleteConfirmTitle(banner.title || 'Banner Sem Título');
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    try {
+      await api.delete(`/banners/${deleteConfirmId}`);
+      fetchBanners();
+    } catch (err) {
+      alert("Erro ao remover banner.");
+    } finally {
+      setDeleteConfirmId(null);
+      setDeleteConfirmTitle('');
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmId(null);
+    setDeleteConfirmTitle('');
   };
 
   return (
@@ -276,7 +295,7 @@ export default function AdminBanners() {
           </form>
         </Card>
 
-        <div className="lg:col-span-2 grid grid-cols-1 gap-4">
+        <div className="lg:col-span-2 grid grid-cols-1 gap-4 h-fit">
           {banners.length === 0 ? (
             <p className="text-outline italic">Nenhum banner ativo. A Home mostrará um fundo padrão.</p>
           ) : (
@@ -298,7 +317,7 @@ export default function AdminBanners() {
                    <Button 
                      variant="ghost" 
                      className="bg-white/20 backdrop-blur-md text-white hover:bg-error hover:text-white"
-                     onClick={() => handleDelete(banner.id)}
+                     onClick={() => handleDeleteTrigger(banner)}
                    >
                      <Trash2 size={20} />
                    </Button>
@@ -308,6 +327,33 @@ export default function AdminBanners() {
           )}
         </div>
       </div>
+
+      {/* Custom Premium Delete Confirmation Modal for Banners */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-surface-container border border-outline-variant max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 text-error">
+              <div className="p-3 bg-error/10 rounded-2xl">
+                <Trash2 size={24} />
+              </div>
+              <h3 className="text-xl font-black uppercase italic tracking-tighter">Excluir Banner?</h3>
+            </div>
+            
+            <p className="text-on-surface/80 text-sm leading-relaxed">
+              Você tem certeza que deseja excluir o banner <strong className="text-primary">"{deleteConfirmTitle}"</strong>? Esta ação é definitiva e removerá a imagem associada.
+            </p>
+            
+            <div className="flex gap-3 justify-end pt-2">
+              <Button variant="ghost" onClick={handleCancelDelete}>
+                Cancelar
+              </Button>
+              <Button variant="secondary" className="bg-error text-white hover:bg-red-600 border-none" onClick={handleConfirmDelete}>
+                Confirmar Exclusão
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
