@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../components/UI';
 import api from '../services/api';
-import { ShoppingCart, Search, Calendar, PackageCheck, Truck, CheckCircle2, XCircle, Info, AlertTriangle, Download, FileText } from 'lucide-react';
+import { ShoppingCart, Search, Calendar, PackageCheck, Truck, CheckCircle2, XCircle, Info, AlertTriangle, Download, FileText, CreditCard } from 'lucide-react';
 import { generateBlueprintPDF, generateNotaFiscalPDF } from '../utils/pdfGenerator';
 
 
@@ -9,6 +9,7 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
   const [expandedOrder, setExpandedOrder] = useState(null);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
 
@@ -34,6 +35,9 @@ export default function AdminOrders() {
         switch (status) {
           case 'PROCESSANDO':
             message = `Olá, ${clientFirstName}! Seu pedido #${order.id} na *Natan Construções* já foi recebido e está *em processamento*!`;
+            break;
+          case 'PAGO':
+            message = `Olá, ${clientFirstName}! Confirmamos o pagamento do seu pedido #${order.id} na *Natan Construções*! Seu material já está sendo separado em nosso estoque e preparado para o envio.`;
             break;
           case 'SAIU_ENTREGA':
             message = `Olá, ${clientFirstName}! Excelente notícia: seu pedido #${order.id} da *Natan Construções* *saiu para entrega* e está a caminho do seu endereço!`;
@@ -67,18 +71,19 @@ export default function AdminOrders() {
   const filteredOrders = orders.filter(o => {
     const matchesSearch = o.id.toString().includes(searchTerm) || o.user.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesDate = dateFilter ? o.createdAt.startsWith(dateFilter) : true;
-    return matchesSearch && matchesDate;
+    const matchesStatus = statusFilter ? o.status === statusFilter : true;
+    return matchesSearch && matchesDate && matchesStatus;
   });
 
   const getStatusStyle = (status) => {
     switch(status) {
       case 'PROCESSANDO': return 'bg-blue-100 text-blue-700';
+      case 'PAGO': return 'bg-emerald-100 text-emerald-700';
       case 'SAIU_ENTREGA': return 'bg-orange-100 text-orange-700';
       case 'ENTREGUE': return 'bg-green-100 text-green-700';
       case 'PENDENTE_CANCELAMENTO': return 'bg-yellow-100 text-yellow-700 font-bold border border-yellow-300 animate-pulse';
       case 'CANCELADO': return 'bg-red-100 text-red-700';
       default: return 'bg-gray-100 text-gray-700';
-
     }
   };
 
@@ -98,13 +103,13 @@ export default function AdminOrders() {
 
 
       {/* Busca Histórica e Filtros */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="md:col-span-2 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={20} />
           <input 
             type="text" 
             placeholder="Pesquisar por ID ou Nome do Cliente..." 
-            className="w-full pl-12 pr-4 py-3 bg-surface border border-outline-variant rounded-2xl outline-none"
+            className="w-full pl-12 pr-4 py-3 bg-surface border border-outline-variant rounded-2xl outline-none text-sm font-semibold"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
@@ -113,10 +118,25 @@ export default function AdminOrders() {
           <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={20} />
           <input 
             type="date" 
-            className="w-full pl-12 pr-4 py-3 bg-surface border border-outline-variant rounded-2xl outline-none"
+            className="w-full pl-12 pr-4 py-3 bg-surface border border-outline-variant rounded-2xl outline-none text-sm font-semibold text-primary"
             value={dateFilter}
             onChange={e => setDateFilter(e.target.value)}
           />
+        </div>
+        <div className="relative">
+          <select 
+            className="w-full px-4 py-3 bg-surface border border-outline-variant rounded-2xl outline-none text-sm font-bold text-primary"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value)}
+          >
+            <option value="">Todos os Status</option>
+            <option value="PROCESSANDO">Processando</option>
+            <option value="PAGO">Pago</option>
+            <option value="SAIU_ENTREGA">Saiu para Entrega</option>
+            <option value="ENTREGUE">Entregue</option>
+            <option value="PENDENTE_CANCELAMENTO">Pendente de Cancelamento</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
         </div>
       </div>
 
@@ -167,6 +187,15 @@ export default function AdminOrders() {
                         className={order.status === 'PROCESSANDO' ? 'bg-primary/10' : ''}
                       >
                         <PackageCheck size={16} />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        title="Confirmar Pagamento" 
+                        onClick={() => handleUpdateStatus(order.id, 'PAGO')}
+                        className={order.status === 'PAGO' ? 'bg-primary/10 text-emerald-600 border-emerald-200' : 'text-emerald-600 hover:bg-emerald-50'}
+                      >
+                        <CreditCard size={16} />
                       </Button>
                       <Button 
                         size="sm" 

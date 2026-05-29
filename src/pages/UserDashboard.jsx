@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import { Card, Button } from '../components/UI';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
-import { ShoppingBag, ChevronRight, Package, Truck, CheckCircle2, MapPin, User as UserIcon, XCircle } from 'lucide-react';
+import { ShoppingBag, ChevronRight, Package, Truck, CheckCircle2, MapPin, User as UserIcon, XCircle, CreditCard } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
 export default function UserDashboard() {
@@ -66,6 +66,7 @@ export default function UserDashboard() {
   const getStatusIcon = (status) => {
     switch(status) {
       case 'PROCESSANDO': return <Package className="text-blue-500" />;
+      case 'PAGO': return <CreditCard className="text-emerald-500" />;
       case 'PENDENTE_CANCELAMENTO': return <XCircle className="text-yellow-600 animate-pulse" />;
       case 'SAIU_ENTREGA': return <Truck className="text-orange-500" />;
       case 'ENTREGUE': return <CheckCircle2 className="text-green-500" />;
@@ -201,7 +202,7 @@ export default function UserDashboard() {
 
                           {/* Seção de Cancelamento */}
                           <div className="mt-8 pt-6 border-t border-outline-variant flex flex-col gap-4">
-                            {order.status === 'PROCESSANDO' ? (
+                             {['PROCESSANDO', 'PAGO'].includes(order.status) ? (
                               cancellingOrderId === order.id ? (
                                 <div className="bg-surface-container/60 p-5 rounded-2xl border border-outline-variant w-full space-y-4 animate-in fade-in duration-200">
                                   <div className="space-y-1">
