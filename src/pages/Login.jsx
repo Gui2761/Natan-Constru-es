@@ -32,6 +32,7 @@ export default function Login() {
   });
   const [avatar, setAvatar] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   // Dynamic CEP Auto-fill for registration
   const handleCepLookup = async (cep) => {
@@ -65,6 +66,20 @@ export default function Login() {
         const user = await login(formData.email, formData.password);
         navigate(user.role === 'ADMIN' ? '/admin' : '/');
       } else {
+        if (formData.password !== confirmPassword) {
+          alert('As senhas não coincidem!');
+          setLoading(false);
+          return;
+        }
+
+        // Validar endereço completo obrigatório
+        const { zipCode, street, number } = formData.address;
+        if (!zipCode || !street || !number) {
+          alert('Por favor, preencha todos os campos de endereço!');
+          setLoading(false);
+          return;
+        }
+
         const data = new FormData();
         data.append('name', formData.name);
         data.append('email', formData.email);
@@ -256,6 +271,19 @@ export default function Login() {
             />
 
             {!isLogin && (
+              <Input 
+                label="Confirmar Senha" 
+                type="password" 
+                placeholder="••••••••" 
+                required 
+                maxLength={20}
+                minLength={6}
+                value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)}
+              />
+            )}
+
+            {!isLogin && (
               <div className="space-y-4 pt-2 border-t border-outline-variant/60">
                 <p className="text-[10px] font-black text-outline uppercase tracking-wider">Endereço de Obra / Entrega</p>
                 <div className="grid grid-cols-2 gap-4">
@@ -263,6 +291,7 @@ export default function Login() {
                     label="CEP (Consulta Automática)" 
                     placeholder="00000-000" 
                     maxLength={9}
+                    required
                     value={formData.address.zipCode}
                     onChange={e => {
                       const val = e.target.value.replace(/\D/g, '').substring(0, 8);
@@ -275,6 +304,7 @@ export default function Login() {
                     label="Número" 
                     placeholder="123" 
                     maxLength={10}
+                    required
                     value={formData.address.number}
                     onChange={e => setFormData({...formData, address: {...formData.address, number: e.target.value}})}
                   />
@@ -283,6 +313,7 @@ export default function Login() {
                       label="Rua" 
                       placeholder="Preenchido automaticamente ao digitar o CEP" 
                       maxLength={100}
+                      required
                       value={formData.address.street}
                       onChange={e => setFormData({...formData, address: {...formData.address, street: e.target.value}})}
                     />
