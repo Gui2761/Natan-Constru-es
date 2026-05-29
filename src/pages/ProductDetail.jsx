@@ -5,7 +5,7 @@ import { useCart } from '../context/CartContext';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, Button, Input } from '../components/UI';
-import api from '../services/api';
+import api, { getImageUrl } from '../services/api';
 import { ShoppingCart, MessageCircle, Calculator, Info, Package, ArrowLeft, Percent } from 'lucide-react';
 
 export default function ProductDetail() {
@@ -32,7 +32,7 @@ export default function ProductDetail() {
       const item = list.find(p => p.id === parseInt(id));
       setProduct(item);
       if (item && item.images) {
-        setSelectedImage(item.images.split(',')[0]);
+        setSelectedImage(getImageUrl(item.images.split(',')[0]));
       } else {
         setSelectedImage('https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?q=80&w=1000');
       }
@@ -78,7 +78,7 @@ export default function ProductDetail() {
                   <Percent size={16} /> Promoção {product.salePercentage}%
                 </div>
               )}
-              <img src={selectedImage} className="w-full h-full object-cover" alt={product.name} />
+              <img src={getImageUrl(selectedImage)} className="w-full h-full object-cover" alt={product.name} />
             </div>
             
             {/* Miniaturas das imagens */}
@@ -87,10 +87,10 @@ export default function ProductDetail() {
                 {product.images.split(',').map((imgUrl, idx) => (
                   <button 
                     key={idx} 
-                    onClick={() => setSelectedImage(imgUrl)}
-                    className={`w-20 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${selectedImage === imgUrl ? 'border-primary ring-2 ring-primary/20 scale-105' : 'border-outline-variant hover:border-primary/50 opacity-70 hover:opacity-100'}`}
+                    onClick={() => setSelectedImage(getImageUrl(imgUrl))}
+                    className={`w-20 h-20 rounded-xl overflow-hidden shrink-0 border-2 transition-all ${selectedImage === getImageUrl(imgUrl) ? 'border-primary ring-2 ring-primary/20 scale-105' : 'border-outline-variant hover:border-primary/50 opacity-70 hover:opacity-100'}`}
                   >
-                    <img src={imgUrl} alt={`${product.name} thumbnail ${idx}`} className="w-full h-full object-cover" />
+                    <img src={getImageUrl(imgUrl)} alt={`${product.name} thumbnail ${idx}`} className="w-full h-full object-cover" />
                   </button>
                 ))}
               </div>
@@ -110,18 +110,40 @@ export default function ProductDetail() {
                    <span className="text-xl text-outline line-through font-medium opacity-50">R$ {product.basePrice.toFixed(2)}</span>
                 )}
               </div>
+              
+              {product.description && (
+                <p className="text-sm font-semibold text-outline leading-relaxed mt-4 bg-surface-container p-4 rounded-2xl border border-outline-variant/30">
+                  {product.description}
+                </p>
+              )}
             </div>
 
             <div className="space-y-6 flex-1">
               <div className="flex items-center gap-4">
                 <div className="w-32">
-                   <Input label="Quantidade" type="number" value={quantity} onChange={e => setQuantity(e.target.value)} min="1" />
+                   <Input 
+                     label="Quantidade" 
+                     type="number" 
+                     value={quantity} 
+                     onChange={e => {
+                       const val = parseInt(e.target.value);
+                       if (val > product.stock) {
+                         setQuantity(product.stock);
+                       } else if (val < 1 || isNaN(val)) {
+                         setQuantity(1);
+                       } else {
+                         setQuantity(val);
+                       }
+                     }} 
+                     min="1" 
+                     max={product.stock} 
+                   />
                 </div>
                 <div className="flex-1 pt-6 text-sm text-outline font-medium">
                    {product.stock > 0 ? (
-                     <span className="text-green-600">✓ Em estoque (Disponível para entrega imediata)</span>
+                     <span className="text-green-600 font-bold">✓ Em estoque ({product.stock} {product.stock === 1 ? 'unidade disponível' : 'unidades disponíveis'})</span>
                    ) : (
-                     <span className="text-error">Out of Stock</span>
+                     <span className="text-error font-bold">Sem estoque disponível</span>
                    )}
                 </div>
               </div>
@@ -198,7 +220,7 @@ export default function ProductDetail() {
                {related.map(rel => (
                  <Card key={rel.id} className="p-0 overflow-hidden" hover onClick={() => navigate(`/produto/${rel.id}`)}>
                     <div className="aspect-square bg-surface-container overflow-hidden">
-                       <img src={rel.images || 'https://images.unsplash.com/photo-1581094288338-2314dddb7ecc?q=80&w=1000'} className="w-full h-full object-cover active:scale-105 transition-transform" alt={rel.name} />
+                       <img src={getImageUrl(rel.images ? rel.images.split(',')[0] : '')} className="w-full h-full object-cover active:scale-105 transition-transform" alt={rel.name} />
                     </div>
                     <div className="p-4">
                        <h4 className="font-bold text-primary truncate uppercase text-sm tracking-tight">{rel.name}</h4>

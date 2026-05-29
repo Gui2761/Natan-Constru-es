@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../components/UI';
-import { Ticket, Plus, Trash2, Calendar, Percent } from 'lucide-react';
+import { Ticket, Plus, Trash2, Calendar, Percent, AlertTriangle } from 'lucide-react';
 import api from '../services/api';
 
 export default function AdminCoupons() {
   const [coupons, setCoupons] = useState([]);
   const [newCoupon, setNewCoupon] = useState({ code: '', discount: '', expiresAt: '' });
   const [loading, setLoading] = useState(false);
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, couponId: null });
 
   useEffect(() => {
     fetchCoupons();
@@ -35,10 +36,13 @@ export default function AdminCoupons() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Deseja remover este cupom?')) return;
+  const handleDelete = (id) => {
+    setConfirmModal({ isOpen: true, couponId: id });
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      await api.delete(`/coupons/${id}`);
+      await api.delete(`/coupons/${confirmModal.couponId}`);
       fetchCoupons();
     } catch (err) {
       alert('Erro ao deletar cupom');
@@ -121,6 +125,39 @@ export default function AdminCoupons() {
           )}
         </div>
       </div>
+
+      {/* Custom Confirm Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <Card className="max-w-md w-full p-6 space-y-6 shadow-2xl scale-in duration-200 bg-surface border border-outline-variant/30 hover-premium">
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center border border-red-200">
+                <AlertTriangle size={24} />
+              </div>
+              <h4 className="text-lg font-black uppercase italic tracking-tighter text-primary">Ação Irreversível</h4>
+              <p className="text-sm text-outline font-medium">Deseja realmente remover este cupom? Esta ação é definitiva.</p>
+            </div>
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                className="flex-1 font-bold uppercase tracking-wider text-xs" 
+                onClick={() => setConfirmModal({ isOpen: false, couponId: null })}
+              >
+                Voltar
+              </Button>
+              <Button 
+                className="flex-1 bg-red-600 hover:bg-red-700 border-none text-white font-bold uppercase tracking-wider text-xs shadow-lg" 
+                onClick={() => {
+                  handleConfirmDelete();
+                  setConfirmModal({ isOpen: false, couponId: null });
+                }}
+              >
+                Confirmar
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

@@ -3,6 +3,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, Button } from '../components/UI';
 import { useCart } from '../context/CartContext';
+import { getImageUrl } from '../services/api';
 import { Trash2, FileText, ArrowRight, ShoppingBag, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import jsPDF from 'jspdf';
@@ -60,7 +61,7 @@ export default function Cart() {
               {cart.map(item => (
                 <Card key={item.id} className="flex gap-6 items-center">
                   <div className="w-24 h-24 bg-surface-container rounded-2xl overflow-hidden shrink-0">
-                    <img src={item.images} className="w-full h-full object-cover" alt={item.name} />
+                    <img src={getImageUrl(item.images ? item.images.split(',')[0] : '')} className="w-full h-full object-cover" alt={item.name} />
                   </div>
                   <div className="flex-1">
                     <h4 className="font-bold text-primary uppercase text-sm">{item.name}</h4>
