@@ -49,6 +49,11 @@ import userRoutes from './server/src/routes/userRoutes.js';
 const app = express();
 const PORT = process.env.PORT || 8080; // Hostinger muitas vezes prefere 8080 se PORT estiver vazio
 
+app.use((req, res, next) => {
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  next();
+});
+
 app.use(cors());
 app.use(express.json());
 
