@@ -24,6 +24,40 @@ export default function AdminOrders() {
   const handleUpdateStatus = async (id, status) => {
     try {
       await api.patch(`/orders/${id}/status`, { status });
+      
+      // Encontrar o pedido correspondente para obter dados do cliente antes de recarregar a lista
+      const order = orders.find(o => o.id === id);
+      if (order && order.user && order.user.phone) {
+        let message = '';
+        const clientFirstName = order.user.name.split(' ')[0];
+        
+        switch (status) {
+          case 'PROCESSANDO':
+            message = `Olá, ${clientFirstName}! Seu pedido #${order.id} na *Natan Construções* já foi recebido e está *em processamento*! 🛠️`;
+            break;
+          case 'SAIU_ENTREGA':
+            message = `Olá, ${clientFirstName}! Excelente notícia: seu pedido #${order.id} da *Natan Construções* *saiu para entrega* e está a caminho do seu endereço! 🚚💨`;
+            break;
+          case 'ENTREGUE':
+            message = `Olá, ${clientFirstName}! Seu pedido #${order.id} na *Natan Construções* foi *entregue com sucesso*! Agradecemos a preferência e desejamos uma ótima obra! 🏠🎉`;
+            break;
+          case 'CANCELADO':
+            message = `Olá, ${clientFirstName}. Informamos que o seu pedido #${order.id} na *Natan Construções* foi *cancelado*. Se tiver qualquer dúvida ou precisar de estorno, por favor, entre em contato conosco por aqui.`;
+            break;
+          default:
+            message = `Olá, ${clientFirstName}! O status do seu pedido #${order.id} na *Natan Construções* foi atualizado para: *${status}*.`;
+        }
+
+        let cleanPhone = order.user.phone.replace(/\D/g, '');
+        if (cleanPhone) {
+          if (!cleanPhone.startsWith('55') && cleanPhone.length <= 11) {
+            cleanPhone = `55${cleanPhone}`;
+          }
+          const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+          window.open(url, '_blank');
+        }
+      }
+      
       fetchOrders();
     } catch (err) {
       alert('Erro ao atualizar status');
