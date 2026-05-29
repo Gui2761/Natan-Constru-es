@@ -78,7 +78,7 @@ export default function CategoryResults() {
       
       {displayBanner && (
         <section className="h-[300px] w-full relative overflow-hidden">
-           <img src={displayBanner.image} className="w-full h-full object-cover" alt={displayBanner.title} />
+           <img src={displayBanner.image} className="w-full h-full object-cover" alt={displayBanner.title} style={{ objectPosition: displayBanner.position || 'center' }} />
            <div className="absolute inset-0 bg-gradient-to-r from-primary/80 to-transparent flex items-center px-10">
               <div className="max-w-7xl mx-auto w-full">
                  <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">

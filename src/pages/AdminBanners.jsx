@@ -7,7 +7,7 @@ export default function AdminBanners() {
   const [banners, setBanners] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ title: '', subtitle: '', tag: '', link: '/', buttonText: '' });
+  const [formData, setFormData] = useState({ title: '', subtitle: '', tag: '', position: 'center', link: '/', buttonText: '' });
   const [selectedFile, setSelectedFile] = useState(null);
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -47,6 +47,7 @@ export default function AdminBanners() {
       formPayload.append('title', formData.title || '');
       formPayload.append('subtitle', formData.subtitle || '');
       formPayload.append('tag', formData.tag || '');
+      formPayload.append('position', formData.position || 'center');
       formPayload.append('link', formData.link || '/');
       formPayload.append('buttonText', formData.buttonText || '');
       if (selectedFile) {
@@ -74,6 +75,7 @@ export default function AdminBanners() {
        title: banner.title || '', 
        subtitle: banner.subtitle || '', 
        tag: banner.tag || '', 
+       position: banner.position || 'center', 
        link: banner.link || '/', 
        buttonText: banner.buttonText || '' 
      });
@@ -82,7 +84,7 @@ export default function AdminBanners() {
   };
 
   const resetForm = () => {
-    setFormData({ title: '', subtitle: '', tag: '', link: '/', buttonText: '' });
+    setFormData({ title: '', subtitle: '', tag: '', position: 'center', link: '/', buttonText: '' });
     setSelectedFile(null);
     setCurrentImageUrl(null);
     setEditingId(null);
@@ -174,6 +176,71 @@ export default function AdminBanners() {
               </div>
             </div>
 
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-on-surface/80">Alinhamento / Foco da Imagem</label>
+              <select 
+                className="w-full px-4 py-3 bg-surface-container border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary/20 outline-none font-bold text-sm text-primary"
+                value={formData.position} 
+                onChange={e => setFormData({...formData, position: e.target.value})}
+              >
+                <option value="center">Centralizado (Padrão)</option>
+                <option value="top">Topo (Foco em cima)</option>
+                <option value="bottom">Base (Foco em baixo)</option>
+                <option value="left">Esquerda</option>
+                <option value="right">Direita</option>
+              </select>
+            </div>
+
+            {/* Live Interactive Mockup Card */}
+            <div className="space-y-1.5 border border-outline-variant/30 p-4 rounded-2xl bg-surface-container/20">
+              <label className="text-xs font-black uppercase tracking-widest text-outline">
+                👁️ Prévia em Tempo Real no Site
+              </label>
+              <div className="relative w-full h-44 rounded-xl overflow-hidden bg-blueprint-grid shadow-inner border border-outline-variant">
+                {(selectedFile || currentImageUrl) ? (
+                  <img 
+                    src={selectedFile ? URL.createObjectURL(selectedFile) : getImageUrl(currentImageUrl)} 
+                    className="w-full h-full object-cover transition-all duration-300" 
+                    alt="Mockup align"
+                    style={{ objectPosition: formData.position || 'center' }}
+                  />
+                ) : (
+                  <div className="absolute inset-0 flex flex-col justify-center items-center text-center p-4">
+                    <div className="absolute inset-0 radial-blueprint-glow pointer-events-none"></div>
+                    <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">Escolha uma imagem</span>
+                  </div>
+                )}
+                
+                {/* Dark overlay & layout mimicking Home.jsx */}
+                <div className="absolute inset-0 bg-black/35 flex items-center p-4">
+                  <div className="max-w-[90%] bg-primary/80 backdrop-blur-sm border border-white/10 p-3 rounded-2xl shadow-xl space-y-2 transform animate-in fade-in slide-in-from-left-4 duration-300">
+                    {formData.tag && (
+                      <span className="bg-secondary text-white text-[7px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full border border-secondary/20 shadow-sm w-fit block">
+                        {formData.tag}
+                      </span>
+                    )}
+                    {formData.title && (
+                      <h4 className="text-[11px] font-black text-white uppercase italic tracking-tighter leading-none line-clamp-1">
+                        {formData.title}
+                      </h4>
+                    )}
+                    {formData.subtitle && (
+                      <p className="text-white/85 text-[8px] font-medium leading-tight line-clamp-2">
+                        {formData.subtitle}
+                      </p>
+                    )}
+                    {formData.buttonText && (
+                      <div className="pt-0.5">
+                        <span className="bg-secondary text-white text-[7px] font-black uppercase tracking-widest px-2.5 py-1 rounded-lg shadow-sm">
+                          {formData.buttonText}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <Input label="Título (Opcional)" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
             <Input label="Descrição / Subtítulo (Opcional)" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} />
             <Input label="Tag do Topo (Opcional - Ex: Oferta Especial)" placeholder="Ex: Oferta Especial Natan" value={formData.tag} onChange={e => setFormData({...formData, tag: e.target.value})} />
@@ -215,7 +282,7 @@ export default function AdminBanners() {
           ) : (
             banners.map(banner => (
               <Card key={banner.id} className="p-0 overflow-hidden relative group">
-                <img src={getImageUrl(banner.image)} alt={banner.title} className="w-full h-48 object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                <img src={getImageUrl(banner.image)} alt={banner.title} className="w-full h-48 object-cover opacity-80 group-hover:opacity-100 transition-opacity" style={{ objectPosition: banner.position || 'center' }} />
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex flex-col justify-end p-6">
                   <h3 className="text-white font-black text-xl uppercase italic tracking-tighter">{banner.title || 'Banner Sem Título'}</h3>
                   <p className="text-white/70 text-xs flex items-center gap-1 mt-1"><ExternalLink size={12}/> {banner.link || 'Sem Link'}</p>

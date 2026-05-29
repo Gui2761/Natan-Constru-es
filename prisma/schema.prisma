@@ -64,6 +64,7 @@ model Banner {
   tag        String?
   buttonText String?
   link       String? @db.Text
+  position   String? @default("center")
   active     Boolean @default(true)
 }
 

@@ -174,6 +174,11 @@ app.get('/api/diag/migrate-db', async (req, res) => {
     } catch (e) {
       console.log("Coluna tag talvez já exista:", e.message);
     }
+    try {
+      await prisma.$queryRaw("ALTER TABLE `Banner` ADD COLUMN `position` VARCHAR(50) DEFAULT 'center' NULL");
+    } catch (e) {
+      console.log("Coluna position talvez já exista:", e.message);
+    }
     res.send("✅ Migração do banco executada com sucesso!");
   } catch (err) {
     res.status(500).send("❌ Erro ao migrar banco de dados: " + err.message);

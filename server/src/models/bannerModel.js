@@ -14,8 +14,8 @@ export const bannerModel = {
   },
 
   async create({ data = {} } = {}) {
-    const [res] = await q('INSERT INTO `Banner` (`image`, `title`, `subtitle`, `tag`, `buttonText`, `link`, `active`) VALUES (?,?,?,?,?,?,?)',
-      [data.image, data.title || null, data.subtitle || null, data.tag || null, data.buttonText || null, data.link || null, data.active !== false ? 1 : 0],
+    const [res] = await q('INSERT INTO `Banner` (`image`, `title`, `subtitle`, `tag`, `buttonText`, `link`, `position`, `active`) VALUES (?,?,?,?,?,?,?,?)',
+      [data.image, data.title || null, data.subtitle || null, data.tag || null, data.buttonText || null, data.link || null, data.position || 'center', data.active !== false ? 1 : 0],
       true // flag para retornar o res original (insertId)
     );
     const rows = await q('SELECT * FROM `Banner` WHERE `id` = ?', [res.insertId]);

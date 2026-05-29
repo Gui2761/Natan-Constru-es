@@ -66,6 +66,7 @@ export default function Home() {
                     src={getImageUrl(banner.image)} 
                     className="img-standard-banner" 
                     alt={banner.title || 'Oferta'} 
+                    style={{ objectPosition: banner.position || 'center' }}
                   />
                   <div className="absolute inset-0 bg-black/35 flex items-center p-6 lg:p-12">
                     <div className="max-w-7xl w-full mx-auto flex items-center justify-start">
