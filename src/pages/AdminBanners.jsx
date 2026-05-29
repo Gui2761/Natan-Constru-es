@@ -9,6 +9,7 @@ export default function AdminBanners() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ title: '', link: '/', buttonText: '' });
   const [selectedFile, setSelectedFile] = useState(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
@@ -32,14 +33,23 @@ export default function AdminBanners() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!editingId && !selectedFile) {
+      alert('Por favor, selecione uma imagem para o novo banner.');
+      return;
+    }
+
     setLoading(true);
     
     try {
       const formPayload = new FormData();
-      if (formData.title) formPayload.append('title', formData.title);
-      if (formData.link) formPayload.append('link', formData.link);
-      if (formData.buttonText) formPayload.append('buttonText', formData.buttonText);
-      if (selectedFile) formPayload.append('image', selectedFile);
+      // Envia campos mesmo vazios se estiver editando para permitir limpar
+      formPayload.append('title', formData.title || '');
+      formPayload.append('link', formData.link || '/');
+      formPayload.append('buttonText', formData.buttonText || '');
+      if (selectedFile) {
+        formPayload.append('image', selectedFile);
+      }
 
       if (editingId) {
         await api.put(`/banners/${editingId}`, formPayload);
@@ -50,7 +60,7 @@ export default function AdminBanners() {
       resetForm();
       fetchBanners();
     } catch (err) {
-      alert('Erro ao salvar banner');
+      alert('Erro ao salvar o banner. Verifique o tamanho do arquivo ou a conexão.');
     } finally {
       setLoading(false);
     }
@@ -64,11 +74,13 @@ export default function AdminBanners() {
        buttonText: banner.buttonText || '' 
      });
      setSelectedFile(null);
+     setCurrentImageUrl(banner.image);
   };
 
   const resetForm = () => {
     setFormData({ title: '', link: '/', buttonText: '' });
     setSelectedFile(null);
+    setCurrentImageUrl(null);
     setEditingId(null);
   };
 
@@ -97,9 +109,13 @@ export default function AdminBanners() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-on-surface/80 block mb-1">Imagem do Banner</label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-sm font-semibold text-on-surface/90">Imagem do Banner</label>
+                <span className="text-[10px] text-outline font-medium">Recomendado: 1920x600px (3:1)</span>
+              </div>
+              
               <div 
-                className="w-full border-2 border-dashed border-primary/20 rounded-2xl p-6 flex flex-col items-center justify-center bg-surface-container/50 hover:bg-primary/5 transition-colors cursor-pointer relative"
+                className="w-full border-2 border-dashed border-primary/20 rounded-2xl p-4 flex flex-col items-center justify-center bg-surface-container/50 hover:bg-primary/5 transition-colors cursor-pointer relative"
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                   e.preventDefault();
@@ -108,27 +124,49 @@ export default function AdminBanners() {
                   }
                 }}
               >
-                 <input 
-                   type="file" 
-                   accept="image/png, image/jpeg, image/webp" 
-                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                   onChange={(e) => setSelectedFile(e.target.files[0])}
-                 />
-                 {!selectedFile ? (
-                   <>
-                     <UploadCloud className="text-secondary mb-2" size={30} />
-                     <p className="font-bold text-primary text-xs uppercase tracking-widest text-center">
-                       Arraste a imagem ou Clique
-                     </p>
-                   </>
-                 ) : (
-                   <div className="relative w-full h-32 rounded-lg overflow-hidden">
-                      <img src={URL.createObjectURL(selectedFile)} alt="preview" className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                         <span className="text-white font-bold text-xs bg-black/50 px-3 py-1 rounded-full">Nova Imagem</span>
-                      </div>
-                   </div>
-                 )}
+                  <input 
+                    type="file" 
+                    accept="image/png, image/jpeg, image/webp" 
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    onChange={(e) => setSelectedFile(e.target.files[0])}
+                  />
+                  {!selectedFile && !currentImageUrl ? (
+                    <div className="py-4 text-center">
+                      <UploadCloud className="text-secondary mx-auto mb-2" size={32} />
+                      <p className="font-bold text-primary text-xs uppercase tracking-widest">
+                        Arraste a imagem ou Clique
+                      </p>
+                      <p className="text-[10px] text-outline mt-1 font-medium">Formatos aceitos: PNG, JPG, WEBP (Máx. 5MB)</p>
+                    </div>
+                  ) : (
+                    <div className="relative w-full h-36 rounded-xl overflow-hidden group/preview z-20">
+                       <img 
+                         src={selectedFile ? URL.createObjectURL(selectedFile) : currentImageUrl} 
+                         alt="preview" 
+                         className="w-full h-full object-cover" 
+                       />
+                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity opacity-80 group-hover/preview:opacity-100">
+                          <span className="text-white font-black text-[10px] uppercase tracking-widest bg-black/60 px-3 py-1.5 rounded-full border border-white/10">
+                            {selectedFile ? 'Nova Imagem Carregada' : 'Imagem Atual do Banner'}
+                          </span>
+                       </div>
+                       <button 
+                         type="button"
+                         onClick={(e) => {
+                           e.stopPropagation();
+                           e.preventDefault();
+                           setSelectedFile(null);
+                           if (!selectedFile) {
+                             setCurrentImageUrl(null);
+                           }
+                         }}
+                         className="absolute top-2 right-2 bg-error text-white p-1.5 rounded-lg shadow-lg hover:scale-110 transition-transform hover:bg-red-600"
+                         title="Remover imagem"
+                       >
+                         <X size={14} />
+                       </button>
+                    </div>
+                  )}
               </div>
             </div>
 

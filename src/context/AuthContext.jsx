@@ -8,12 +8,16 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const storedUser = localStorage.getItem('user');
-    if (token && storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setLoading(false);
+    const initAuth = async () => {
+      const token = localStorage.getItem('token');
+      const storedUser = localStorage.getItem('user');
+      if (token && storedUser) {
+        setUser(JSON.parse(storedUser));
+        await refreshUser();
+      }
+      setLoading(false);
+    };
+    initAuth();
   }, []);
 
   const login = async (email, password) => {
@@ -61,6 +65,9 @@ export const AuthProvider = ({ children }) => {
       setUser(data);
     } catch (err) {
       console.error("Erro ao atualizar dados do usuário", err);
+      if (err.response && err.response.status === 401) {
+        logout();
+      }
     }
   };
 
