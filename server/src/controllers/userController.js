@@ -26,7 +26,7 @@ export const updateMe = async (req, res) => {
   const userId = req.userId;
   console.log(`[DEBUG] Iniciando updateMe para Usuário ID: ${userId}`);
 
-  let { name, email, password, address } = req.body;
+  let { name, email, password, phone, address } = req.body;
 
   if (typeof address === 'string') {
     try {
@@ -44,6 +44,7 @@ export const updateMe = async (req, res) => {
     const updateData = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
     
     if (password) {
       if (password.length < 6 || password.length > 20) {

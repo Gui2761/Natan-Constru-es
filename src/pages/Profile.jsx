@@ -21,6 +21,7 @@ export default function Profile() {
     name: user?.name || '',
     email: user?.email || '',
     password: '',
+    phone: user?.phone || '',
     address: {
       zipCode: user?.address?.zipCode || '',
       street: user?.address?.street || '',
@@ -39,6 +40,7 @@ export default function Profile() {
         name: user.name,
         email: user.email,
         password: '',
+        phone: user.phone || '',
         address: {
           zipCode: user.address?.zipCode || '',
           street: user.address?.street || '',
@@ -59,6 +61,7 @@ export default function Profile() {
       data.append('name', formData.name);
       data.append('email', formData.email);
       if (formData.password) data.append('password', formData.password);
+      data.append('phone', formData.phone);
       data.append('address', JSON.stringify(formData.address));
       if (avatar) data.append('avatar', avatar);
 
@@ -144,15 +147,35 @@ export default function Profile() {
                        onChange={e => setFormData({...formData, name: e.target.value})}
                        required 
                      />
-                     <Input 
-                       label="E-mail de Acesso" 
-                       type="email" 
-                       value={formData.email} 
-                       maxLength={100}
-                       onChange={e => setFormData({...formData, email: e.target.value})}
-                       required 
-                     />
-                     <div className="md:col-span-2">
+                      <Input 
+                        label="E-mail de Acesso" 
+                        type="email" 
+                        value={formData.email} 
+                        maxLength={100}
+                        onChange={e => setFormData({...formData, email: e.target.value})}
+                        required 
+                      />
+                      <div className="md:col-span-2">
+                         <Input 
+                           label="Telefone / WhatsApp" 
+                           value={formData.phone} 
+                           placeholder="Ex: (79) 99999-9999"
+                           maxLength={15}
+                           onChange={e => {
+                             const val = e.target.value.replace(/\D/g, '');
+                             let formatted = val;
+                             if (val.length > 2) {
+                               formatted = `(${val.substring(0, 2)}) ${val.substring(2)}`;
+                             }
+                             if (val.length > 7) {
+                               formatted = `(${val.substring(0, 2)}) ${val.substring(2, 7)}-${val.substring(7, 11)}`;
+                             }
+                             setFormData({...formData, phone: formatted});
+                           }}
+                           required
+                         />
+                      </div>
+                      <div className="md:col-span-2">
                         <Input 
                           label="Nova Senha (deixe em branco para manter)" 
                           type="password" 

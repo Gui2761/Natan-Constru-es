@@ -104,7 +104,14 @@ export default function AdminOrders() {
                       {order.status.replace('_', ' ')}
                     </span>
                   </div>
-                  <p className="text-sm font-bold text-on-surface">Cliente: {order.user.name}</p>
+                  <p className="text-sm font-bold text-on-surface">
+                    Cliente: {order.user.name}
+                    {order.user.phone && (
+                      <span className="text-xs text-secondary font-black bg-secondary/10 px-2.5 py-0.5 rounded-lg ml-2 inline-flex items-center gap-1 border border-secondary/20 shadow-sm">
+                        📞 {order.user.phone}
+                      </span>
+                    )}
+                  </p>
                   <p className="text-xs text-outline">
                     Endereço: {order.user.address?.street}, {order.user.address?.number} - {order.user.address?.city}/{order.user.address?.state}
                   </p>

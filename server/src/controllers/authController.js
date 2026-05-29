@@ -7,7 +7,7 @@ import axios from 'axios';
 
 
 export const register = async (req, res) => {
-  let { name, email, password, address } = req.body;
+  let { name, email, password, phone, address } = req.body;
 
   // Se o address vier como string (FormData), parsear
   if (typeof address === 'string') {
@@ -40,6 +40,7 @@ export const register = async (req, res) => {
         name,
         email,
         password: hashedPassword,
+        phone: phone || null,
         avatar: avatarUrl,
         address: {
           create: {

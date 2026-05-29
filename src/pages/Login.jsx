@@ -21,6 +21,7 @@ export default function Login() {
     name: '',
     email: '',
     password: '',
+    phone: '',
     address: {
       zipCode: '',
       street: '',
@@ -68,6 +69,7 @@ export default function Login() {
         data.append('name', formData.name);
         data.append('email', formData.email);
         data.append('password', formData.password);
+        data.append('phone', formData.phone);
         data.append('address', JSON.stringify(formData.address));
         if (avatar) {
           data.append('avatar', avatar);
@@ -202,14 +204,34 @@ export default function Login() {
             )}
 
             {!isLogin && (
-              <Input 
-                label="Nome Completo" 
-                placeholder="Ex: João da Silva" 
-                required 
-                maxLength={50}
-                value={formData.name}
-                onChange={e => setFormData({...formData, name: e.target.value})}
-              />
+              <>
+                <Input 
+                  label="Nome Completo" 
+                  placeholder="Ex: João da Silva" 
+                  required 
+                  maxLength={50}
+                  value={formData.name}
+                  onChange={e => setFormData({...formData, name: e.target.value})}
+                />
+                <Input 
+                  label="Telefone / WhatsApp" 
+                  placeholder="Ex: (79) 99999-9999" 
+                  required 
+                  maxLength={15}
+                  value={formData.phone}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    let formatted = val;
+                    if (val.length > 2) {
+                      formatted = `(${val.substring(0, 2)}) ${val.substring(2)}`;
+                    }
+                    if (val.length > 7) {
+                      formatted = `(${val.substring(0, 2)}) ${val.substring(2, 7)}-${val.substring(7, 11)}`;
+                    }
+                    setFormData({...formData, phone: formatted});
+                  }}
+                />
+              </>
             )}
 
             <Input 

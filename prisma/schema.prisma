@@ -13,6 +13,7 @@ model User {
   name      String
   email     String   @unique
   password  String
+  phone     String?  // Campo de telefone / WhatsApp do cliente
   role      String   @default("CLIENT") // "ADMIN" or "CLIENT"
   avatar    String?  @db.Text
   address   Address?

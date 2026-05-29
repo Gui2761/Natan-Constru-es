@@ -78,6 +78,7 @@ export default function Checkout() {
     const text = `*NOVO PEDIDO - NATAN CONSTRUÇÕES* 🏗️\n\n` +
       `*Pedido:* #${orderId}\n` +
       `*Cliente:* ${createdOrder.user.name}\n` +
+      `*Telefone:* ${createdOrder.user.phone || 'Não informado'}\n` +
       `*Endereço:* ${createdOrder.user.address.zipCode} - ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n\n` +
       `*Itens do Pedido:*\n${itemsList}\n\n` +
       `*Peso da Carga:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
