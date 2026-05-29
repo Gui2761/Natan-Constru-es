@@ -143,3 +143,68 @@ export const googleLogin = async (req, res) => {
     res.status(400).json({ message: "Falha na validação do Google Login", error: error.message });
   }
 };
+
+// Callback do Google Login em modo Redirecionamento (Evita COOP/Popups Block)
+export const googleLoginCallback = async (req, res) => {
+  const token = req.body.credential;
+  const frontendUrl = process.env.FRONTEND_URL || 'https://natanconstrucoes.com.br';
+
+  try {
+    if (!token) {
+      return res.redirect(`${frontendUrl}/login?error=no_token`);
+    }
+
+    // Validar token com o Google OAuth API
+    const googleRes = await axios.get(`https://oauth2.googleapis.com/tokeninfo?id_token=${token}`);
+    const payload = googleRes.data;
+
+    if (!payload.email) {
+      return res.redirect(`${frontendUrl}/login?error=no_email`);
+    }
+
+    const email = payload.email.toLowerCase();
+    let user = await prisma.user.findUnique({
+      where: { email },
+      include: { address: true }
+    });
+
+    if (!user) {
+      // Registrar novo usuário com dados do Google
+      const randomPassword = Math.random().toString(36).slice(-10);
+      const hashedPassword = await bcrypt.hash(randomPassword, 12);
+      
+      user = await prisma.user.create({
+        data: {
+          name: (payload.name || "Usuário Google").substring(0, 50),
+          email: email,
+          password: hashedPassword,
+          avatar: payload.picture || null,
+          address: {
+            create: {
+              zipCode: '',
+              street: '',
+              number: '',
+              complement: '',
+              city: '',
+              state: ''
+            }
+          }
+        },
+        include: { address: true }
+      });
+    }
+
+    const sessionToken = jwt.sign(
+      { email: user.email, id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    // Redireciona de volta para o login passando o token e dados do usuário na query string
+    const redirectUrl = `${frontendUrl}/login?token=${sessionToken}&user=${encodeURIComponent(JSON.stringify(user))}`;
+    res.redirect(redirectUrl);
+  } catch (error) {
+    console.error("Erro no Google Login Callback:", error.message);
+    res.redirect(`${frontendUrl}/login?error=auth_failed`);
+  }
+};

@@ -44,6 +44,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Servir Frontend (Vite Build)
 const distPath = path.resolve(__dirname, '../../dist');

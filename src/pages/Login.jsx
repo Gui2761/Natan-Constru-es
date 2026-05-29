@@ -30,6 +30,24 @@ export default function Login() {
   };
 
   React.useEffect(() => {
+    // Intercepta parâmetros de redirecionamento Oauth do Google
+    const params = new URLSearchParams(window.location.search);
+    const tokenParam = params.get('token');
+    const userParam = params.get('user');
+
+    if (tokenParam && userParam) {
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userParam));
+        localStorage.setItem('token', tokenParam);
+        localStorage.setItem('user', JSON.stringify(parsedUser));
+        // Recarrega e direciona para o painel correto
+        window.location.href = parsedUser.role === 'ADMIN' ? '/admin' : '/';
+        return;
+      } catch (e) {
+        console.error("Erro ao analisar login redirecionado", e);
+      }
+    }
+
     const script = document.createElement('script');
     script.src = 'https://accounts.google.com/gsi/client';
     script.async = true;
@@ -40,7 +58,8 @@ export default function Login() {
       if (window.google) {
         window.google.accounts.id.initialize({
           client_id: '250984542079-illms0fgfk1krfkq4ko0i2skftjfd121.apps.googleusercontent.com',
-          callback: handleGoogleCallback,
+          ux_mode: 'redirect',
+          login_uri: `${window.location.origin}/api/auth/google/callback`
         });
 
         window.google.accounts.id.renderButton(

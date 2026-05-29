@@ -56,6 +56,7 @@ app.use((req, res, next) => {
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Resolução de Caminhos Estáticos (A partir da RAIZ)
 const distPath = path.resolve(__dirname, 'dist');
