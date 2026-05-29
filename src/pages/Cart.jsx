@@ -4,39 +4,12 @@ import Footer from '../components/Footer';
 import { Card, Button } from '../components/UI';
 import { useCart } from '../context/CartContext';
 import { getImageUrl } from '../services/api';
-import { Trash2, FileText, ArrowRight, ShoppingBag, Package } from 'lucide-react';
+import { Trash2, ArrowRight, ShoppingBag, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 export default function Cart() {
-  const { cart, removeFromCart, subtotal, totalWeight } = useCart();
+  const { cart, removeFromCart, updateCartQuantity, subtotal, totalWeight } = useCart();
   const navigate = useNavigate();
-
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(20);
-    doc.text('NATAN CONSTRUÇÕES - ORÇAMENTO', 10, 20);
-    doc.setFontSize(10);
-    doc.text(`Data: ${new Date().toLocaleDateString()}`, 10, 30);
-    doc.text(`Peso Total Estimado: ${totalWeight.toFixed(2)} kg`, 10, 35);
-
-    const tableData = cart.map(item => [
-      item.name,
-      item.quantity,
-      `R$ ${item.finalPrice.toFixed(2)}`,
-      `R$ ${(item.finalPrice * item.quantity).toFixed(2)}`
-    ]);
-
-    doc.autoTable({
-      head: [['Produto', 'Qtd', 'Preço Unit.', 'Total']],
-      body: tableData,
-      startY: 45
-    });
-
-    doc.text(`Total do Orçamento: R$ ${subtotal.toFixed(2)}`, 140, doc.autoTable.previous.finalY + 10);
-    doc.save('orcamento_natan.pdf');
-  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -67,7 +40,28 @@ export default function Cart() {
                     <h4 className="font-bold text-primary uppercase text-sm">{item.name}</h4>
                     <p className="text-outline text-xs mt-1">Peso: {item.weight} kg/un</p>
                     <div className="mt-4 flex items-center justify-between">
-                       <span className="font-black text-primary">R$ {item.finalPrice.toFixed(2)} <span className="text-outline font-medium text-xs">x {item.quantity}</span></span>
+                       <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                         <span className="font-black text-primary">R$ {item.finalPrice.toFixed(2)}</span>
+                         <div className="flex items-center gap-2 bg-surface-container/50 px-2 py-1 rounded-xl border border-outline-variant/30">
+                           <button 
+                             type="button"
+                             className="w-8 h-8 rounded-lg bg-white hover:bg-primary/5 text-primary border border-outline-variant/30 flex items-center justify-center font-black active:scale-95 transition-all disabled:opacity-50"
+                             onClick={() => updateCartQuantity(item.id, item.quantity - 1)}
+                             disabled={item.quantity <= 1}
+                           >
+                             -
+                           </button>
+                           <span className="w-8 text-center font-black text-sm text-primary">{item.quantity}</span>
+                           <button 
+                             type="button"
+                             className="w-8 h-8 rounded-lg bg-white hover:bg-primary/5 text-primary border border-outline-variant/30 flex items-center justify-center font-black active:scale-95 transition-all disabled:opacity-50"
+                             onClick={() => updateCartQuantity(item.id, item.quantity + 1)}
+                             disabled={item.quantity >= (item.stock || 999)}
+                           >
+                             +
+                           </button>
+                         </div>
+                       </div>
                        <Button variant="ghost" className="text-error" onClick={() => removeFromCart(item.id)}>
                          <Trash2 size={18} />
                        </Button>
@@ -105,10 +99,6 @@ export default function Cart() {
                    Ir para Checkout <ArrowRight className="ml-2" />
                 </Button>
               </Card>
-
-              <Button variant="outline" className="w-full h-14 border-primary/20 text-primary uppercase font-black text-xs tracking-widest" onClick={generatePDF}>
-                <FileText className="mr-2 w-4 h-4" /> Gerar Orçamento em PDF
-              </Button>
             </div>
           </div>
         )}

@@ -34,6 +34,12 @@ export const CartProvider = ({ children }) => {
     setCart(prev => prev.filter(item => item.id !== productId));
   };
 
+  const updateCartQuantity = (productId, quantity) => {
+    setCart(prev => prev.map(item => 
+      item.id === productId ? { ...item, quantity: Math.max(1, parseInt(quantity)) } : item
+    ));
+  };
+
   const clearCart = () => {
     setCart([]);
     setCoupon(null);
@@ -58,7 +64,7 @@ export const CartProvider = ({ children }) => {
 
   return (
     <CartContext.Provider value={{ 
-      cart, addToCart, removeFromCart, clearCart, 
+      cart, addToCart, removeFromCart, updateCartQuantity, clearCart, 
       subtotal, totalWeight, total, coupon, applyCoupon, 
       discountAmount 
     }}>

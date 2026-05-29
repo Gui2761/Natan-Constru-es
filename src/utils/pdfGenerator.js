@@ -56,12 +56,16 @@ export const generateBlueprintPDF = (order) => {
     doc.text('INFORMAÇÕES DO CLIENTE:', 15, 80);
     doc.setFont('helvetica', 'normal');
     doc.text(`Nome: ${order.user.name}`, 15, 86);
-    doc.text(`E-mail: ${order.user.email}`, 15, 92);
+    doc.text(`Telefone: ${order.user.phone || 'Não informado'}`, 15, 92);
+    doc.text(`E-mail: ${order.user.email}`, 15, 98);
     
     if (order.user.address) {
       const addr = order.user.address;
-      doc.text(`Endereço: ${addr.street}, ${addr.number} ${addr.complement ? `- ${addr.complement}` : ''}`, 15, 98);
-      doc.text(`Cidade/UF: ${addr.city}/${addr.state} - CEP: ${addr.zipCode}`, 15, 104);
+      doc.text(`Endereço: ${addr.street}, ${addr.number} ${addr.complement ? `- ${addr.complement}` : ''}`, 15, 104);
+      doc.text(`Cidade/UF: ${addr.city}/${addr.state} - CEP: ${addr.zipCode}`, 15, 110);
+      if (order.deliveryNotes) {
+        doc.text(`Observações: ${order.deliveryNotes}`, 15, 116);
+      }
     }
   }
 
@@ -77,8 +81,9 @@ export const generateBlueprintPDF = (order) => {
   ]);
 
   // Adicionando a Tabela usando jspdf-autotable
+  const tableStartY = order.user ? (order.deliveryNotes ? 124 : 116) : 80;
   doc.autoTable({
-    startY: order.user ? 112 : 80,
+    startY: tableStartY,
     head: [['Item', 'Descrição', 'Qtd', 'Preço Unitário', 'Peso Unitário', 'Subtotal']],
     body: tableRows,
     headStyles: {
@@ -99,13 +104,17 @@ export const generateBlueprintPDF = (order) => {
   doc.setFontSize(11);
   doc.text(`Peso Total da Carga: ${(order.totalWeight || 0).toFixed(2)} kg`, 15, finalY);
 
-  if (order.shippingCost > 0) {
-    doc.text(`Frete Logístico (${order.shippingService || 'PAC'}): R$ ${order.shippingCost.toFixed(2)}`, 15, finalY + 6);
+  if (order.shippingService === 'PICKUP') {
+    doc.text(`Opção de Entrega: Buscar na Loja (Grátis)`, 15, finalY + 6);
+  } else {
+    doc.text(`Opção de Entrega: Caminhão da Empresa`, 15, finalY + 6);
+    doc.text(`Frete Logístico: R$ ${order.shippingCost.toFixed(2)}`, 15, finalY + 12);
   }
 
   doc.setFontSize(16);
   doc.setTextColor(...primaryColor);
-  doc.text(`VALOR TOTAL: R$ ${order.totalAmount.toFixed(2)}`, 120, finalY + 5);
+  const totalOffset = order.shippingService === 'PICKUP' ? 5 : 8;
+  doc.text(`VALOR TOTAL: R$ ${order.totalAmount.toFixed(2)}`, 120, finalY + totalOffset);
 
   // Termos de Compromisso / Assinatura
   const termsY = finalY + 25;
