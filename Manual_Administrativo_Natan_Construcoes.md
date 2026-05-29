@@ -145,3 +145,27 @@ Para garantir a melhor experiência para o seu cliente e manter o seu caixa orga
 4.  **Emissão e Separação de Carga:** No Painel do Administrador, vá em **Pedidos**, expanda o pedido dele, clique em **"Gerar Nota Fiscal"** para imprimir o recibo de entrega que vai com o motorista do caminhão.
 5.  **Despacho da Carga:** Mude o status do pedido no painel para **"Saiu para Entrega"**.
 6.  **Finalização:** Quando o motorista retornar com o canhoto assinado pelo cliente, altere o status para **"Entregue"** para computar o faturamento definitivo no seu Dashboard financeiro.
+
+---
+
+## 🔄 9. Funcionamento do WhatsApp e Controle Automatizado de Estoque
+
+Para evitar falhas humanas e garantir que o seu controle de materiais esteja sempre perfeito, o sistema possui processos automatizados para os fluxos de fechamento de venda e cancelamento:
+
+### A. Fluxo de Venda (WhatsApp & Estoque)
+1.  **No Checkout:** Ao clicar em "Confirmar Pedido", o pedido é gravado no banco de dados como `PROCESSANDO`.
+2.  **Dedução de Estoque Automática:** A API do sistema varre os itens comprados e **subtrai automaticamente** as quantidades compradas do estoque de cada produto cadastrado.
+3.  **Formalização no WhatsApp:** O cliente é redirecionado ao WhatsApp comercial da loja com a **Mensagem de Compra Premium** contendo os detalhes do pedido, frete, endereço, e a identificação visual de qualquer cupom aplicado (porcentagem ou frete grátis).
+4.  **Emissão de NF:** O administrador imprime a Nota Fiscal/Recibo no painel e realiza a expedição.
+
+---
+
+### B. Fluxo de Cancelamento (WhatsApp & Estoque)
+1.  **Solicitação do Cliente:** O cliente acessa seu perfil pessoal e, se o pedido ainda não tiver saído para entrega, clica em **"Solicitar Cancelamento"**.
+2.  **Justificativa Obrigatória:** O cliente preenche obrigatoriamente um formulário explicando o motivo (ex: *"errei a quantidade"*). O pedido muda para `PENDENTE_CANCELAMENTO`.
+3.  **Aviso no WhatsApp:** O WhatsApp do cliente abre automaticamente enviando uma **Mensagem de Cancelamento Premium** com a justificativa técnica para o seu suporte.
+4.  **Visualização no Painel:** O card do pedido pisca em **amarelo pulsante** no seu painel administrativo.
+5.  **Aprovação e Restauração de Estoque:** Assim que o administrador altera o status do pedido para **`CANCELADO`** no painel:
+    *   O status vira definitivo (card com borda vermelha e bloqueado).
+    *   **O sistema devolve/restaura automaticamente** todos os produtos daquele pedido de volta ao estoque da loja de forma 100% autônoma!
+    *   Se um pedido cancelado for reativado por engano pelo administrador, o estoque é debitado novamente para garantir a integridade dos dados.
