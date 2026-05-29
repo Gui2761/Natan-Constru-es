@@ -44,6 +44,28 @@ export const deleteCoupon = async (req, res) => {
   }
 };
 
+// Atualizar cupom (Admin)
+export const updateCoupon = async (req, res) => {
+  const { id } = req.params;
+  const { code, discount, expiresAt } = req.body;
+  try {
+    const coupon = await prisma.coupon.update({
+      where: { id: parseInt(id) },
+      data: {
+        code: code.toUpperCase(),
+        discount: parseFloat(discount),
+        expiresAt: expiresAt ? new Date(expiresAt) : null
+      }
+    });
+    res.json(coupon);
+  } catch (error) {
+    if (error.code === 'P2002') {
+      return res.status(400).json({ message: "Este código de cupom já existe" });
+    }
+    res.status(500).json({ message: "Erro ao atualizar cupom" });
+  }
+};
+
 // Validar cupom (Public/Checkout)
 export const validateCoupon = async (req, res) => {
   const { code } = req.body;

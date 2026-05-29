@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../components/UI';
-import { Ticket, Plus, Trash2, Calendar, Percent, AlertTriangle } from 'lucide-react';
+import { Ticket, Plus, Trash2, Calendar, Percent, AlertTriangle, Edit2, X } from 'lucide-react';
 import api from '../services/api';
 
 export default function AdminCoupons() {
   const [coupons, setCoupons] = useState([]);
   const [newCoupon, setNewCoupon] = useState({ code: '', discount: '', expiresAt: '' });
+  const [editingCoupon, setEditingCoupon] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, couponId: null });
 
@@ -22,18 +23,37 @@ export default function AdminCoupons() {
     }
   };
 
-  const handleCreate = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await api.post('/coupons', newCoupon);
+      if (editingCoupon) {
+        await api.put(`/coupons/${editingCoupon.id}`, newCoupon);
+        setEditingCoupon(null);
+      } else {
+        await api.post('/coupons', newCoupon);
+      }
       setNewCoupon({ code: '', discount: '', expiresAt: '' });
       fetchCoupons();
     } catch (err) {
-      alert(err.response?.data?.message || 'Erro ao criar cupom');
+      alert(err.response?.data?.message || 'Erro ao salvar cupom');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditClick = (coupon) => {
+    setEditingCoupon(coupon);
+    setNewCoupon({
+      code: coupon.code,
+      discount: coupon.discount,
+      expiresAt: coupon.expiresAt ? coupon.expiresAt.substring(0, 10) : ''
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCoupon(null);
+    setNewCoupon({ code: '', discount: '', expiresAt: '' });
   };
 
   const handleDelete = (id) => {
@@ -43,6 +63,9 @@ export default function AdminCoupons() {
   const handleConfirmDelete = async () => {
     try {
       await api.delete(`/coupons/${confirmModal.couponId}`);
+      if (editingCoupon && editingCoupon.id === confirmModal.couponId) {
+        handleCancelEdit();
+      }
       fetchCoupons();
     } catch (err) {
       alert('Erro ao deletar cupom');
@@ -59,12 +82,31 @@ export default function AdminCoupons() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Formulário Novo Cupom */}
+        {/* Formulário Novo/Editar Cupom */}
         <Card className="lg:col-span-1 h-fit sticky top-8">
-           <h3 className="font-black uppercase italic tracking-tighter text-primary mb-6 flex items-center gap-2">
-             <Plus size={20} className="text-secondary" /> Novo Cupom
-           </h3>
-           <form onSubmit={handleCreate} className="space-y-4">
+           <div className="flex justify-between items-center mb-6">
+             <h3 className="font-black uppercase italic tracking-tighter text-primary flex items-center gap-2">
+               {editingCoupon ? (
+                 <>
+                   <Edit2 size={20} className="text-secondary" /> Editar Cupom
+                 </>
+               ) : (
+                 <>
+                   <Plus size={20} className="text-secondary" /> Novo Cupom
+                 </>
+               )}
+             </h3>
+             {editingCoupon && (
+               <button 
+                 onClick={handleCancelEdit} 
+                 className="p-1.5 text-outline hover:text-primary hover:bg-outline/5 rounded-lg transition-all"
+                 title="Cancelar Edição"
+               >
+                 <X size={16} />
+               </button>
+             )}
+           </div>
+           <form onSubmit={handleSubmit} className="space-y-4">
               <Input 
                 label="Código (Ex: NATAN10)" 
                 value={newCoupon.code} 
@@ -84,9 +126,16 @@ export default function AdminCoupons() {
                 value={newCoupon.expiresAt} 
                 onChange={e => setNewCoupon({...newCoupon, expiresAt: e.target.value})} 
               />
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Criando...' : 'Criar Cupom'}
-              </Button>
+              <div className="flex gap-2">
+                {editingCoupon && (
+                  <Button type="button" variant="outline" className="flex-1" onClick={handleCancelEdit}>
+                    Cancelar
+                  </Button>
+                )}
+                <Button type="submit" className="flex-1" disabled={loading}>
+                  {loading ? 'Salvando...' : editingCoupon ? 'Salvar Alterações' : 'Criar Cupom'}
+                </Button>
+              </div>
            </form>
         </Card>
 
@@ -114,12 +163,22 @@ export default function AdminCoupons() {
                     </div>
                   </div>
                 </div>
-                <button 
-                  onClick={() => handleDelete(coupon.id)}
-                  className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
-                >
-                  <Trash2 size={20} />
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => handleEditClick(coupon)}
+                    className="p-3 text-primary hover:bg-primary/5 rounded-xl transition-colors"
+                    title="Editar Cupom"
+                  >
+                    <Edit2 size={20} />
+                  </button>
+                  <button 
+                    onClick={() => handleDelete(coupon.id)}
+                    className="p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                    title="Excluir Cupom"
+                  >
+                    <Trash2 size={20} />
+                  </button>
+                </div>
               </Card>
             ))
           )}

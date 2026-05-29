@@ -6,7 +6,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, Button, Input } from '../components/UI';
 import api, { getImageUrl } from '../services/api';
-import { ShoppingCart, MessageCircle, Calculator, Info, Package, ArrowLeft, Percent } from 'lucide-react';
+import { ShoppingCart, MessageCircle, Calculator, Info, Package, ArrowLeft, Percent, Share2 } from 'lucide-react';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -56,6 +56,24 @@ export default function ProductDetail() {
     addToCart(product, quantity);
     setAdded(true);
     setTimeout(() => setAdded(false), 3000);
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: product.name,
+      text: `Confira ${product.name} na Natan Construções por R$ ${product.finalPrice.toFixed(2)}!`,
+      url: window.location.href
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        alert('Link do produto copiado com sucesso!');
+      }
+    } catch (err) {
+      console.error('Erro ao compartilhar', err);
+    }
   };
 
 
@@ -160,6 +178,15 @@ export default function ProductDetail() {
                   <MessageCircle className="mr-3 text-green-600" /> Negociar Lote
                 </Button>
               </div>
+
+              <Button 
+                size="md" 
+                variant="ghost" 
+                className="w-full text-xs font-black uppercase tracking-widest flex items-center justify-center gap-2 text-outline hover:text-primary mt-2 h-12 hover:bg-primary/5 rounded-2xl" 
+                onClick={handleShare}
+              >
+                <Share2 size={16} className="text-secondary animate-pulse" /> Compartilhar este Produto
+              </Button>
 
               {/* Calculadora de Materiais Premium */}
               <Card className="bg-surface-container border-dashed border-2 border-outline-variant mt-10">

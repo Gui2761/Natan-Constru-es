@@ -70,6 +70,24 @@ export default function Checkout() {
   const shippingCost = calculateShipping();
   const grandTotal = total + shippingCost;
 
+  const generateWhatsAppLink = () => {
+    if (!createdOrder) return '';
+    const orderId = createdOrder.id || 'N/A';
+    const itemsList = createdOrder.items.map(item => `• ${item.name} (x${item.quantity}) - R$ ${(item.finalPrice * item.quantity).toFixed(2)}`).join('\n');
+    
+    const text = `*NOVO PEDIDO - NATAN CONSTRUÇÕES* 🏗️\n\n` +
+      `*Pedido:* #${orderId}\n` +
+      `*Cliente:* ${createdOrder.user.name}\n` +
+      `*Endereço:* ${createdOrder.user.address.zipCode} - ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n\n` +
+      `*Itens do Pedido:*\n${itemsList}\n\n` +
+      `*Peso da Carga:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
+      `*Frete Logístico (${createdOrder.shippingService}):* R$ ${createdOrder.shippingCost.toFixed(2)}\n` +
+      `*VALOR TOTAL:* R$ ${createdOrder.totalAmount.toFixed(2)}\n\n` +
+      `*Gostaria de agendar a entrega do meu material!*`;
+    
+    return `https://wa.me/5579996741307?text=${encodeURIComponent(text)}`;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) return navigate('/login');
@@ -104,25 +122,20 @@ export default function Checkout() {
     }
   };
 
-  if (success) {
-    const generateWhatsAppLink = () => {
-      if (!createdOrder) return '';
-      const orderId = createdOrder.id || 'N/A';
-      const itemsList = createdOrder.items.map(item => `• ${item.name} (x${item.quantity}) - R$ ${(item.finalPrice * item.quantity).toFixed(2)}`).join('\n');
-      
-      const text = `*NOVO PEDIDO - NATAN CONSTRUÇÕES* 🏗️\n\n` +
-        `*Pedido:* #${orderId}\n` +
-        `*Cliente:* ${createdOrder.user.name}\n` +
-        `*Endereço:* ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n\n` +
-        `*Itens do Pedido:*\n${itemsList}\n\n` +
-        `*Peso da Carga:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
-        `*Frete Logístico (${createdOrder.shippingService}):* R$ ${createdOrder.shippingCost.toFixed(2)}\n` +
-        `*VALOR TOTAL:* R$ ${createdOrder.totalAmount.toFixed(2)}\n\n` +
-        `*Gostaria de agendar a entrega do meu material!*`;
-      
-      return `https://wa.me/5579996741307?text=${encodeURIComponent(text)}`;
-    };
+  // Passo obrigatório: redirecionamento automático para o WhatsApp
+  React.useEffect(() => {
+    if (success && createdOrder) {
+      const link = generateWhatsAppLink();
+      if (link) {
+        const timer = setTimeout(() => {
+          window.open(link, '_blank');
+        }, 1500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [success, createdOrder]);
 
+  if (success) {
     return (
       <div className="min-h-screen flex flex-col bg-background">
         <Header />
@@ -139,7 +152,7 @@ export default function Checkout() {
                 <h2 className="text-3xl font-black text-primary uppercase italic tracking-tighter">Pedido Realizado!</h2>
               </div>
               <p className="text-outline text-sm">
-                Seu pedido foi encaminhado no sistema. Para garantir o melhor prazo de frete e separação rápida, faça o download do orçamento e envie ao nosso atendimento no WhatsApp!
+                Seu pedido foi recebido com sucesso! <span className="font-bold text-primary block mt-1">Estamos te redirecionando automaticamente para o WhatsApp para concluir seu agendamento obrigatório.</span> Se a conversa não abrir, clique no botão verde abaixo.
               </p>
               
               <div className="flex flex-col gap-3 pt-4">
