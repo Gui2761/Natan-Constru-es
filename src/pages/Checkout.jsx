@@ -19,7 +19,8 @@ export default function Checkout() {
   const [couponCode, setCouponCode] = useState('');
   const [couponResult, setCouponResult] = useState(null);
   const [createdOrder, setCreatedOrder] = useState(null);
-  const [shippingService, setShippingService] = useState('PAC');
+  const [shippingService, setShippingService] = useState('TRUCK');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
 
   // Pre-fill address if user is logged in
   const [formData, setFormData] = useState({
@@ -52,17 +53,20 @@ export default function Checkout() {
     }
   };
 
-  // Calculate Shipping based on totalWeight, State (UF) and Service (PAC vs SEDEX)
+  // Calculate Shipping based on totalWeight, State (UF) and Service (TRUCK vs PICKUP)
   const calculateShipping = () => {
+    if (shippingService === 'PICKUP') return 0;
     if (!formData.state || totalWeight === 0) return 0;
-    const base = shippingService === 'SEDEX' ? 28.0 : 15.0;
-    const rate = shippingService === 'SEDEX' ? 2.10 : 1.20;
+    
+    // Caminhão da Empresa
+    const base = 35.0; // Taxa base de frete rodoviário
+    const rate = 0.80; // Custo logístico por kg do material
     const weightFee = totalWeight * rate;
     
     const state = formData.state.toUpperCase().trim();
-    let multiplier = 2.2; // default outer state
-    if (state === 'SE') multiplier = 1.0; // Local rate for Sergipe
-    else if (['AL', 'BA', 'PE'].includes(state)) multiplier = 1.5; // Regional rate for neighboring Northeast states
+    let multiplier = 2.0; 
+    if (state === 'SE') multiplier = 1.0; // Tarifa local para Sergipe
+    else if (['AL', 'BA', 'PE'].includes(state)) multiplier = 1.5; // Estados vizinhos
     
     return base + (weightFee * multiplier);
   };
@@ -79,10 +83,12 @@ export default function Checkout() {
       `*Pedido:* #${orderId}\n` +
       `*Cliente:* ${createdOrder.user.name}\n` +
       `*Telefone:* ${createdOrder.user.phone || 'Não informado'}\n` +
-      `*Endereço:* ${createdOrder.user.address.zipCode} - ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n\n` +
+      `*Endereço:* ${createdOrder.user.address.zipCode} - ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n` +
+      (createdOrder.deliveryNotes ? `*Observações de Entrega:* ${createdOrder.deliveryNotes}\n` : '') + `\n` +
       `*Itens do Pedido:*\n${itemsList}\n\n` +
       `*Peso da Carga:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
-      `*Frete Logístico (${createdOrder.shippingService}):* R$ ${createdOrder.shippingCost.toFixed(2)}\n` +
+      `*Opção de Frete:* ${createdOrder.shippingService === 'PICKUP' ? 'Buscar na Loja (Grátis)' : 'Caminhão da Empresa'}\n` +
+      `*Frete Logístico:* R$ ${createdOrder.shippingCost.toFixed(2)}\n` +
       `*VALOR TOTAL:* R$ ${createdOrder.totalAmount.toFixed(2)}\n\n` +
       `*Gostaria de agendar a entrega do meu material!*`;
     
@@ -107,6 +113,7 @@ export default function Checkout() {
         totalWeight,
         shippingCost,
         shippingService,
+        deliveryNotes,
         user: {
           ...user,
           address: formData
@@ -239,47 +246,56 @@ export default function Checkout() {
                    maxLength={2}
                    onChange={e => setFormData({...formData, state: e.target.value.toUpperCase()})} 
                  />
+                 <div className="md:col-span-2">
+                   <Input 
+                     label="Observações de Entrega (Ex: Condomínio, Bloco, Ponto de Referência)" 
+                     value={deliveryNotes} 
+                     maxLength={150}
+                     placeholder="Ex: Condomínio Residencial, Bloco C, Apto 204"
+                     onChange={e => setDeliveryNotes(e.target.value)} 
+                   />
+                 </div>
               </form>
             </Card>
 
-            {/* Seletor de Frete Correios */}
+            {/* Opções de Frete Customizadas */}
             <Card>
                <h3 className="text-lg font-black uppercase italic tracking-tighter text-primary mb-6 flex items-center gap-2">
-                <Truck size={20} className="text-secondary" /> Opção de Frete (Correios)
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div 
-                  className={`p-4 border-2 rounded-2xl cursor-pointer transition-all flex items-center justify-between ${shippingService === 'PAC' ? 'border-primary bg-primary/5 shadow-md scale-[1.01]' : 'border-outline-variant hover:border-primary/50'}`}
-                  onClick={() => setShippingService('PAC')}
-                >
-                  <div className="flex items-center gap-3">
-                    <Truck className="text-primary" />
-                    <div>
-                      <p className="font-bold text-primary">Correios PAC</p>
-                      <p className="text-[10px] text-outline uppercase font-black">Entrega Normal Logística</p>
-                    </div>
-                  </div>
-                  <span className="font-black text-primary">
-                    {formData.state ? `R$ ${(15.0 + totalWeight * 1.20 * (formData.state === 'SE' ? 1.0 : ['AL','BA','PE'].includes(formData.state) ? 1.5 : 2.2)).toFixed(2)}` : 'Preencha o CEP'}
-                  </span>
-                </div>
+                 <Truck size={20} className="text-secondary" /> Opção de Frete & Entrega
+               </h3>
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                 <div 
+                   className={`p-4 border-2 rounded-2xl cursor-pointer transition-all flex items-center justify-between ${shippingService === 'TRUCK' ? 'border-primary bg-primary/5 shadow-md scale-[1.01]' : 'border-outline-variant hover:border-primary/50'}`}
+                   onClick={() => setShippingService('TRUCK')}
+                 >
+                   <div className="flex items-center gap-3">
+                     <Truck className="text-primary animate-pulse" />
+                     <div>
+                       <p className="font-bold text-primary">Caminhão da Empresa</p>
+                       <p className="text-[10px] text-outline uppercase font-black">Entrega Logística na Obra</p>
+                     </div>
+                   </div>
+                   <span className="font-black text-primary text-sm md:text-base">
+                     {formData.state ? `R$ ${(35.0 + totalWeight * 0.80 * (formData.state === 'SE' ? 1.0 : ['AL','BA','PE'].includes(formData.state) ? 1.5 : 2.0)).toFixed(2)}` : 'Preencha o CEP'}
+                   </span>
+                 </div>
 
-                <div 
-                  className={`p-4 border-2 rounded-2xl cursor-pointer transition-all flex items-center justify-between ${shippingService === 'SEDEX' ? 'border-primary bg-primary/5 shadow-md scale-[1.01]' : 'border-outline-variant hover:border-primary/50'}`}
-                  onClick={() => setShippingService('SEDEX')}
-                >
-                  <div className="flex items-center gap-3">
-                    <Truck className="text-secondary" />
-                    <div>
-                      <p className="font-bold text-primary">Correios SEDEX</p>
-                      <p className="text-[10px] text-outline uppercase font-black">Entrega Rápida Expressa</p>
-                    </div>
-                  </div>
-                  <span className="font-black text-primary">
-                    {formData.state ? `R$ ${(28.0 + totalWeight * 2.10 * (formData.state === 'SE' ? 1.0 : ['AL','BA','PE'].includes(formData.state) ? 1.5 : 2.2)).toFixed(2)}` : 'Preencha o CEP'}
-                  </span>
-                </div>
-              </div>
+                 <div 
+                   className={`p-4 border-2 rounded-2xl cursor-pointer transition-all flex items-center justify-between ${shippingService === 'PICKUP' ? 'border-primary bg-primary/5 shadow-md scale-[1.01]' : 'border-outline-variant hover:border-primary/50'}`}
+                   onClick={() => setShippingService('PICKUP')}
+                 >
+                   <div className="flex items-center gap-3">
+                     <MapPin className="text-secondary" />
+                     <div>
+                       <p className="font-bold text-primary">Buscar na Loja</p>
+                       <p className="text-[10px] text-outline uppercase font-black">Retirada Direta / Sem Frete</p>
+                     </div>
+                   </div>
+                   <span className="font-black text-green-600 uppercase tracking-widest text-xs md:text-sm">
+                     Grátis
+                   </span>
+                 </div>
+               </div>
             </Card>
 
             <Card>
