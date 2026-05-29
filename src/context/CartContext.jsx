@@ -21,12 +21,17 @@ export const CartProvider = ({ children }) => {
   const addToCart = (product, quantity) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id);
+      const qtyToAdd = parseInt(quantity);
+      const maxStock = product.stock !== undefined ? product.stock : 999;
+      
       if (existing) {
         return prev.map(item => 
-          item.id === product.id ? { ...item, quantity: item.quantity + parseInt(quantity) } : item
+          item.id === product.id 
+            ? { ...item, quantity: Math.min(maxStock, existing.quantity + qtyToAdd) } 
+            : item
         );
       }
-      return [...prev, { ...product, quantity: parseInt(quantity) }];
+      return [...prev, { ...product, quantity: Math.min(maxStock, qtyToAdd) }];
     });
   };
 
@@ -36,7 +41,9 @@ export const CartProvider = ({ children }) => {
 
   const updateCartQuantity = (productId, quantity) => {
     setCart(prev => prev.map(item => 
-      item.id === productId ? { ...item, quantity: Math.max(1, parseInt(quantity)) } : item
+      item.id === productId 
+        ? { ...item, quantity: Math.min(item.stock !== undefined ? item.stock : 999, Math.max(1, parseInt(quantity))) } 
+        : item
     ));
   };
 
