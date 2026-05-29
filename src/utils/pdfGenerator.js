@@ -30,9 +30,9 @@ export const generateBlueprintPDF = (order) => {
 
   // Informações da Empresa (Lado Direito do Cabeçalho)
   doc.setFontSize(8);
-  doc.text('CNPJ: 12.345.678/0001-99', 140, 15);
+  doc.text('CNPJ: 65.585.500/0001-88', 140, 15);
   doc.text('WhatsApp: (79) 99674-1307', 140, 20);
-  doc.text('natan.obras@suaobra.com.br', 140, 25);
+  doc.text('natanconstrucoes79@gmail.com', 140, 25);
   doc.text('www.natanconstrucoes.com.br', 140, 30);
 
   // Corpo do Orçamento
@@ -155,10 +155,10 @@ export const generateNotaFiscalPDF = (order) => {
 
   // Corporate Info
   doc.setFontSize(8);
-  doc.text('CNPJ: 12.345.678/0001-99', 140, 15);
-  doc.text('Insc. Estadual: 098.765.432-1', 140, 20);
-  doc.text('Endereço: Av. Principal, 1000 - Centro, Aracaju/SE', 140, 25);
-  doc.text('WhatsApp: (79) 99674-1307', 140, 30);
+  doc.text('CNPJ: 65.585.500/0001-88', 140, 15);
+  doc.text('Insc. Estadual: ISENTO', 140, 20);
+  doc.text('Endereço: Av. Erotildes Noer de Aragão, 1545', 140, 25);
+  doc.text('Glória/SE - CEP: 49680-000', 140, 30);
 
   // Invoice Meta
   doc.setTextColor(...textColor);
@@ -277,7 +277,7 @@ export const generateFinancialReportPDF = (report) => {
 
   // Corporate Info
   doc.setFontSize(8);
-  doc.text('CNPJ: 12.345.678/0001-99', 140, 15);
+  doc.text('CNPJ: 65.585.500/0001-88', 140, 15);
   doc.text('Área: Controle Administrativo e Custos', 140, 20);
   doc.text('Gerado Eletronicamente via Dashboard', 140, 25);
   doc.text('www.natanconstrucoes.com.br', 140, 30);
