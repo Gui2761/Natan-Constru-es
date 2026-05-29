@@ -47,9 +47,26 @@ export const productModel = {
   async update({ where = {}, data = {} } = {}) {
     if (Object.keys(data).length === 0) return this.findUnique({ where });
 
-    const setClause = Object.keys(data).map(k => `\`${k}\` = ?`).join(', ');
+    const setClauses = [];
+    const updateParams = [];
+
+    for (const k of Object.keys(data)) {
+      const val = data[k];
+      if (val && typeof val === 'object' && val.decrement !== undefined) {
+        setClauses.push(`\`${k}\` = \`${k}\` - ?`);
+        updateParams.push(val.decrement);
+      } else if (val && typeof val === 'object' && val.increment !== undefined) {
+        setClauses.push(`\`${k}\` = \`${k}\` + ?`);
+        updateParams.push(val.increment);
+      } else {
+        setClauses.push(`\`${k}\` = ?`);
+        updateParams.push(val);
+      }
+    }
+
+    const setClause = setClauses.join(', ');
     const { clause, params: whereParams } = buildWhere(where);
-    await q(`UPDATE \`Product\` SET ${setClause} ${clause}`, [...Object.values(data), ...whereParams]);
+    await q(`UPDATE \`Product\` SET ${setClause} ${clause}`, [...updateParams, ...whereParams]);
     return this.findUnique({ where });
   },
 
