@@ -1,8 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Facebook, Instagram, Youtube, Mail, MapPin, Phone } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Footer() {
+  const { user, isAdmin } = useAuth();
+
   return (
     <footer className="bg-primary text-white pt-20 pb-10 mt-20">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 border-b border-white/10 pb-12">
@@ -36,8 +39,10 @@ export default function Footer() {
         <div>
           <h4 className="font-bold uppercase tracking-widest text-secondary text-sm mb-8">Navegação</h4>
           <ul className="space-y-4 text-sm text-white/80">
-            <li><Link to="/admin" className="hover:text-secondary">Painel Administrativo</Link></li>
-            <li><Link to="/login" className="hover:text-secondary">Minha Conta</Link></li>
+            {isAdmin && (
+              <li><Link to="/admin" className="hover:text-secondary">Painel Administrativo</Link></li>
+            )}
+            <li><Link to={user ? '/minha-conta' : '/login'} className="hover:text-secondary">Minha Conta</Link></li>
             <li><Link to="/carrinho" className="hover:text-secondary">Carrinho de Compras</Link></li>
             <li><Link to="/produtos" className="hover:text-secondary">Ofertas do Dia</Link></li>
           </ul>
