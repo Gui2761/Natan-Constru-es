@@ -45,3 +45,8 @@ Params: []
 DATABASE_URL inválida. Configure mysql:// no painel da Hostinger.
 SQL: SELECT * FROM `Product`  ORDER BY `createdAt` DESC 
 Params: []
+
+[2026-05-29T23:36:29.670Z] SQL ERROR:
+DATABASE_URL inválida. Configure mysql:// no painel da Hostinger.
+SQL: DESCRIBE `Banner`
+Params: []

@@ -180,6 +180,18 @@ app.get('/api/diag/migrate-db', async (req, res) => {
   }
 });
 
+// Diagnostic endpoint to check columns of Banner table
+app.get('/api/diag/db-banner-cols', async (req, res) => {
+  try {
+    const prisma = (await import('./server/src/lib/prisma.js')).default;
+    const columns = await prisma.$queryRaw('DESCRIBE `Banner`');
+    res.json(columns);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 // Usar Rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
