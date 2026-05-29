@@ -24,6 +24,8 @@ export default function AdminProducts() {
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [deleteConfirmName, setDeleteConfirmName] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -100,10 +102,27 @@ export default function AdminProducts() {
     setExistingImages([]);
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm('Deseja excluir este produto?')) return;
-    await api.delete(`/products/${id}`);
-    fetchData();
+  const handleDeleteTrigger = (product) => {
+    setDeleteConfirmId(product.id);
+    setDeleteConfirmName(product.name);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteConfirmId) return;
+    try {
+      await api.delete(`/products/${deleteConfirmId}`);
+      fetchData();
+    } catch (err) {
+      alert("Erro ao excluir produto.");
+    } finally {
+      setDeleteConfirmId(null);
+      setDeleteConfirmName('');
+    }
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirmId(null);
+    setDeleteConfirmName('');
   };
 
   const filteredProducts = products.filter(p => 
@@ -295,7 +314,7 @@ export default function AdminProducts() {
                   <Button variant="ghost" className="text-primary hover:bg-primary/10" onClick={() => handleEdit(p)}>
                     Editar
                   </Button>
-                  <Button variant="ghost" className="text-error" onClick={() => handleDelete(p.id)}>
+                  <Button variant="ghost" className="text-error" onClick={() => handleDeleteTrigger(p)}>
                     <Trash2 size={18} />
                   </Button>
                 </td>
@@ -304,6 +323,33 @@ export default function AdminProducts() {
           </tbody>
         </table>
       </Card>
+
+      {/* Custom Premium Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-surface-container border border-outline-variant max-w-md w-full p-6 rounded-3xl shadow-2xl space-y-4 animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-3 text-error">
+              <div className="p-3 bg-error/10 rounded-2xl">
+                <Trash2 size={24} />
+              </div>
+              <h3 className="text-xl font-black uppercase italic tracking-tighter">Excluir Produto?</h3>
+            </div>
+            
+            <p className="text-on-surface/80 text-sm leading-relaxed">
+              Você tem certeza que deseja excluir o produto <strong className="text-primary">"{deleteConfirmName}"</strong>? Esta ação é definitiva e removerá as mídias associadas.
+            </p>
+            
+            <div className="flex gap-3 justify-end pt-2">
+              <Button variant="ghost" onClick={handleCancelDelete}>
+                Cancelar
+              </Button>
+              <Button variant="secondary" className="bg-error text-white hover:bg-red-600 border-none" onClick={handleConfirmDelete}>
+                Confirmar Exclusão
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
