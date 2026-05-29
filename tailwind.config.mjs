@@ -18,6 +18,7 @@ export default {
         'on-surface': '#1a1c1f',
         'outline': '#737780',
         'outline-variant': '#c2c6d0',
+        'error': '#dc2626',
       },
       fontFamily: {
         headline: ['Work Sans', 'sans-serif'],

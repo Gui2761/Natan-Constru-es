@@ -9,7 +9,9 @@ import {
   Package,
   ArrowRight,
   TrendingDown,
-  DollarSign
+  DollarSign,
+  Download,
+  Calendar
 } from 'lucide-react';
 import { 
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
@@ -17,6 +19,7 @@ import {
 } from 'recharts';
 import api from '../services/api';
 import { useNavigate } from 'react-router-dom';
+import { generateFinancialReportPDF } from '../utils/pdfGenerator';
 
 const StatCard = ({ title, value, icon: Icon, color, trend, loading }) => (
   <Card className="flex flex-col gap-4 overflow-hidden relative">
@@ -55,6 +58,10 @@ export default function AdminDashboard() {
     monthlyData: []
   });
   const [loading, setLoading] = useState(true);
+  const [rawOrders, setRawOrders] = useState([]);
+  const [rawProducts, setRawProducts] = useState([]);
+  const [reportPeriod, setReportPeriod] = useState('weekly');
+  const [customDates, setCustomDates] = useState({ start: '', end: '' });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -71,6 +78,9 @@ export default function AdminDashboard() {
 
       const orders = ordersRes.data;
       const products = productsRes.data.products || productsRes.data;
+
+      setRawOrders(orders);
+      setRawProducts(products);
 
       // 1. Cálculos de Vendas
       const today = new Date().toISOString().split('T')[0];
@@ -98,14 +108,12 @@ export default function AdminDashboard() {
       const avgTicket = activeOrders.length > 0 ? totalSales / activeOrders.length : 0;
 
       // 2. Lucro Estimado (Considerando costPrice)
-      // Nota: Para pedidos antigos sem costPrice salvo no JSON do item, estimamos 70% de margem
       let totalProfit = 0;
       activeOrders.forEach(order => {
         let orderCost = 0;
         try {
            const items = JSON.parse(order.items);
            items.forEach(item => {
-              // Busca o costPrice atual do produto como fallback
               const product = products.find(p => p.id === item.id);
               const cost = product?.costPrice || (item.finalPrice * 0.7); 
               orderCost += (cost * item.quantity);
@@ -167,8 +175,148 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleGenerateFinancialReport = () => {
+    let startDate, endDate;
+    let periodName = '';
+
+    const today = new Date();
+
+    if (reportPeriod === 'weekly') {
+      startDate = new Date();
+      startDate.setDate(today.getDate() - 7);
+      endDate = today;
+      periodName = 'Semanal (Ultimos 7 dias)';
+    } else if (reportPeriod === 'monthly') {
+      startDate = new Date();
+      startDate.setDate(today.getDate() - 30);
+      endDate = today;
+      periodName = 'Mensal (Ultimos 30 dias)';
+    } else if (reportPeriod === 'yearly') {
+      startDate = new Date(today.getFullYear(), 0, 1);
+      endDate = today;
+      periodName = `Anual (${today.getFullYear()})`;
+    } else if (reportPeriod === 'custom') {
+      if (!customDates.start || !customDates.end) {
+        alert('Por favor, selecione as datas de início e fim!');
+        return;
+      }
+      startDate = new Date(customDates.start);
+      endDate = new Date(customDates.end);
+      endDate.setHours(23, 59, 59, 999);
+      periodName = `Personalizado (${new Date(customDates.start).toLocaleDateString('pt-BR')} a ${new Date(customDates.end).toLocaleDateString('pt-BR')})`;
+    }
+
+    // Filtrar pedidos ativos no período
+    const activeOrders = rawOrders.filter(o => {
+      if (o.status === 'CANCELADO') return false;
+      const d = new Date(o.createdAt);
+      return d >= startDate && d <= endDate;
+    });
+
+    if (activeOrders.length === 0) {
+      alert('Nenhum pedido faturado encontrado neste período!');
+      return;
+    }
+
+    let totalSales = 0;
+    let totalProfit = 0;
+    const ordersList = [];
+
+    activeOrders.forEach(order => {
+      let orderCost = 0;
+      try {
+        const items = JSON.parse(order.items);
+        items.forEach(item => {
+          const product = rawProducts.find(p => p.id === item.id);
+          const cost = product?.costPrice || (item.finalPrice * 0.7);
+          orderCost += (cost * item.quantity);
+        });
+      } catch (e) {
+        orderCost = order.totalAmount * 0.7;
+      }
+
+      const profit = order.totalAmount - orderCost;
+      totalSales += order.totalAmount;
+      totalProfit += profit;
+
+      ordersList.push({
+        ...order,
+        estimatedCost: orderCost,
+        estimatedProfit: profit
+      });
+    });
+
+    const margin = totalSales > 0 ? (totalProfit / totalSales) * 100 : 0;
+    const avgTicket = activeOrders.length > 0 ? totalSales / activeOrders.length : 0;
+
+    generateFinancialReportPDF({
+      periodName,
+      totalSales,
+      totalProfit,
+      margin,
+      ordersCount: activeOrders.length,
+      avgTicket,
+      ordersList
+    });
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
+      {/* Widget Exportar Relatório Financeiro Premium */}
+      <Card className="bg-surface-container border border-outline-variant/30 p-6 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden hover-premium">
+         <div className="relative z-10 space-y-1">
+            <h4 className="text-xl font-black uppercase italic tracking-tighter text-primary flex items-center gap-2">
+               📊 Relatórios de Performance Financeira
+            </h4>
+            <p className="text-xs text-outline font-bold uppercase tracking-widest">
+              Gere demonstrativos de lucro, custos e faturamento em PDF para reuniões.
+            </p>
+         </div>
+         <div className="flex flex-wrap items-center gap-4 z-10 w-full md:w-auto">
+            <select 
+              className="bg-surface border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-primary focus:ring-2 focus:ring-primary/20 outline-none cursor-pointer"
+              value={reportPeriod}
+              onChange={e => {
+                setReportPeriod(e.target.value);
+                if (e.target.value !== 'custom') {
+                  setCustomDates({ start: '', end: '' });
+                }
+              }}
+            >
+               <option value="weekly">Últimos 7 Dias (Semanal)</option>
+               <option value="monthly">Últimos 30 Dias (Mensal)</option>
+               <option value="yearly">Este Ano (Anual)</option>
+               <option value="custom">Período Personalizado</option>
+            </select>
+            
+            {reportPeriod === 'custom' && (
+              <div className="flex items-center gap-2 animate-in slide-in-from-left duration-300">
+                 <input 
+                   type="date" 
+                   className="bg-surface border border-outline-variant rounded-xl px-3 py-2 text-xs font-bold text-primary outline-none"
+                   value={customDates.start}
+                   onChange={e => setCustomDates({...customDates, start: e.target.value})}
+                 />
+                 <span className="text-xs font-black text-outline">Até</span>
+                 <input 
+                   type="date" 
+                   className="bg-surface border border-outline-variant rounded-xl px-3 py-2 text-xs font-bold text-primary outline-none"
+                   value={customDates.end}
+                   onChange={e => setCustomDates({...customDates, end: e.target.value})}
+                 />
+              </div>
+            )}
+            
+            <Button 
+              size="md" 
+              className="font-black uppercase italic tracking-widest text-xs h-12 hover-premium"
+              onClick={handleGenerateFinancialReport}
+            >
+              <Download className="mr-2 animate-bounce" size={16} /> Exportar Relatório PDF
+            </Button>
+         </div>
+      </Card>
+
       {/* Alerta de Novos Pedidos */}
       {stats.pendingOrders > 0 && (
         <div className="bg-primary border-l-8 border-l-secondary p-6 rounded-2xl flex items-center justify-between shadow-2xl animate-pulse">

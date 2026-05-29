@@ -218,9 +218,9 @@ export default function UserDashboard() {
                                       Voltar
                                     </Button>
                                     <Button 
-                                      variant="outline" 
+                                      variant="primary" 
                                       size="sm" 
-                                      className="bg-error text-white hover:bg-error/90 uppercase text-[10px] tracking-widest font-black border-transparent"
+                                      className="bg-error text-white hover:bg-error/90 uppercase text-[10px] tracking-widest font-black shadow-md"
                                       onClick={() => handleCancelRequest(order)}
                                     >
                                       Confirmar e Abrir WhatsApp

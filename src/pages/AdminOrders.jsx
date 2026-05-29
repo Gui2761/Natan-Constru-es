@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../components/UI';
 import api from '../services/api';
-import { ShoppingCart, Search, Calendar, PackageCheck, Truck, CheckCircle2, XCircle, Info, AlertTriangle } from 'lucide-react';
+import { ShoppingCart, Search, Calendar, PackageCheck, Truck, CheckCircle2, XCircle, Info, AlertTriangle, Download, FileText } from 'lucide-react';
+import { generateBlueprintPDF, generateNotaFiscalPDF } from '../utils/pdfGenerator';
 
 
 export default function AdminOrders() {
@@ -198,6 +199,24 @@ export default function AdminOrders() {
                         </div>
                       ))}
                    </div>
+                   <div className="flex flex-wrap gap-4 mt-6 pt-6 border-t border-outline-variant/40">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] h-11 px-6 hover:bg-secondary/5 border-secondary/20 rounded-xl"
+                        onClick={() => generateBlueprintPDF(order)}
+                      >
+                        <Download size={14} className="text-secondary animate-bounce" /> Baixar Orçamento PDF
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="flex items-center gap-2 font-black uppercase tracking-widest text-[10px] h-11 px-6 hover:bg-primary/5 border-primary/20 rounded-xl"
+                        onClick={() => generateNotaFiscalPDF(order)}
+                      >
+                        <FileText size={14} className="text-primary" /> Gerar Nota Fiscal
+                      </Button>
+                    </div>
                 </div>
               )}
             </Card>
