@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Input } from '../components/UI';
 import api from '../services/api';
-import { ShoppingCart, Search, Calendar, PackageCheck, Truck, CheckCircle2, XCircle, Info } from 'lucide-react';
+import { ShoppingCart, Search, Calendar, PackageCheck, Truck, CheckCircle2, XCircle, Info, AlertTriangle } from 'lucide-react';
 
 
 export default function AdminOrders() {
@@ -9,7 +9,7 @@ export default function AdminOrders() {
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('');
   const [expandedOrder, setExpandedOrder] = useState(null);
-
+  const [confirmModal, setConfirmModal] = useState({ isOpen: false, message: '', onConfirm: null });
 
   useEffect(() => {
     fetchOrders();
@@ -112,49 +112,59 @@ export default function AdminOrders() {
                 </div>
 
                 <div className="flex flex-col items-end gap-4 min-w-[200px]">
-                  <span className="text-2xl font-black text-secondary">R$ {order.totalAmount.toFixed(2)}</span>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      title="Processar" 
-                      onClick={() => handleUpdateStatus(order.id, 'PROCESSANDO')}
-                      className={order.status === 'PROCESSANDO' ? 'bg-primary/10' : ''}
-                    >
-                      <PackageCheck size={16} />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      title="Saiu para Entrega"
-                      onClick={() => handleUpdateStatus(order.id, 'SAIU_ENTREGA')}
-                      className={order.status === 'SAIU_ENTREGA' ? 'bg-primary/10' : ''}
-                    >
-                      <Truck size={16} />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      title="Entregue"
-                      onClick={() => handleUpdateStatus(order.id, 'ENTREGUE')}
-                      className={order.status === 'ENTREGUE' ? 'bg-primary/10' : ''}
-                    >
-                      <CheckCircle2 size={16} />
-                    </Button>
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      title="Cancelar Pedido"
-                      onClick={() => {
-                        if(window.confirm('Deseja realmente CANCELAR este pedido? Esta ação é irreversível no sistema.')) {
-                           handleUpdateStatus(order.id, 'CANCELADO');
-                        }
-                      }}
-                      className={`border-red-200 text-red-500 hover:bg-red-50 ${order.status === 'CANCELADO' ? 'bg-red-100 border-red-500' : ''}`}
-                    >
-                      <XCircle size={16} />
-                    </Button>
-                  </div>
+                  {order.status !== 'CANCELADO' && (
+                    <span className="text-2xl font-black text-secondary">R$ {order.totalAmount.toFixed(2)}</span>
+                  )}
+                  {order.status !== 'CANCELADO' ? (
+                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        title="Processar" 
+                        onClick={() => handleUpdateStatus(order.id, 'PROCESSANDO')}
+                        className={order.status === 'PROCESSANDO' ? 'bg-primary/10' : ''}
+                      >
+                        <PackageCheck size={16} />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        title="Saiu para Entrega"
+                        onClick={() => handleUpdateStatus(order.id, 'SAIU_ENTREGA')}
+                        className={order.status === 'SAIU_ENTREGA' ? 'bg-primary/10' : ''}
+                      >
+                        <Truck size={16} />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        title="Entregue"
+                        onClick={() => handleUpdateStatus(order.id, 'ENTREGUE')}
+                        className={order.status === 'ENTREGUE' ? 'bg-primary/10' : ''}
+                      >
+                        <CheckCircle2 size={16} />
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        title="Cancelar Pedido"
+                        onClick={() => {
+                          setConfirmModal({
+                            isOpen: true,
+                            message: 'Deseja realmente CANCELAR este pedido? Esta ação é irreversível no sistema.',
+                            onConfirm: () => handleUpdateStatus(order.id, 'CANCELADO')
+                          });
+                        }}
+                        className={`border-red-200 text-red-500 hover:bg-red-50`}
+                      >
+                        <XCircle size={16} />
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-xs font-black uppercase tracking-wider text-red-600 bg-red-50 border border-red-200 px-3 py-1.5 rounded-full">
+                      Cancelado (Irreversível)
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
@@ -187,6 +197,39 @@ export default function AdminOrders() {
           ))
         )}
       </div>
+
+      {/* Custom Confirm Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <Card className="max-w-md w-full p-6 space-y-6 shadow-2xl scale-in duration-200 bg-surface border border-outline-variant/30 hover-premium">
+            <div className="flex flex-col items-center text-center space-y-3">
+              <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center border border-red-200">
+                <AlertTriangle size={24} />
+              </div>
+              <h4 className="text-lg font-black uppercase italic tracking-tighter text-primary">Ação Irreversível</h4>
+              <p className="text-sm text-outline font-medium">{confirmModal.message}</p>
+            </div>
+            <div className="flex gap-4">
+              <Button 
+                variant="outline" 
+                className="flex-1 font-bold uppercase tracking-wider text-xs" 
+                onClick={() => setConfirmModal({ isOpen: false, message: '', onConfirm: null })}
+              >
+                Voltar
+              </Button>
+              <Button 
+                className="flex-1 bg-red-600 hover:bg-red-700 border-none text-white font-bold uppercase tracking-wider text-xs shadow-lg" 
+                onClick={() => {
+                  if (confirmModal.onConfirm) confirmModal.onConfirm();
+                  setConfirmModal({ isOpen: false, message: '', onConfirm: null });
+                }}
+              >
+                Confirmar
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

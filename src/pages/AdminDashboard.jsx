@@ -78,25 +78,29 @@ export default function AdminDashboard() {
       const thisYear = new Date().getFullYear();
 
       const toISO = (d) => (d instanceof Date ? d.toISOString() : String(d || ''));
-      const totalSales = orders.reduce((acc, current) => acc + (current.totalAmount || 0), 0);
-      const dailySales = orders
+      
+      // Filtrar apenas pedidos NÃO cancelados para faturamento
+      const activeOrders = orders.filter(o => o.status !== 'CANCELADO');
+
+      const totalSales = activeOrders.reduce((acc, current) => acc + (current.totalAmount || 0), 0);
+      const dailySales = activeOrders
         .filter(o => toISO(o.createdAt).startsWith(today))
         .reduce((acc, current) => acc + (current.totalAmount || 0), 0);
-      const monthlySales = orders
+      const monthlySales = activeOrders
         .filter(o => {
           const d = new Date(o.createdAt);
           return d.getMonth() === thisMonth && d.getFullYear() === thisYear;
         })
         .reduce((acc, current) => acc + (current.totalAmount || 0), 0);
 
-      const pendingOrders = orders.filter(o => o.status === 'PROCESSANDO').length;
+      const pendingOrders = activeOrders.filter(o => o.status === 'PROCESSANDO').length;
       const lowStockItems = products.filter(p => p.stock <= 5);
-      const avgTicket = orders.length > 0 ? totalSales / orders.length : 0;
+      const avgTicket = activeOrders.length > 0 ? totalSales / activeOrders.length : 0;
 
       // 2. Lucro Estimado (Considerando costPrice)
       // Nota: Para pedidos antigos sem costPrice salvo no JSON do item, estimamos 70% de margem
       let totalProfit = 0;
-      orders.forEach(order => {
+      activeOrders.forEach(order => {
         let orderCost = 0;
         try {
            const items = JSON.parse(order.items);
@@ -117,7 +121,7 @@ export default function AdminDashboard() {
         const d = new Date();
         d.setDate(d.getDate() - (6 - i));
         const dateStr = d.toISOString().split('T')[0];
-        const daySales = orders
+        const daySales = activeOrders
           .filter(o => toISO(o.createdAt).startsWith(dateStr))
           .reduce((acc, current) => acc + (current.totalAmount || 0), 0);
         
@@ -133,7 +137,7 @@ export default function AdminDashboard() {
          const d = new Date();
          d.setMonth(d.getMonth() - (5 - i));
          const mIdx = d.getMonth();
-         const mSales = orders
+         const mSales = activeOrders
            .filter(o => new Date(o.createdAt).getMonth() === mIdx)
            .reduce((acc, current) => acc + (current.totalAmount || 0), 0);
          
