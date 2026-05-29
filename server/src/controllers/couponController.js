@@ -14,12 +14,13 @@ export const getCoupons = async (req, res) => {
 
 // Criar novo cupom (Admin)
 export const createCoupon = async (req, res) => {
-  const { code, discount, expiresAt } = req.body;
+  const { code, discount, isFreeShipping, expiresAt } = req.body;
   try {
     const coupon = await prisma.coupon.create({
       data: {
         code: code.toUpperCase(),
-        discount: parseFloat(discount),
+        discount: isFreeShipping ? 0 : parseFloat(discount || 0),
+        isFreeShipping: !!isFreeShipping,
         expiresAt: expiresAt ? new Date(expiresAt) : null,
         active: true
       }
@@ -47,13 +48,14 @@ export const deleteCoupon = async (req, res) => {
 // Atualizar cupom (Admin)
 export const updateCoupon = async (req, res) => {
   const { id } = req.params;
-  const { code, discount, expiresAt } = req.body;
+  const { code, discount, isFreeShipping, expiresAt } = req.body;
   try {
     const coupon = await prisma.coupon.update({
       where: { id: parseInt(id) },
       data: {
         code: code.toUpperCase(),
-        discount: parseFloat(discount),
+        discount: isFreeShipping ? 0 : parseFloat(discount || 0),
+        isFreeShipping: !!isFreeShipping,
         expiresAt: expiresAt ? new Date(expiresAt) : null
       }
     });
@@ -89,7 +91,8 @@ export const validateCoupon = async (req, res) => {
     res.json({ 
       id: coupon.id,
       code: coupon.code,
-      discount: coupon.discount 
+      discount: coupon.discount,
+      isFreeShipping: coupon.isFreeShipping
     });
   } catch (error) {
     res.status(500).json({ message: "Erro ao validar cupom" });

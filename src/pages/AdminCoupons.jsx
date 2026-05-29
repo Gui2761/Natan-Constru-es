@@ -5,7 +5,7 @@ import api from '../services/api';
 
 export default function AdminCoupons() {
   const [coupons, setCoupons] = useState([]);
-  const [newCoupon, setNewCoupon] = useState({ code: '', discount: '', expiresAt: '' });
+  const [newCoupon, setNewCoupon] = useState({ code: '', discount: '', isFreeShipping: false, expiresAt: '' });
   const [editingCoupon, setEditingCoupon] = useState(null);
   const [loading, setLoading] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ isOpen: false, couponId: null });
@@ -33,7 +33,7 @@ export default function AdminCoupons() {
       } else {
         await api.post('/coupons', newCoupon);
       }
-      setNewCoupon({ code: '', discount: '', expiresAt: '' });
+      setNewCoupon({ code: '', discount: '', isFreeShipping: false, expiresAt: '' });
       fetchCoupons();
     } catch (err) {
       alert(err.response?.data?.message || 'Erro ao salvar cupom');
@@ -47,13 +47,14 @@ export default function AdminCoupons() {
     setNewCoupon({
       code: coupon.code,
       discount: coupon.discount,
+      isFreeShipping: coupon.isFreeShipping || false,
       expiresAt: coupon.expiresAt ? coupon.expiresAt.substring(0, 10) : ''
     });
   };
 
   const handleCancelEdit = () => {
     setEditingCoupon(null);
-    setNewCoupon({ code: '', discount: '', expiresAt: '' });
+    setNewCoupon({ code: '', discount: '', isFreeShipping: false, expiresAt: '' });
   };
 
   const handleDelete = (id) => {
@@ -113,13 +114,34 @@ export default function AdminCoupons() {
                 onChange={e => setNewCoupon({...newCoupon, code: e.target.value})} 
                 required 
               />
-              <Input 
-                label="Desconto (%)" 
-                type="number" 
-                value={newCoupon.discount} 
-                onChange={e => setNewCoupon({...newCoupon, discount: e.target.value})} 
-                required 
-              />
+              
+              <div className="flex items-center gap-2.5 py-1.5 bg-surface-container/40 px-3 rounded-xl border border-outline-variant/30">
+                <input 
+                  type="checkbox" 
+                  id="isFreeShipping" 
+                  className="w-4 h-4 text-primary focus:ring-primary rounded border-outline-variant cursor-pointer"
+                  checked={newCoupon.isFreeShipping}
+                  onChange={e => setNewCoupon({
+                    ...newCoupon, 
+                    isFreeShipping: e.target.checked, 
+                    discount: e.target.checked ? '0' : ''
+                  })}
+                />
+                <label htmlFor="isFreeShipping" className="text-xs font-black uppercase text-primary cursor-pointer select-none">
+                  🚚 Ativar Frete Grátis neste Cupom
+                </label>
+              </div>
+
+              {!newCoupon.isFreeShipping && (
+                <Input 
+                  label="Desconto (%)" 
+                  type="number" 
+                  value={newCoupon.discount} 
+                  onChange={e => setNewCoupon({...newCoupon, discount: e.target.value})} 
+                  required 
+                />
+              )}
+
               <Input 
                 label="Expira em (Opcional)" 
                 type="date" 
@@ -156,7 +178,13 @@ export default function AdminCoupons() {
                   <div>
                     <h4 className="text-xl font-black text-primary tracking-tighter italic">{coupon.code}</h4>
                     <div className="flex items-center gap-3 text-xs text-outline font-bold uppercase">
-                      <span className="flex items-center gap-1 text-secondary"><Percent size={12} /> {coupon.discount}% OFF</span>
+                      <span className="flex items-center gap-1 text-secondary">
+                        {coupon.isFreeShipping ? (
+                          <>🚚 FRETE GRÁTIS</>
+                        ) : (
+                          <><Percent size={12} /> {coupon.discount}% OFF</>
+                        )}
+                      </span>
                       {coupon.expiresAt && (
                         <span className="flex items-center gap-1"><Calendar size={12} /> Expira: {new Date(coupon.expiresAt).toLocaleDateString()}</span>
                       )}

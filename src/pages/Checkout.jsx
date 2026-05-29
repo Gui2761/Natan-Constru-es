@@ -71,26 +71,46 @@ export default function Checkout() {
     return base + (weightFee * multiplier);
   };
 
-  const shippingCost = calculateShipping();
+  const shippingCost = coupon?.isFreeShipping ? 0 : calculateShipping();
   const grandTotal = total + shippingCost;
 
   const generateWhatsAppLink = () => {
     if (!createdOrder) return '';
     const orderId = createdOrder.id || 'N/A';
-    const itemsList = createdOrder.items.map(item => `• ${item.name} (x${item.quantity}) - R$ ${(item.finalPrice * item.quantity).toFixed(2)}`).join('\n');
     
-    const text = `*NOVO PEDIDO - NATAN CONSTRUÇÕES* 🏗️\n\n` +
-      `*Pedido:* #${orderId}\n` +
-      `*Cliente:* ${createdOrder.user.name}\n` +
-      `*Telefone:* ${createdOrder.user.phone || 'Não informado'}\n` +
-      `*Endereço:* ${createdOrder.user.address.zipCode} - ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n` +
-      (createdOrder.deliveryNotes ? `*Observações de Entrega:* ${createdOrder.deliveryNotes}\n` : '') + `\n` +
-      `*Itens do Pedido:*\n${itemsList}\n\n` +
-      `*Peso da Carga:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
-      `*Opção de Frete:* ${createdOrder.shippingService === 'PICKUP' ? 'Buscar na Loja (Grátis)' : 'Caminhão da Empresa'}\n` +
-      `*Frete Logístico:* R$ ${createdOrder.shippingCost.toFixed(2)}\n` +
-      `*VALOR TOTAL:* R$ ${createdOrder.totalAmount.toFixed(2)}\n\n` +
-      `*Gostaria de agendar a entrega do meu material!*`;
+    // Lista de itens formatada com visual premium
+    const itemsList = createdOrder.items.map(item => {
+      return `🔹 *${item.name}*\n   ${item.quantity} un. x R$ ${item.finalPrice.toFixed(2)}  ➔  *R$ ${(item.finalPrice * item.quantity).toFixed(2)}*`;
+    }).join('\n\n');
+    
+    let couponText = '';
+    if (createdOrder.coupon) {
+      if (createdOrder.coupon.isFreeShipping) {
+        couponText = `🎁 *Cupom Aplicado:* \`${createdOrder.coupon.code}\` (Frete Grátis) 🎉\n`;
+      } else {
+        couponText = `🏷️ *Cupom Aplicado:* \`${createdOrder.coupon.code}\` (-${createdOrder.coupon.discount}% de Desconto)\n`;
+      }
+    }
+
+    const text = 
+      `*🏗️ NATAN CONSTRUÇÕES — NOVO PEDIDO 🏗️*\n` +
+      `==========================================\n\n` +
+      `📦 *PEDIDO:* #${orderId}\n` +
+      `📅 *DATA:* ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}\n\n` +
+      `👤 *CLIENTE:* ${createdOrder.user.name}\n` +
+      `📞 *TELEFONE:* ${createdOrder.user.phone || 'Não informado'}\n` +
+      `📍 *ENDEREÇO:* ${createdOrder.user.address.zipCode} - ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n` +
+      (createdOrder.deliveryNotes ? `📝 *OBSERVAÇÕES:* _${createdOrder.deliveryNotes}_\n` : '') + `\n` +
+      `==========================================\n` +
+      `🛒 *ITENS DO PEDIDO:*\n\n${itemsList}\n\n` +
+      `==========================================\n` +
+      `⚖️ *PESO TOTAL DA CARGA:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
+      `🚚 *MODALIDADE DE FRETE:* ${createdOrder.shippingService === 'PICKUP' ? 'Buscar na Loja (Grátis)' : 'Caminhão da Empresa'}\n` +
+      `💵 *CUSTO DO FRETE:* ${createdOrder.shippingCost === 0 ? '*GRÁTIS*' : `R$ ${createdOrder.shippingCost.toFixed(2)}`}\n` +
+      (couponText ? `${couponText}` : '') +
+      `💰 *VALOR TOTAL DO PEDIDO:* *R$ ${createdOrder.totalAmount.toFixed(2)}*\n\n` +
+      `==========================================\n` +
+      `*Gostaria de agendar a entrega do meu material!* 📲`;
     
     return `https://wa.me/5579996741307?text=${encodeURIComponent(text)}`;
   };
@@ -114,6 +134,7 @@ export default function Checkout() {
         shippingCost,
         shippingService,
         deliveryNotes,
+        coupon, // <-- Cupom acoplado aqui
         user: {
           ...user,
           address: formData
@@ -372,12 +393,29 @@ export default function Checkout() {
                   </div>
                   <div className="flex justify-between text-sm">
                      <span className="text-outline uppercase font-black text-[10px] flex items-center gap-1"><Truck size={14} /> Frete Logístico</span>
-                     <span className="font-black">{shippingCost > 0 ? `R$ ${shippingCost.toFixed(2)}` : 'Digite o Estado'}</span>
+                     <span className="font-black">
+                       {coupon?.isFreeShipping ? (
+                         <span className="text-green-600 font-black">GRÁTIS 🎉</span>
+                       ) : shippingCost > 0 ? (
+                         `R$ ${shippingCost.toFixed(2)}`
+                       ) : (
+                         'Digite o Estado'
+                       )}
+                     </span>
                   </div>
                   {coupon && (
                     <div className="flex justify-between text-sm text-green-600 py-2 border-y border-green-100 italic font-bold">
-                       <span className="flex items-center gap-1"><Tag size={14} /> Desconto ({coupon.discount}%)</span>
-                       <span>- R$ {discountAmount.toFixed(2)}</span>
+                       {coupon.isFreeShipping ? (
+                         <>
+                           <span className="flex items-center gap-1"><Tag size={14} /> Cupom: {coupon.code}</span>
+                           <span>FRETE GRÁTIS 🚚</span>
+                         </>
+                       ) : (
+                         <>
+                           <span className="flex items-center gap-1"><Tag size={14} /> Desconto ({coupon.discount}%)</span>
+                           <span>- R$ {discountAmount.toFixed(2)}</span>
+                         </>
+                       )}
                     </div>
                   )}
                   <div className="flex justify-between items-center text-4xl font-black text-primary pt-2">
