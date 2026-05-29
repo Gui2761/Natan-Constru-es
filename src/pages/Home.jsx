@@ -200,9 +200,8 @@ export default function Home() {
                </div>
             </div>
           </div>
-          <div className="flex-1 w-full aspect-video rounded-3xl overflow-hidden shadow-2xl relative">
-            <img src="https://images.unsplash.com/photo-1503387762-5929c69d3978?q=80&w=1000" className="w-full h-full object-cover" alt="Obra" />
-            <div className="absolute inset-0 bg-primary/20"></div>
+          <div className="flex-1 w-full aspect-video rounded-3xl overflow-hidden shadow-2xl relative bg-white flex items-center justify-center p-8 border border-outline-variant/30 hover-premium">
+            <img src="/logo_horizontal.png" className="max-h-full max-w-full object-contain" alt="Natan Construções" />
           </div>
         </div>
       </section>
