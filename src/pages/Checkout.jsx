@@ -78,39 +78,39 @@ export default function Checkout() {
     if (!createdOrder) return '';
     const orderId = createdOrder.id || 'N/A';
     
-    // Lista de itens formatada com visual premium
+    // Lista de itens formatada sem emojis para evitar problemas de codificacao
     const itemsList = createdOrder.items.map(item => {
-      return `🔹 *${item.name}*\n   ${item.quantity} un. x R$ ${item.finalPrice.toFixed(2)}  ➔  *R$ ${(item.finalPrice * item.quantity).toFixed(2)}*`;
+      return `- *${item.name}*\n   ${item.quantity} un. x R$ ${item.finalPrice.toFixed(2)}  ->  *R$ ${(item.finalPrice * item.quantity).toFixed(2)}*`;
     }).join('\n\n');
     
     let couponText = '';
     if (createdOrder.coupon) {
       if (createdOrder.coupon.isFreeShipping) {
-        couponText = `🎁 *Cupom Aplicado:* \`${createdOrder.coupon.code}\` (Frete Grátis) 🎉\n`;
+        couponText = `*Cupom Aplicado:* \`${createdOrder.coupon.code}\` (Frete Gratis)\n`;
       } else {
-        couponText = `🏷️ *Cupom Aplicado:* \`${createdOrder.coupon.code}\` (-${createdOrder.coupon.discount}% de Desconto)\n`;
+        couponText = `*Cupom Aplicado:* \`${createdOrder.coupon.code}\` (-${createdOrder.coupon.discount}% de Desconto)\n`;
       }
     }
 
     const text = 
-      `*🏗️ NATAN CONSTRUÇÕES — NOVO PEDIDO 🏗️*\n` +
+      `*NATAN CONSTRUCOES -- NOVO PEDIDO*\n` +
       `==========================================\n\n` +
-      `📦 *PEDIDO:* #${orderId}\n` +
-      `📅 *DATA:* ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}\n\n` +
-      `👤 *CLIENTE:* ${createdOrder.user.name}\n` +
-      `📞 *TELEFONE:* ${createdOrder.user.phone || 'Não informado'}\n` +
-      `📍 *ENDEREÇO:* ${createdOrder.user.address.zipCode} - ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n` +
-      (createdOrder.deliveryNotes ? `📝 *OBSERVAÇÕES:* _${createdOrder.deliveryNotes}_\n` : '') + `\n` +
+      `*PEDIDO:* #${orderId}\n` +
+      `*DATA:* ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}\n\n` +
+      `*CLIENTE:* ${createdOrder.user.name}\n` +
+      `*TELEFONE:* ${createdOrder.user.phone || 'Nao informado'}\n` +
+      `*ENDERECO:* ${createdOrder.user.address.zipCode} - ${createdOrder.user.address.street}, ${createdOrder.user.address.number} - ${createdOrder.user.address.city}/${createdOrder.user.address.state}\n` +
+      (createdOrder.deliveryNotes ? `*OBSERVACOES:* _${createdOrder.deliveryNotes}_\n` : '') + `\n` +
       `==========================================\n` +
-      `🛒 *ITENS DO PEDIDO:*\n\n${itemsList}\n\n` +
+      `*ITENS DO PEDIDO:*\n\n${itemsList}\n\n` +
       `==========================================\n` +
-      `⚖️ *PESO TOTAL DA CARGA:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
-      `🚚 *MODALIDADE DE FRETE:* ${createdOrder.shippingService === 'PICKUP' ? 'Buscar na Loja (Grátis)' : 'Caminhão da Empresa'}\n` +
-      `💵 *CUSTO DO FRETE:* ${createdOrder.shippingCost === 0 ? '*GRÁTIS*' : `R$ ${createdOrder.shippingCost.toFixed(2)}`}\n` +
+      `*PESO TOTAL DA CARGA:* ${createdOrder.totalWeight.toFixed(2)} kg\n` +
+      `*MODALIDADE DE FRETE:* ${createdOrder.shippingService === 'PICKUP' ? 'Buscar na Loja (Gratis)' : 'Caminhao da Empresa'}\n` +
+      `*CUSTO DO FRETE:* ${createdOrder.shippingCost === 0 ? '*GRATIS*' : `R$ ${createdOrder.shippingCost.toFixed(2)}`}\n` +
       (couponText ? `${couponText}` : '') +
-      `💰 *VALOR TOTAL DO PEDIDO:* *R$ ${createdOrder.totalAmount.toFixed(2)}*\n\n` +
+      `*VALOR TOTAL DO PEDIDO:* *R$ ${createdOrder.totalAmount.toFixed(2)}*\n\n` +
       `==========================================\n` +
-      `*Gostaria de agendar a entrega do meu material!* 📲`;
+      `*Gostaria de pagar e agendar a entrega do meu material!*`;
     
     return `https://wa.me/5579996741307?text=${encodeURIComponent(text)}`;
   };
