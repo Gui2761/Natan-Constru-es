@@ -65,8 +65,9 @@ export default function CategoryResults() {
   };
 
   // Lógica de Banner: Tenta achar um banner da categoria, senão usa o da Home
-  const categoryLink = `/produtos?categoria=${slug}`;
-  const specificBanner = banners.find(b => b.link === categoryLink);
+  const categoryLink1 = `/categoria/${slug}`;
+  const categoryLink2 = `/produtos?categoria=${slug}`;
+  const specificBanner = banners.find(b => b.link === categoryLink1 || b.link === categoryLink2);
   const displayBanner = specificBanner 
     ? specificBanner 
     : (banners[0] ? { ...banners[0], title: '' } : null); // Se for fallback, limpa o título
@@ -83,9 +84,12 @@ export default function CategoryResults() {
                  <h2 className="text-5xl font-black text-white uppercase italic tracking-tighter leading-none">
                     {category?.name}
                  </h2>
-                 {displayBanner.title && (
-                   <p className="text-white/70 text-lg font-bold uppercase mt-4">{displayBanner.title}</p>
-                 )}
+                  {displayBanner.title && (
+                    <p className="text-white/70 text-lg font-bold uppercase mt-4">{displayBanner.title}</p>
+                  )}
+                  {displayBanner.subtitle && (
+                    <p className="text-white/80 text-sm font-medium max-w-xl leading-relaxed mt-2">{displayBanner.subtitle}</p>
+                  )}
               </div>
            </div>
         </section>

@@ -60,6 +60,8 @@ model Banner {
   id         Int     @id @default(autoincrement())
   image      String  @db.Text
   title      String?
+  subtitle   String? @db.Text
+  tag        String?
   buttonText String?
   link       String? @db.Text
   active     Boolean @default(true)

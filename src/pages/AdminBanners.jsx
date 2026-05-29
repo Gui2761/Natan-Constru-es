@@ -7,7 +7,7 @@ export default function AdminBanners() {
   const [banners, setBanners] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({ title: '', link: '/', buttonText: '' });
+  const [formData, setFormData] = useState({ title: '', subtitle: '', tag: '', link: '/', buttonText: '' });
   const [selectedFile, setSelectedFile] = useState(null);
   const [currentImageUrl, setCurrentImageUrl] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -45,6 +45,8 @@ export default function AdminBanners() {
       const formPayload = new FormData();
       // Envia campos mesmo vazios se estiver editando para permitir limpar
       formPayload.append('title', formData.title || '');
+      formPayload.append('subtitle', formData.subtitle || '');
+      formPayload.append('tag', formData.tag || '');
       formPayload.append('link', formData.link || '/');
       formPayload.append('buttonText', formData.buttonText || '');
       if (selectedFile) {
@@ -70,6 +72,8 @@ export default function AdminBanners() {
      setEditingId(banner.id);
      setFormData({ 
        title: banner.title || '', 
+       subtitle: banner.subtitle || '', 
+       tag: banner.tag || '', 
        link: banner.link || '/', 
        buttonText: banner.buttonText || '' 
      });
@@ -78,7 +82,7 @@ export default function AdminBanners() {
   };
 
   const resetForm = () => {
-    setFormData({ title: '', link: '/', buttonText: '' });
+    setFormData({ title: '', subtitle: '', tag: '', link: '/', buttonText: '' });
     setSelectedFile(null);
     setCurrentImageUrl(null);
     setEditingId(null);
@@ -171,6 +175,8 @@ export default function AdminBanners() {
             </div>
 
             <Input label="Título (Opcional)" value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
+            <Input label="Descrição / Subtítulo (Opcional)" value={formData.subtitle} onChange={e => setFormData({...formData, subtitle: e.target.value})} />
+            <Input label="Tag do Topo (Opcional - Ex: Oferta Especial)" placeholder="Ex: Oferta Especial Natan" value={formData.tag} onChange={e => setFormData({...formData, tag: e.target.value})} />
             
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-on-surface/80">Destino do Clique</label>
