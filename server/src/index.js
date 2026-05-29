@@ -26,7 +26,18 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 
-app.use(cors());
+app.use(cors({
+  origin: [
+    'https://natanconstrucoes.com.br',
+    'https://www.natanconstrucoes.com.br',
+    'https://natybrown-guanaco-311539.hostingersite.com',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Servir Frontend (Vite Build)

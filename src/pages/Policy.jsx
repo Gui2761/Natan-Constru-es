@@ -131,7 +131,7 @@ export default function Policy() {
                     
                     <div className="space-y-1">
                       <p className="text-[10px] font-black uppercase text-outline">CNPJ</p>
-                      <p className="font-bold text-primary">00.000.000/0001-00</p>
+                      <p className="font-bold text-primary">65.585.500/0001-88</p>
                     </div>
 
                     <div className="space-y-1">
@@ -139,8 +139,8 @@ export default function Policy() {
                         <MapPin size={10} className="text-secondary" /> Endereço de Registro
                       </p>
                       <p className="font-bold text-primary leading-relaxed">
-                        Rodovia Glória Feira Nova, S/N<br />
-                        Nossa Senhora da Glória - SE<br />
+                        Av. Erotildes Noer de Aragão, 1545<br />
+                        Jardim do Sertão - Nossa Sra. da Glória - SE<br />
                         CEP: 49680-000
                       </p>
                     </div>
@@ -149,7 +149,7 @@ export default function Policy() {
                       <p className="text-[10px] font-black uppercase text-outline flex items-center gap-1">
                         <Mail size={10} className="text-secondary" /> E-mail de Contato
                       </p>
-                      <p className="font-bold text-primary truncate">vendas@natanconstrucoes.com.br</p>
+                      <p className="font-bold text-primary truncate">natanconstrucoes79@gmail.com</p>
                     </div>
 
                     <div className="space-y-1 pb-2">

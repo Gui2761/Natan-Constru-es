@@ -49,7 +49,7 @@ export default function Footer() {
           <ul className="space-y-6">
             <li className="flex gap-3 items-start">
               <MapPin className="text-secondary shrink-0" size={20} />
-              <p className="text-sm text-white/80">Rodovia Glória Feira Nova, S/N - Nossa Senhora da Glória - SE, 49680-000</p>
+              <p className="text-sm text-white/80">Av. Erotildes Noer de Aragão, 1545 - Jardim do Sertão - Nossa Senhora da Glória - SE, 49680-000</p>
             </li>
             <li className="flex gap-3 items-center">
               <Phone className="text-secondary shrink-0" size={20} />
@@ -57,7 +57,7 @@ export default function Footer() {
             </li>
             <li className="flex gap-3 items-center">
               <Mail className="text-secondary shrink-0" size={20} />
-              <p className="text-sm text-white/80">vendas@natanconstrucoes.com.br</p>
+              <p className="text-sm text-white/80">natanconstrucoes79@gmail.com</p>
             </li>
           </ul>
         </div>
@@ -65,7 +65,7 @@ export default function Footer() {
 
       <div className="max-w-7xl mx-auto mt-10 flex flex-col md:flex-row justify-between items-center gap-6">
         <p className="text-[10px] text-white/40 uppercase font-medium tracking-widest">
-          © 2026 Natan Construções - Todos os direitos reservados. CNPJ: 00.000.000/0001-00
+          © 2026 Natan Construções - Todos os direitos reservados. CNPJ: 65.585.500/0001-88
         </p>
         <div className="flex gap-4 items-center opacity-40">
            <div className="flex items-center gap-1 border border-white/20 px-2 py-0.5 rounded text-[8px] font-black tracking-widest uppercase">

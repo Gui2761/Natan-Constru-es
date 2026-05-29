@@ -39,7 +39,7 @@ export default function Login() {
     script.onload = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: '502014169727-vavh0uikv8c2n6jge41afl7rm4kpgbnd.apps.googleusercontent.com',
+          client_id: '250984542079-illms0fgfk1krfkq4ko0i2skftjfd121.apps.googleusercontent.com',
           callback: handleGoogleCallback,
         });
 
