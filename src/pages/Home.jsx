@@ -67,21 +67,31 @@ export default function Home() {
                     className="img-standard-banner" 
                     alt={banner.title || 'Oferta'} 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/90 via-primary/40 to-transparent flex items-center">
-                    <div className="max-w-7xl w-full px-10 mx-auto">
-                      <h2 className="text-6xl font-black text-white uppercase italic tracking-tighter max-w-2xl leading-[0.9] drop-shadow-lg">
-                        {banner.title}
-                      </h2>
-                      {banner.buttonText && (
-                        <Button 
-                          variant="secondary" 
-                          size="lg" 
-                          className="mt-8 text-xl px-12 uppercase italic h-16 shadow-2xl hover:scale-105 transition-transform"
-                          onClick={() => banner.link && navigate(banner.link)}
-                        >
-                          {banner.buttonText} <ArrowRight className="ml-2" />
-                        </Button>
-                      )}
+                  <div className="absolute inset-0 bg-black/35 flex items-center p-6 lg:p-12">
+                    <div className="max-w-7xl w-full mx-auto flex items-center justify-start">
+                      <div className="max-w-xl bg-primary/75 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-2xl space-y-5 transform translate-x-0 lg:translate-x-12 animate-in fade-in slide-in-from-left-8 duration-500 hover-premium">
+                        <span className="bg-secondary text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full border border-secondary/20 shadow-md w-fit">
+                          Oferta Especial Natan
+                        </span>
+                        <h2 className="text-4xl lg:text-5xl font-black text-white uppercase italic tracking-tighter leading-none drop-shadow-xl">
+                          {banner.title}
+                        </h2>
+                        <p className="text-white/80 text-sm font-medium leading-relaxed">
+                          Materiais profissionais de alta performance selecionados para garantir a máxima segurança, durabilidade e economia para a sua obra.
+                        </p>
+                        {banner.buttonText && (
+                          <div className="pt-2">
+                            <Button 
+                              variant="secondary" 
+                              size="lg" 
+                              className="w-full sm:w-auto text-sm px-8 uppercase italic font-black tracking-widest h-14 shadow-lg hover:scale-105 transition-transform"
+                              onClick={() => banner.link && navigate(banner.link)}
+                            >
+                              {banner.buttonText} <ArrowRight className="ml-2" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
