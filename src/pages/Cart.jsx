@@ -1,15 +1,46 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Card, Button } from '../components/UI';
 import { useCart } from '../context/CartContext';
-import { getImageUrl } from '../services/api';
+import api, { getImageUrl } from '../services/api';
 import { Trash2, ArrowRight, ShoppingBag, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Cart() {
   const { cart, removeFromCart, updateCartQuantity, subtotal, totalWeight } = useCart();
   const navigate = useNavigate();
+  const [checkingStock, setCheckingStock] = useState(false);
+
+  const handleGoToCheckout = async () => {
+    if (checkingStock) return;
+    setCheckingStock(true);
+    try {
+      const { data } = await api.get('/products');
+      const list = data.products || data;
+      
+      for (const item of cart) {
+        const freshProduct = list.find(p => p.id === item.id);
+        if (!freshProduct) {
+          alert(`O produto '${item.name}' nao esta mais disponivel.`);
+          setCheckingStock(false);
+          return;
+        }
+        if (freshProduct.stock < item.quantity) {
+          alert(`O produto '${item.name}' possui apenas ${freshProduct.stock} unidades em estoque. Ajuste a quantidade no carrinho antes de prosseguir.`);
+          setCheckingStock(false);
+          return;
+        }
+      }
+      
+      navigate('/checkout');
+    } catch (err) {
+      console.error(err);
+      alert('Erro ao verificar estoque dos produtos.');
+    } finally {
+      setCheckingStock(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -95,8 +126,13 @@ export default function Cart() {
                    <span className="text-3xl font-black text-secondary">R$ {subtotal.toFixed(2)}</span>
                 </div>
 
-                <Button variant="secondary" className="w-full h-16 font-black uppercase text-base italic" onClick={() => navigate('/checkout')}>
-                   Ir para Checkout <ArrowRight className="ml-2" />
+                <Button 
+                   variant="secondary" 
+                   className="w-full h-16 font-black uppercase text-base italic" 
+                   onClick={handleGoToCheckout}
+                   disabled={checkingStock}
+                 >
+                    {checkingStock ? 'Verificando Estoque...' : <>Ir para Checkout <ArrowRight className="ml-2" /></>}
                 </Button>
               </Card>
             </div>
