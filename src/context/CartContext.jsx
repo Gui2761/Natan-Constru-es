@@ -1,22 +1,37 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useRef } from 'react';
 import api from '../services/api';
-
+import { useAuth } from './AuthContext';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  const { user } = useAuth();
+  const [cart, setCart] = useState(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      const initialUser = storedUser ? JSON.parse(storedUser) : null;
+      const key = initialUser ? `cart_${initialUser.id}` : 'cart_guest';
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  });
   const [coupon, setCoupon] = useState(null);
-
-
-  useEffect(() => {
-    const storedCart = localStorage.getItem('cart');
-    if (storedCart) setCart(JSON.parse(storedCart));
-  }, []);
+  const loadedUserRef = useRef(user?.id);
 
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
+    const key = user ? `cart_${user.id}` : 'cart_guest';
+    
+    if (loadedUserRef.current !== user?.id) {
+      const stored = localStorage.getItem(key);
+      const parsed = stored ? JSON.parse(stored) : [];
+      loadedUserRef.current = user?.id;
+      setCart(parsed);
+    } else {
+      localStorage.setItem(key, JSON.stringify(cart));
+    }
+  }, [cart, user]);
 
   const addToCart = (product, quantity) => {
     setCart(prev => {
