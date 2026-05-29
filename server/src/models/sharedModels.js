@@ -17,6 +17,42 @@ export const userModel = {
     return user;
   },
 
+  async create({ data = {}, include = {} } = {}) {
+    const { address, ...uData } = data;
+    const finalData = scrub(uData);
+    
+    if (finalData.role === undefined) {
+      finalData.role = 'CLIENT';
+    }
+
+    const keys = Object.keys(finalData);
+    const placeholders = keys.map(() => '?').join(', ');
+    const fields = keys.map(k => `\`${k}\``).join(', ');
+
+    const [res] = await q(
+      `INSERT INTO \`User\` (${fields}) VALUES (${placeholders})`,
+      Object.values(finalData),
+      true
+    );
+
+    const userId = res.insertId;
+
+    if (address && address.create) {
+      const addrData = scrub(address.create);
+      const addrKeys = Object.keys(addrData);
+      const addrPlaceholders = ['?', ...addrKeys.map(() => '?')].join(', ');
+      const addrFields = ['\`userId\`', ...addrKeys.map(k => `\`${k}\``)].join(', ');
+
+      await q(
+        `INSERT INTO \`Address\` (${addrFields}) VALUES (${addrPlaceholders})`,
+        [userId, ...Object.values(addrData)],
+        true
+      );
+    }
+
+    return this.findUnique({ where: { id: userId }, include });
+  },
+
   async update({ where = {}, data = {} } = {}) {
     const { address, ...uData } = data;
     const finalData = scrub(uData);
