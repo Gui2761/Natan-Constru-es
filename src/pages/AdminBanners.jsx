@@ -145,7 +145,7 @@ export default function AdminBanners() {
                   ) : (
                     <div className="relative w-full h-36 rounded-xl overflow-hidden group/preview z-20">
                        <img 
-                         src={selectedFile ? URL.createObjectURL(selectedFile) : currentImageUrl} 
+                         src={selectedFile ? URL.createObjectURL(selectedFile) : getImageUrl(currentImageUrl)} 
                          alt="preview" 
                          className="w-full h-full object-cover" 
                        />
