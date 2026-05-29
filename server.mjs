@@ -155,6 +155,21 @@ app.get('/api/diag/clear-images', async (req, res) => {
   }
 });
 
+// Rota para adicionar a coluna phone faltante em User no MySQL de produção
+app.get('/api/diag/migrate-db', async (req, res) => {
+  try {
+    const prisma = (await import('./server/src/lib/prisma.js')).default;
+    try {
+      await prisma.$queryRaw('ALTER TABLE `User` ADD COLUMN `phone` VARCHAR(255) NULL');
+    } catch (e) {
+      console.log("Coluna phone talvez já exista:", e.message);
+    }
+    res.send("✅ Migração do banco executada com sucesso!");
+  } catch (err) {
+    res.status(500).send("❌ Erro ao migrar banco de dados: " + err.message);
+  }
+});
+
 // Usar Rotas
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
