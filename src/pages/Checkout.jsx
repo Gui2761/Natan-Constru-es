@@ -145,7 +145,8 @@ export default function Checkout() {
       setSuccess(true);
       clearCart();
     } catch (err) {
-      alert('Erro ao processar pedido');
+      const errMsg = err.response?.data?.message || 'Erro ao processar pedido';
+      alert(errMsg);
     } finally {
       setLoading(false);
     }

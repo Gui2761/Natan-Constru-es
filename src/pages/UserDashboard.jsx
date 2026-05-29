@@ -39,17 +39,17 @@ export default function UserDashboard() {
       await api.patch(`/orders/${order.id}/status`, { status: 'PENDENTE_CANCELAMENTO' });
       
       const text = 
-        `*❌ NATAN CONSTRUÇÕES — SOLICITAÇÃO DE CANCELAMENTO ❌*\n` +
+        `*NATAN CONSTRUCOES -- SOLICITACAO DE CANCELAMENTO*\n` +
         `==========================================\n\n` +
-        `📦 *PEDIDO:* #${order.id}\n` +
-        `👤 *CLIENTE:* ${user.name}\n` +
-        `📞 *TELEFONE:* ${user.phone || 'Não informado'}\n` +
-        `💰 *VALOR DO PEDIDO:* *R$ ${order.totalAmount.toFixed(2)}*\n\n` +
+        `*PEDIDO:* #${order.id}\n` +
+        `*CLIENTE:* ${user.name}\n` +
+        `*TELEFONE:* ${user.phone || 'Nao informado'}\n` +
+        `*VALOR DO PEDIDO:* *R$ ${order.totalAmount.toFixed(2)}*\n\n` +
         `==========================================\n` +
-        `💬 *JUSTIFICATIVA DO CLIENTE:*\n` +
+        `*JUSTIFICATIVA DO CLIENTE:*\n` +
         `_"${cancelReason}"_\n\n` +
         `==========================================\n` +
-        `*Gostaria de formalizar o cancelamento do meu pedido com o suporte comercial.* 📲`;
+        `*Gostaria de formalizar o cancelamento do meu pedido com o suporte comercial.*`;
       
       const whatsappUrl = `https://wa.me/5579996741307?text=${encodeURIComponent(text)}`;
       window.open(whatsappUrl, '_blank');

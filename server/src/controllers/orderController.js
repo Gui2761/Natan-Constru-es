@@ -17,6 +17,26 @@ export const getOrders = async (req, res) => {
 export const createOrder = async (req, res) => {
   const { items, totalAmount, userId } = req.body;
   try {
+    const parsedItems = typeof items === 'string' ? JSON.parse(items) : items;
+    
+    // 1. Validar estoque de todos os itens antes de fechar o pedido
+    for (const item of parsedItems) {
+      const product = await prisma.product.findUnique({
+        where: { id: parseInt(item.id) }
+      });
+      
+      if (!product) {
+        return res.status(400).json({ message: `Produto '${item.name}' nao encontrado.` });
+      }
+      
+      if (product.stock < parseInt(item.quantity)) {
+        return res.status(400).json({ 
+          message: `O produto '${product.name}' possui apenas ${product.stock} unidades disponiveis. Ajuste seu carrinho.` 
+        });
+      }
+    }
+
+    // 2. Criar o pedido no banco de dados
     const order = await prisma.order.create({
       data: {
         userId: parseInt(userId),
@@ -26,21 +46,16 @@ export const createOrder = async (req, res) => {
       }
     });
 
-    // Deduz o estoque automaticamente na criação do pedido
-    try {
-      const parsedItems = typeof items === 'string' ? JSON.parse(items) : items;
-      for (const item of parsedItems) {
-        await prisma.product.update({
-          where: { id: parseInt(item.id) },
-          data: {
-            stock: {
-              decrement: parseInt(item.quantity)
-            }
+    // 3. Deduzir o estoque com seguranca
+    for (const item of parsedItems) {
+      await prisma.product.update({
+        where: { id: parseInt(item.id) },
+        data: {
+          stock: {
+            decrement: parseInt(item.quantity)
           }
-        });
-      }
-    } catch (stockErr) {
-      console.error("Falha ao debitar estoque:", stockErr);
+        }
+      });
     }
 
     res.status(201).json(order);
