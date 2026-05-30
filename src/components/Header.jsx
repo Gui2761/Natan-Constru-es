@@ -205,7 +205,7 @@ export default function Header() {
                     {order.status.replace('_', ' ')}
                   </span>
                   <span>{text}</span>
-                  <Link to="/minha-conta" className="text-secondary hover:underline ml-1">Acompanhar</Link>
+                  <Link to="/minha-conta" className="text-secondary hover:underline ml-1" onClick={() => handleDismissNotif(order.id, order.status)}>Acompanhar</Link>
                   <button 
                     onClick={() => handleDismissNotif(order.id, order.status)}
                     className="ml-1 text-outline hover:text-error transition-colors p-0.5 rounded-full hover:bg-outline-variant/25"
