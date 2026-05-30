@@ -15,6 +15,14 @@ export default function Header() {
   const { cart } = useCart();
   const navigate = useNavigate();
   const [activeOrders, setActiveOrders] = useState([]);
+  const [dismissedNotifs, setDismissedNotifs] = useState(() => {
+    try {
+      const saved = localStorage.getItem('dismissed_order_notifs');
+      return saved ? JSON.parse(saved) : [];
+    } catch (e) {
+      return [];
+    }
+  });
 
   const handleLogout = () => {
     logout();
@@ -40,6 +48,13 @@ export default function Header() {
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const handleDismissNotif = (orderId, status) => {
+    const key = `${orderId}_${status}`;
+    const nextDismissed = [...dismissedNotifs, key];
+    setDismissedNotifs(nextDismissed);
+    localStorage.setItem('dismissed_order_notifs', JSON.stringify(nextDismissed));
   };
 
   const handleSearch = (e) => {
@@ -152,10 +167,10 @@ export default function Header() {
       </div>
 
       {/* Barra de Notificações de Pedidos Ativos */}
-      {user && !isAdmin && activeOrders.length > 0 && (
+      {user && !isAdmin && activeOrders.filter(order => !dismissedNotifs.includes(`${order.id}_${order.status}`)).length > 0 && (
         <div className="bg-surface-container border-t border-b border-outline-variant/30 px-6 py-2">
           <div className="max-w-7xl mx-auto flex flex-wrap gap-4 items-center text-[11px] font-bold text-primary">
-            {activeOrders.map(order => {
+            {activeOrders.filter(order => !dismissedNotifs.includes(`${order.id}_${order.status}`)).map(order => {
               let text = '';
               let badgeStyle = '';
               
@@ -191,6 +206,13 @@ export default function Header() {
                   </span>
                   <span>{text}</span>
                   <Link to="/minha-conta" className="text-secondary hover:underline ml-1">Acompanhar</Link>
+                  <button 
+                    onClick={() => handleDismissNotif(order.id, order.status)}
+                    className="ml-1 text-outline hover:text-error transition-colors p-0.5 rounded-full hover:bg-outline-variant/25"
+                    title="Dispensar notificação"
+                  >
+                    <X size={10} />
+                  </button>
                 </div>
               );
             })}
